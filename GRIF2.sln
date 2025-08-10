@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRIF2", "GRIF2\GRIF2.csproj", "{5951B37D-D7E3-468A-BC30-0053E74C62F0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5951B37D-D7E3-468A-BC30-0053E74C62F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5951B37D-D7E3-468A-BC30-0053E74C62F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5951B37D-D7E3-468A-BC30-0053E74C62F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5951B37D-D7E3-468A-BC30-0053E74C62F0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E42E6E12-5BF3-4C4F-B5EF-C1FD63E21D60}
+	EndGlobalSection
+EndGlobal
