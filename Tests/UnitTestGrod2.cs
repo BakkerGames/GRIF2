@@ -9,6 +9,8 @@ public class UnitTestGrod2
     private const string Level1 = "Base";
     private const string Level2 = "Overlay";
     private const string InvalidKey = "   ";
+    private static readonly string[] expectedValue1 = ["Value1"];
+    private static readonly string[] expectedValue2 = ["Value2"];
 
     [SetUp]
     public void Setup()
@@ -17,6 +19,20 @@ public class UnitTestGrod2
         _grod2.AddLevel(Level1);
         _grod2.AddLevel(Level2, Level1);
         _grod2.SetCurrentLevel(Level2);
+    }
+
+    [Test]
+    public void TestInitialization()
+    {
+        // Test if Grod2 initializes correctly
+        Assert.That(_grod2, Is.Not.Null);
+        Assert.That(_grod2.GetCurrentLevel, Is.EqualTo(Level2));
+        Assert.That(_grod2.LevelKeys, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(_grod2.LevelKeys, Does.Contain(Level1));
+            Assert.That(_grod2.LevelKeys, Does.Contain(Level2));
+        });
     }
 
     [Test]
@@ -47,16 +63,16 @@ public class UnitTestGrod2
         var item = _grod2.GetItem("TestKey");
         Assert.Multiple(() =>
         {
-            Assert.That(item.Key, Is.EqualTo("TestKey"));
-            Assert.That(item.Text, Is.Empty);
+            Assert.That(item, Is.Null);
         });
         // Set the item and test again
         _grod2.Set(new Item { Key = "TestKey", Text = "TestValue" });
         item = _grod2.GetItem("TestKey");
         Assert.Multiple(() =>
         {
-            Assert.That(item.Key, Is.EqualTo("TestKey"));
-            Assert.That(item.Text, Is.EqualTo("TestValue"));
+            Assert.That(item, Is.Not.Null);
+            Assert.That(item!.Key, Is.EqualTo("TestKey"));
+            Assert.That(item!.Text, Is.EqualTo("TestValue"));
         });
     }
 
@@ -104,11 +120,7 @@ public class UnitTestGrod2
     {
         // Test getting a non-existent item
         var item = _grod2.GetItem("NonExistentKey");
-        Assert.Multiple(() =>
-        {
-            Assert.That(item.Key, Is.EqualTo("NonExistentKey"));
-            Assert.That(item.Text, Is.Empty);
-        });
+        Assert.That(item, Is.Null);
     }
 
     [Test]
@@ -180,5 +192,188 @@ public class UnitTestGrod2
         _grod2.Remove("SharedKey");
         // Verify that the key is now completely removed
         Assert.That(_grod2.Get("SharedKey"), Is.Null);
+    }
+
+    [Test]
+    public void TestSetItemWithEmptyText()
+    {
+        // Test setting an item with empty text
+        _grod2.Set(new Item { Key = "EmptyTextKey", Text = string.Empty });
+        var item = _grod2.GetItem("EmptyTextKey");
+        Assert.Multiple(() =>
+        {
+            Assert.That(item, Is.Not.Null);
+            Assert.That(item!.Key, Is.EqualTo("EmptyTextKey"));
+            Assert.That(item!.Text, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void TestSetItemWithWhitespaceKey()
+    {
+        // Test setting an item with a whitespace key
+        Assert.Throws<ArgumentNullException>(() => _grod2.Set(new Item { Key = "   ", Text = "Value" }));
+    }
+
+    [Test]
+    public void TestSetItemWithNullText()
+    {
+        // Test setting an item with null text
+        var item = new Item { Key = "NullTextKey", Text = null! };
+        _grod2.Set(item);
+        var item2 = _grod2.GetItem("NullTextKey");
+        Assert.Multiple(() =>
+        {
+            Assert.That(item2, Is.Null);
+        });
+    }
+
+    [Test]
+    public void TestGetItemByLevel()
+    {
+        // Test getting an item by level name
+        _grod2.Set(Level1, "Level1Key", "Level1Value");
+        var item = _grod2.GetItem(Level1, "Level1Key");
+        Assert.Multiple(() =>
+        {
+            Assert.That(item, Is.Not.Null);
+            Assert.That(item!.Key, Is.EqualTo("Level1Key"));
+            Assert.That(item!.Text, Is.EqualTo("Level1Value"));
+        });
+        // Test getting an item from the current level
+        _grod2.Set(Level2, "Level2Key", "Level2Value");
+        item = _grod2.GetItem(Level2, "Level2Key");
+        Assert.Multiple(() =>
+        {
+            Assert.That(item, Is.Not.Null);
+            Assert.That(item!.Key, Is.EqualTo("Level2Key"));
+            Assert.That(item!.Text, Is.EqualTo("Level2Value"));
+        });
+    }
+
+    [Test]
+    public void TestSetAndGetByLevelKey()
+    {
+        // Test setting a value by level name
+        _grod2.Set(Level1, "Level1Key", "Level1Value");
+        Assert.That(_grod2.Get(Level1, "Level1Key"), Is.EqualTo("Level1Value"));
+        // Test setting a value in the current level
+        _grod2.Set(Level2, "Level2Key", "Level2Value");
+        Assert.Multiple(() =>
+        {
+            Assert.That(_grod2.Get(Level2, "Level2Key"), Is.EqualTo("Level2Value"));
+            // Test getting a value from a parent level
+            Assert.That(_grod2.Get(Level2, "Level1Key"), Is.EqualTo("Level1Value"));
+        });
+        Assert.That(_grod2.Get(Level1, "Level2Key"), Is.Null, "Should not find Level2Key in Level1");
+    }
+
+    [Test]
+    public void TestRemoveKeyFromSpecificLevel()
+    {
+        // Set a key in the base level
+        _grod2.Set(Level1, "SharedKey", "BaseValue");
+        // Set the same key in the overlay level
+        _grod2.Set(Level2, "SharedKey", "OverlayValue");
+        // Verify the value in the overlay level
+        Assert.That(_grod2.Get(Level2, "SharedKey"), Is.EqualTo("OverlayValue"));
+        // Remove the key from the overlay level
+        _grod2.Remove(Level2, "SharedKey");
+        // Verify that the key now resolves to the base level value
+        Assert.That(_grod2.Get(Level1, "SharedKey"), Is.EqualTo("BaseValue"));
+        // Remove the key from the base level
+        _grod2.Remove(Level1, "SharedKey");
+        // Verify that the key is now completely removed
+        Assert.That(_grod2.Get(Level1, "SharedKey"), Is.Null);
+    }
+
+    [Test]
+    public void TestGetKeys()
+    {
+        // Test getting all keys in the current level
+        _grod2.Set("Key1", "Value1");
+        _grod2.Set("Key2", "Value2");
+        var keys = _grod2.GetKeys();
+        Assert.That(keys.Count, Is.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(keys, Does.Contain("Key1"));
+            Assert.That(keys, Does.Contain("Key2"));
+        });
+    }
+
+
+    [Test]
+    public void TestGetKeysRecursive()
+    {
+        // Test getting all keys recursively from the current level
+        _grod2.Set(Level1, "Key1", "Value1");
+        _grod2.Set(Level2, "Key2", "Value2");
+        var keys = _grod2.GetKeysRecursive();
+        Assert.That(keys, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(keys, Does.Contain("Key1"));
+            Assert.That(keys, Does.Contain("Key2"));
+        });
+    }
+
+    [Test]
+    public void TestGetKeysSorted()
+    {
+        // Test getting all keys sorted
+        _grod2.Set("KeyB", "ValueB");
+        _grod2.Set("KeyA", "ValueA");
+        var keys = _grod2.GetKeysSorted();
+        Assert.That(keys, Is.EqualTo(new List<string> { "KeyA", "KeyB" }));
+    }
+
+    [Test]
+    public void TestGetItems()
+    {
+        // Test getting all items in the current level
+        _grod2.Set("Item1", "Value1");
+        _grod2.Set("Item2", "Value2");
+        var items = _grod2.GetItems();
+        Assert.That(items, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(items.Where(x => x.Key == "Item1").Select(x => x.Text), Is.EqualTo(expectedValue1));
+            Assert.That(items.Where(x => x.Key == "Item2").Select(x => x.Text), Is.EqualTo(expectedValue2));
+        });
+    }
+
+    [Test]
+    public void TestGetItemsRecursive()
+    {
+        // Test getting all items recursively from the current level
+        _grod2.Set(Level1, "Item1", "Value1");
+        _grod2.Set(Level2, "Item2", "Value2");
+        var items = _grod2.GetItemsRecursive(Level2);
+        Assert.That(items, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(items.Where(x => x.Key == "Item1").Select(x => x.Text), Is.EqualTo(expectedValue1));
+            Assert.That(items.Where(x => x.Key == "Item2").Select(x => x.Text), Is.EqualTo(expectedValue2));
+        });
+    }
+
+    [Test]
+    public void TestCaseInsensitiveKeyHandling()
+    {
+        // Test case-insensitive key handling
+        _grod2.Set("TestKey", "TestValue");
+        Assert.Multiple(() =>
+        {
+            Assert.That(_grod2.Get("testkey"), Is.EqualTo("TestValue"));
+            Assert.That(_grod2.Get("TESTKEY"), Is.EqualTo("TestValue"));
+        });
+        // Test setting a value with different case
+        _grod2.Set("TESTKEY", "UpdatedValue");
+        Assert.Multiple(() =>
+        {
+            Assert.That(_grod2.Get("testkey"), Is.EqualTo("UpdatedValue"));
+            Assert.That(_grod2.Get("TESTKEY"), Is.EqualTo("UpdatedValue"));
+        });
     }
 }

@@ -22,6 +22,8 @@ public class Grod2
 
     #region Level management
 
+    public List<string> LevelKeys => [.. _levels.Keys];
+
     public void AddLevel(string levelKey)
     {
         ValidateLevelKey(levelKey);
@@ -115,20 +117,30 @@ public class Grod2
 
     #region GetItem methods
 
-    public Item GetItem(string key)
+    public Item? GetItem(string key)
     {
         ValidateCurrentLevel();
         return _currentLevel!.GetItem(key);
     }
 
-    public Item GetItem(string levelKey, string key)
+    public Item? GetItem(string levelKey, string key)
     {
         ValidateLevelKey(levelKey);
         if (!_levels.TryGetValue(levelKey, out var lvl))
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
-        return lvl.GetItem(key);
+        var item = lvl.GetItem(key);
+        while (item == null && lvl != null && lvl.Parent != null)
+        {
+            if (!_levels.TryGetValue(lvl.Parent, out var lvl2))
+            {
+                throw new KeyNotFoundException($"Level '{lvl.Parent}' not found.");
+            }
+            lvl = lvl2;
+            item = lvl?.GetItem(key);
+        }
+        return item;
     }
 
     #endregion
@@ -328,7 +340,11 @@ public class Grod2
         List<Item> sortedItems = [];
         foreach (var key in keys)
         {
-            sortedItems.Add(lvl.GetItem(key));
+            var item = lvl.GetItem(key);
+            if (item != null)
+            {
+                sortedItems.Add(item);
+            }
         }
         return sortedItems;
     }
@@ -344,7 +360,27 @@ public class Grod2
         List<Item> allItems = [];
         foreach (var key in keys)
         {
-            allItems.Add(lvl.GetItem(key));
+            var item = lvl!.GetItem(key);
+            if (item != null)
+            {
+                allItems.Add(item);
+                continue;
+            }
+            // If item is not found in the current level, check parent levels
+            while (lvl != null && lvl.Parent != null)
+            {
+                if (!_levels.TryGetValue(lvl.Parent, out var parentLevel))
+                {
+                    throw new KeyNotFoundException($"Parent level '{lvl.Parent}' not found.");
+                }
+                item = parentLevel.GetItem(key);
+                if (item != null)
+                {
+                    allItems.Add(item);
+                    break;
+                }
+                lvl = parentLevel;
+            }
         }
         return allItems;
     }
@@ -360,7 +396,11 @@ public class Grod2
         List<Item> allItems = [];
         foreach (var key in keys)
         {
-            allItems.Add(lvl.GetItem(key));
+            var item = lvl.GetItem(key);
+            if (item != null)
+            {
+                allItems.Add(item);
+            }
         }
         return allItems;
     }

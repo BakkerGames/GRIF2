@@ -18,14 +18,14 @@ public class Data
         return null;
     }
 
-    public Item GetItem(string key)
+    public Item? GetItem(string key)
     {
         ValidateKey(key);
         if (_data.TryGetValue(key, out var text))
         {
             return new Item { Key = key, Text = text };
         }
-        return new Item { Key = key, Text = string.Empty };
+        return null;
     }
 
     public void Set(string key, string? text)
