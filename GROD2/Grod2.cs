@@ -8,9 +8,6 @@ public class Grod2
 
     private readonly Dictionary<string, Level> _levels = new(StringComparer.OrdinalIgnoreCase);
 
-    private string? _currentLevelKey;
-    private Level? _currentLevel;
-
     public Grod2()
     {
     }
@@ -20,9 +17,10 @@ public class Grod2
         return Version;
     }
 
-    #region Level management
-
-    public List<string> LevelKeys => [.. _levels.Keys];
+    public List<string> GetLevelKeys()
+    {
+        return [.. _levels.Keys];
+    }
 
     public void AddLevel(string levelKey)
     {
@@ -49,13 +47,41 @@ public class Grod2
         _levels[levelKey] = new Level(levelKey, parentLevelKey);
     }
 
+    public string? GetLevelParent(string levelKey)
+    {
+        ValidateLevelKey(levelKey);
+        if (!_levels.TryGetValue(levelKey, out var level))
+        {
+            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
+        }
+        return level.Parent;
+    }
+
+    public void SetLevelParent(string levelKey, string? parentLevelKey)
+    {
+        ValidateLevelKey(levelKey);
+        if (string.IsNullOrWhiteSpace(parentLevelKey))
+        {
+            parentLevelKey = null; // Allow setting parent to null
+        }
+        else
+        {
+            ValidateLevelKey(parentLevelKey);
+            if (!_levels.ContainsKey(parentLevelKey))
+            {
+                throw new KeyNotFoundException($"Parent level '{parentLevelKey}' not found.");
+            }
+        }
+        if (!_levels.TryGetValue(levelKey, out var level))
+        {
+            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
+        }
+        level.Parent = parentLevelKey;
+    }
+
     public void RemoveLevel(string levelKey)
     {
         ValidateLevelKey(levelKey);
-        if (_currentLevelKey == levelKey)
-        {
-            throw new InvalidOperationException($"Cannot remove current level '{levelKey}'. Please set another level as current before removing.");
-        }
         foreach (var level in _levels.Values)
         {
             if (level.Parent == levelKey)
@@ -69,38 +95,6 @@ public class Grod2
         }
     }
 
-    public void SetCurrentLevel(string? levelKey)
-    {
-        if (string.IsNullOrWhiteSpace(levelKey))
-        {
-            _currentLevelKey = null;
-            _currentLevel = null;
-            return;
-        }
-        ValidateLevelKey(levelKey);
-        if (!_levels.TryGetValue(levelKey, out var lvl))
-        {
-            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
-        }
-        _currentLevelKey = levelKey;
-        _currentLevel = lvl;
-    }
-
-    public string? GetCurrentLevel()
-    {
-        return _currentLevelKey;
-    }
-
-    #endregion
-
-    #region Get methods
-
-    public string? Get(string key)
-    {
-        ValidateCurrentLevel();
-        return Get(_currentLevel!, key);
-    }
-
     public string? Get(string levelKey, string key)
     {
         ValidateLevelKey(levelKey);
@@ -108,37 +102,17 @@ public class Grod2
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
-        return Get(lvl, key);
+        return lvl.Get(key);
     }
 
-    #endregion
-
-    #region GetItem methods
-
-    public Item? GetItem(string key)
-    {
-        ValidateCurrentLevel();
-        return GetItem(_currentLevel!, key);
-    }
-
-    public Item? GetItem(string levelKey, string key)
+    public string? GetRecursive(string levelKey, string key)
     {
         ValidateLevelKey(levelKey);
         if (!_levels.TryGetValue(levelKey, out var lvl))
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
-        return GetItem(lvl, key);
-    }
-
-    #endregion
-
-    #region Set methods
-
-    public void Set(string key, string? text)
-    {
-        ValidateCurrentLevel();
-        _currentLevel!.Set(key, text);
+        return GetRecursive(lvl, key);
     }
 
     public void Set(string levelKey, string key, string? text)
@@ -151,36 +125,6 @@ public class Grod2
         lvl.Set(key, text);
     }
 
-    public void Set(Item item)
-    {
-        if (item == null)
-        {
-            throw new ArgumentNullException(nameof(item), "Item cannot be null.");
-        }
-        ValidateCurrentLevel();
-        _currentLevel!.Set(item);
-    }
-
-    public void Set(string levelKey, Item item)
-    {
-        ValidateLevelKey(levelKey);
-        if (!_levels.TryGetValue(levelKey, out var lvl))
-        {
-            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
-        }
-        lvl.Set(item);
-    }
-
-    #endregion
-
-    #region Remove methods
-
-    public void Remove(string key)
-    {
-        ValidateCurrentLevel();
-        _currentLevel!.Remove(key);
-    }
-
     public void Remove(string levelKey, string key)
     {
         ValidateLevelKey(levelKey);
@@ -189,16 +133,6 @@ public class Grod2
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
         lvl.Remove(key);
-    }
-
-    #endregion
-
-    #region Clear methods
-
-    public void Clear()
-    {
-        ValidateCurrentLevel();
-        _currentLevel!.Clear();
     }
 
     public void Clear(string levelKey)
@@ -211,46 +145,16 @@ public class Grod2
         lvl.Clear();
     }
 
-    #endregion
-
-    #region GetKeys methods
-
-    public IEnumerable<string> GetKeys()
-    {
-        ValidateCurrentLevel();
-        return GetKeys(_currentLevelKey!);
-    }
-
-    public IEnumerable<string> GetKeysSorted()
-    {
-        ValidateCurrentLevel();
-        return GetKeysSorted(_currentLevelKey!);
-    }
-
-    public IEnumerable<string> GetKeys(string levelKey)
+    public List<string> GetKeys(string levelKey)
     {
         ValidateLevelKey(levelKey);
         if (!_levels.TryGetValue(levelKey, out var lvl))
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
-        return lvl.Keys;
-    }
-
-    public IEnumerable<string> GetKeysSorted(string levelKey)
-    {
-        ValidateLevelKey(levelKey);
-        if (!_levels.TryGetValue(levelKey, out var lvl))
-        {
-            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
-        }
-        return lvl.SortedKeys;
-    }
-
-    public List<string> GetKeysRecursive()
-    {
-        ValidateCurrentLevel();
-        return GetKeysRecursive(_currentLevelKey!);
+        var keys = lvl.Keys;
+        keys.Sort(OIC);
+        return keys;
     }
 
     public List<string> GetKeysRecursive(string levelKey)
@@ -280,30 +184,8 @@ public class Grod2
             }
             lvl = parentLevel;
         }
-        return allKeys;
-    }
-
-    public List<string> GetKeysRecursiveSorted()
-    {
-        ValidateCurrentLevel();
-        return GetKeysRecursiveSorted(_currentLevelKey!);
-    }
-
-    public List<string> GetKeysRecursiveSorted(string levelKey)
-    {
-        var allKeys = GetKeysRecursive(levelKey);
         allKeys.Sort(OIC);
         return allKeys;
-    }
-
-    #endregion
-
-    #region GetItems methods
-
-    public List<Item> GetItems()
-    {
-        ValidateCurrentLevel();
-        return _currentLevel!.Items;
     }
 
     public List<Item> GetItems(string levelKey)
@@ -313,25 +195,15 @@ public class Grod2
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
-        return lvl.Items;
-    }
-
-    public List<Item> GetItemsSorted(string levelKey)
-    {
-        ValidateLevelKey(levelKey);
-        if (!_levels.TryGetValue(levelKey, out var lvl))
-        {
-            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
-        }
-        var keys = lvl.SortedKeys;
+        var keys = lvl.Keys;
         keys.Sort(OIC);
         List<Item> sortedItems = [];
         foreach (var key in keys)
         {
-            var item = lvl.GetItem(key);
-            if (item != null)
+            var value = lvl.Get(key);
+            if (value != null)
             {
-                sortedItems.Add(item);
+                sortedItems.Add(new Item { Key = key, Text = value });
             }
         }
         return sortedItems;
@@ -345,55 +217,28 @@ public class Grod2
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
         var keys = GetKeysRecursive(levelKey);
+        keys.Sort(OIC);
         List<Item> allItems = [];
         foreach (var key in keys)
         {
-            var item = lvl!.GetItem(key);
-            if (item != null)
+            var value = GetRecursive(lvl, key);
+            if (value != null)
             {
-                allItems.Add(item);
-                continue;
-            }
-            // If item is not found in the current level, check parent levels
-            while (lvl != null && lvl.Parent != null)
-            {
-                if (!_levels.TryGetValue(lvl.Parent, out var parentLevel))
-                {
-                    throw new KeyNotFoundException($"Parent level '{lvl.Parent}' not found.");
-                }
-                item = parentLevel.GetItem(key);
-                if (item != null)
-                {
-                    allItems.Add(item);
-                    break;
-                }
-                lvl = parentLevel;
+                allItems.Add(new Item { Key = key, Text = value });
             }
         }
         return allItems;
     }
 
-    public List<Item> GetItemsRecursiveSorted(string levelKey)
+    public void AddRange(string levelKey, List<Item> items)
     {
         ValidateLevelKey(levelKey);
         if (!_levels.TryGetValue(levelKey, out var lvl))
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
-        var keys = GetKeysRecursiveSorted(levelKey);
-        List<Item> allItems = [];
-        foreach (var key in keys)
-        {
-            var item = lvl.GetItem(key);
-            if (item != null)
-            {
-                allItems.Add(item);
-            }
-        }
-        return allItems;
+        lvl.AddRange(items);
     }
-
-    #endregion
 
     #region private methods
 
@@ -405,15 +250,7 @@ public class Grod2
         }
     }
 
-    private void ValidateCurrentLevel()
-    {
-        if (string.IsNullOrWhiteSpace(_currentLevelKey) || _currentLevel == null)
-        {
-            throw new InvalidOperationException("Current level is not set.");
-        }
-    }
-
-    private string? Get(Level lvl, string key)
+    private string? GetRecursive(Level lvl, string key)
     {
         if (lvl == null)
         {
@@ -430,25 +267,6 @@ public class Grod2
             value = lvl?.Get(key);
         }
         return value;
-    }
-
-    private Item? GetItem(Level lvl, string key)
-    {
-        if (lvl == null)
-        {
-            throw new ArgumentNullException(nameof(lvl), "Level cannot be null.");
-        }
-        var item = lvl.GetItem(key);
-        while (item == null && lvl != null && lvl.Parent != null)
-        {
-            if (!_levels.TryGetValue(lvl.Parent, out var lvl2))
-            {
-                throw new KeyNotFoundException($"Level '{lvl.Parent}' not found.");
-            }
-            lvl = lvl2;
-            item = lvl?.GetItem(key);
-        }
-        return item;
     }
 
     #endregion

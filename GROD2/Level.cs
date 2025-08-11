@@ -5,7 +5,7 @@ public class Level : Data
     public Level(string name)
     {
         Name = name;
-    }   
+    }
 
     public Level(string name, string? parent)
     {
@@ -14,6 +14,6 @@ public class Level : Data
     }
 
     public string Name { get; set; }
-    
+
     public string? Parent { get; set; }
 }

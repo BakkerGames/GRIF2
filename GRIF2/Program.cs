@@ -1,9 +1,13 @@
-﻿namespace GRIF2;
+﻿using GROD2;
+
+namespace GRIF2;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static void Main(string[] _)
     {
-        Console.WriteLine("Hello, World!");
+        var grod = new Grod2();
+        grod.AddLevel("base");
+        grod.AddLevel("overlay", "base");
     }
 }

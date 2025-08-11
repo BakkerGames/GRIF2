@@ -7,23 +7,13 @@ public class Data
     public Data()
     {
     }
-    
+
     public string? Get(string key)
     {
         ValidateKey(key);
         if (_data.TryGetValue(key, out var item))
         {
             return item;
-        }
-        return null;
-    }
-
-    public Item? GetItem(string key)
-    {
-        ValidateKey(key);
-        if (_data.TryGetValue(key, out var text))
-        {
-            return new Item { Key = key, Text = text };
         }
         return null;
     }
@@ -42,15 +32,6 @@ public class Data
         }
     }
 
-    public void Set(Item item)
-    {
-        if (item == null)
-        {
-            throw new ArgumentNullException(nameof(item), "Item cannot be null.");
-        }
-        Set(item.Key, item.Text);
-    }
-
     public void Remove(string key)
     {
         ValidateKey(key);
@@ -62,15 +43,11 @@ public class Data
         _data.Clear();
     }
 
-    public IEnumerable<string> Keys => [.. _data.Keys];
-
-    public List<string> SortedKeys
+    public List<string> Keys
     {
         get
         {
-            var keys = _data.Keys.ToList();
-            keys.Sort(StringComparer.OrdinalIgnoreCase);
-            return keys;
+            return [.. _data.Keys];
         }
     }
 
@@ -82,6 +59,20 @@ public class Data
         }
     }
 
+    public void AddRange(IEnumerable<Item> items)
+    {
+        if (items == null)
+        {
+            throw new ArgumentNullException(nameof(items), "Items cannot be null.");
+        }
+        foreach (var item in items)
+        {
+            Set(item.Key, item.Text);
+        }
+    }
+
+    #region private methods
+
     private static void ValidateKey(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
@@ -89,4 +80,6 @@ public class Data
             throw new ArgumentNullException(nameof(key), "Key cannot be null or whitespace.");
         }
     }
+
+    #endregion
 }

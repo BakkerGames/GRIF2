@@ -8,4 +8,8 @@
     <Version>2.2025.0810</Version>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GROD2\GROD2.csproj" />
+  </ItemGroup>
+
 </Project>
