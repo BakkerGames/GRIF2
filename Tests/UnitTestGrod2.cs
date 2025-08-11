@@ -57,6 +57,21 @@ public class UnitTestGrod2
     }
 
     [Test]
+    public void TestSetAndGetItemByLevel()
+    {
+        // Test setting an item by level name
+        var item = new Item { Key = "TestKey", Text = "TestValue" };
+        _grod2.Set(Level1, item);
+        var retrievedItem = _grod2.GetItem(Level1, "TestKey");
+        Assert.Multiple(() =>
+        {
+            Assert.That(retrievedItem, Is.Not.Null);
+            Assert.That(retrievedItem!.Key, Is.EqualTo("TestKey"));
+            Assert.That(retrievedItem!.Text, Is.EqualTo("TestValue"));
+        });
+    }
+
+    [Test]
     public void TestGetItem()
     {
         // Test getting an item
@@ -85,6 +100,32 @@ public class UnitTestGrod2
         // Test setting current level to a different one
         _grod2.SetCurrentLevel(Level1);
         Assert.That(_grod2.GetCurrentLevel, Is.EqualTo(Level1));
+    }
+
+    [Test]
+    public void TestRemoveLevel()
+    {
+        _grod2.SetCurrentLevel(Level2);
+        // Test removing a level which is the current level
+        Assert.Throws<InvalidOperationException>(() => _grod2.RemoveLevel(Level2));
+        // Test removing a level which is a parent of some level
+        Assert.Throws<InvalidOperationException>(() => _grod2.RemoveLevel(Level1));
+        // Test if the level was not removed
+        Assert.That(_grod2.LevelKeys, Has.Count.EqualTo(2));
+        _grod2.SetCurrentLevel(null);
+        _grod2.RemoveLevel(Level2);
+        // Test if the level was removed
+        Assert.That(_grod2.LevelKeys, Has.Count.EqualTo(1));
+        // Test if the current level is null
+        Assert.That(_grod2.GetCurrentLevel, Is.Null);
+    }
+
+    [Test]
+    public void TestRemoveLevelInUse()
+    {
+        Assert.Throws<InvalidOperationException>(() => _grod2.RemoveLevel(Level1));
+        // Test if the level was not removed
+        Assert.That(_grod2.LevelKeys, Has.Count.EqualTo(2));
     }
 
     [Test]
@@ -332,8 +373,8 @@ public class UnitTestGrod2
     public void TestGetItems()
     {
         // Test getting all items in the current level
-        _grod2.Set("Item1", "Value1");
-        _grod2.Set("Item2", "Value2");
+        _grod2.Set("Item1", expectedValue1[0]);
+        _grod2.Set("Item2", expectedValue2[0]);
         var items = _grod2.GetItems();
         Assert.That(items, Has.Count.EqualTo(2));
         Assert.Multiple(() =>
@@ -347,8 +388,8 @@ public class UnitTestGrod2
     public void TestGetItemsRecursive()
     {
         // Test getting all items recursively from the current level
-        _grod2.Set(Level1, "Item1", "Value1");
-        _grod2.Set(Level2, "Item2", "Value2");
+        _grod2.Set(Level1, "Item1", expectedValue1[0]);
+        _grod2.Set(Level2, "Item2", expectedValue2[0]);
         var items = _grod2.GetItemsRecursive(Level2);
         Assert.That(items, Has.Count.EqualTo(2));
         Assert.Multiple(() =>

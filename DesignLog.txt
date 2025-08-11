@@ -1,0 +1,11 @@
+2025-08-10
+
+- Created GRIF2 version 2.2025.810
+- Created design document for GRIF2.
+- Created design document for GROD2.
+- Created GROD2 classes Grod2, Item, Data, Level.
+- Grod2 contains a list of levels, each with a list of items.
+- Levels can have a parent.
+- If a level has a parent, it inherits items from the parent level unless they are overridden.
+- Added methods to add levels, set items, and get items with inheritance.
+- Created unit tests for Grod2.

@@ -2,7 +2,7 @@
 
 public class Grod2
 {
-    private const string Version = "2.0.0";
+    private const string Version = "2.2025.0810";
 
     private readonly StringComparer OIC = StringComparer.OrdinalIgnoreCase;
 
@@ -52,14 +52,31 @@ public class Grod2
     public void RemoveLevel(string levelKey)
     {
         ValidateLevelKey(levelKey);
+        if (_currentLevelKey == levelKey)
+        {
+            throw new InvalidOperationException($"Cannot remove current level '{levelKey}'. Please set another level as current before removing.");
+        }
+        foreach (var level in _levels.Values)
+        {
+            if (level.Parent == levelKey)
+            {
+                throw new InvalidOperationException($"Cannot remove level '{levelKey}' because it is a parent of another level.");
+            }
+        }
         if (!_levels.Remove(levelKey))
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
     }
 
-    public void SetCurrentLevel(string levelKey)
+    public void SetCurrentLevel(string? levelKey)
     {
+        if (string.IsNullOrWhiteSpace(levelKey))
+        {
+            _currentLevelKey = null;
+            _currentLevel = null;
+            return;
+        }
         ValidateLevelKey(levelKey);
         if (!_levels.TryGetValue(levelKey, out var lvl))
         {
@@ -94,25 +111,6 @@ public class Grod2
         return Get(lvl, key);
     }
 
-    private string? Get(Level lvl, string key)
-    {
-        if (lvl == null)
-        {
-            throw new ArgumentNullException(nameof(lvl), "Level cannot be null.");
-        }
-        var value = lvl.Get(key);
-        while (value == null && lvl != null && lvl.Parent != null)
-        {
-            if (!_levels.TryGetValue(lvl.Parent, out var lvl2))
-            {
-                throw new KeyNotFoundException($"Level '{lvl.Parent}' not found.");
-            }
-            lvl = lvl2;
-            value = lvl?.Get(key);
-        }
-        return value;
-    }
-
     #endregion
 
     #region GetItem methods
@@ -120,7 +118,7 @@ public class Grod2
     public Item? GetItem(string key)
     {
         ValidateCurrentLevel();
-        return _currentLevel!.GetItem(key);
+        return GetItem(_currentLevel!, key);
     }
 
     public Item? GetItem(string levelKey, string key)
@@ -130,17 +128,7 @@ public class Grod2
         {
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
-        var item = lvl.GetItem(key);
-        while (item == null && lvl != null && lvl.Parent != null)
-        {
-            if (!_levels.TryGetValue(lvl.Parent, out var lvl2))
-            {
-                throw new KeyNotFoundException($"Level '{lvl.Parent}' not found.");
-            }
-            lvl = lvl2;
-            item = lvl?.GetItem(key);
-        }
-        return item;
+        return GetItem(lvl, key);
     }
 
     #endregion
@@ -423,6 +411,44 @@ public class Grod2
         {
             throw new InvalidOperationException("Current level is not set.");
         }
+    }
+
+    private string? Get(Level lvl, string key)
+    {
+        if (lvl == null)
+        {
+            throw new ArgumentNullException(nameof(lvl), "Level cannot be null.");
+        }
+        var value = lvl.Get(key);
+        while (value == null && lvl != null && lvl.Parent != null)
+        {
+            if (!_levels.TryGetValue(lvl.Parent, out var lvl2))
+            {
+                throw new KeyNotFoundException($"Level '{lvl.Parent}' not found.");
+            }
+            lvl = lvl2;
+            value = lvl?.Get(key);
+        }
+        return value;
+    }
+
+    private Item? GetItem(Level lvl, string key)
+    {
+        if (lvl == null)
+        {
+            throw new ArgumentNullException(nameof(lvl), "Level cannot be null.");
+        }
+        var item = lvl.GetItem(key);
+        while (item == null && lvl != null && lvl.Parent != null)
+        {
+            if (!_levels.TryGetValue(lvl.Parent, out var lvl2))
+            {
+                throw new KeyNotFoundException($"Level '{lvl.Parent}' not found.");
+            }
+            lvl = lvl2;
+            item = lvl?.GetItem(key);
+        }
+        return item;
     }
 
     #endregion
