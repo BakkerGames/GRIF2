@@ -2,7 +2,7 @@
 
 public class Grod2
 {
-    private const string Version = "2.2025.0810";
+    private const string Version = "2.2025.0812";
 
     private readonly StringComparer OIC = StringComparer.OrdinalIgnoreCase;
 
@@ -95,6 +95,16 @@ public class Grod2
         }
     }
 
+    public void ClearLevel(string levelKey)
+    {
+        ValidateLevelKey(levelKey);
+        if (!_levels.TryGetValue(levelKey, out var lvl))
+        {
+            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
+        }
+        lvl.Clear();
+    }
+
     public string? Get(string levelKey, string key)
     {
         ValidateLevelKey(levelKey);
@@ -133,16 +143,6 @@ public class Grod2
             throw new KeyNotFoundException($"Level '{levelKey}' not found.");
         }
         lvl.Remove(key);
-    }
-
-    public void Clear(string levelKey)
-    {
-        ValidateLevelKey(levelKey);
-        if (!_levels.TryGetValue(levelKey, out var lvl))
-        {
-            throw new KeyNotFoundException($"Level '{levelKey}' not found.");
-        }
-        lvl.Clear();
     }
 
     public List<string> GetKeys(string levelKey)
