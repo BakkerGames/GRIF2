@@ -6,7 +6,7 @@ GRIF2 is a game runner for interactive fiction games. It is designed to be a sim
 
 ## Features
 
-- Supports GRIF and GRIF2 game formats
+- Supports GRIF game formats
 - Runs games in a terminal with a text-based interface
 - Runs on Windows, Linux, and macOS
 - Supports multiple written languages for text output
