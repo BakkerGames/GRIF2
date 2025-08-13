@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GROD2\GROD2.csproj" />
+    <ProjectReference Include="..\Grif\Grif.csproj" />
   </ItemGroup>
 
   <ItemGroup>

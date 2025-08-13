@@ -1,14 +1,11 @@
-﻿using GROD2;
-
-namespace GRIF2;
+﻿namespace Grif;
 
 internal class Program
 {
     static void Main(string[] _)
     {
-        var grod = new Grod2();
-        grod.AddLevel("base");
-        grod.AddLevel("overlay", "base");
+        var grodBase = new Grod("base");
+        //var grodOverlay = new Grod("overlay", grodBase);
         var lines = File.ReadAllLines("..\\..\\..\\..\\TestData\\test.grif");
         var key = string.Empty;
         foreach (var line in lines)
@@ -24,12 +21,12 @@ internal class Program
                 {
                     continue; // Skip empty keys or values
                 }
-                grod.Set("base", key, value);
+                grodBase.Set( key, value);
             }
         }
-        foreach (string key2 in grod.GetKeys("base"))
+        foreach (GrodItem item in grodBase.Items(false, true))
         {
-            Console.WriteLine($"{key2}: {grod.Get("base", key2)}");
+            Console.WriteLine($"{item.Key}: {grodBase.Get(item.Key, false)}");
         }
     }
 }
