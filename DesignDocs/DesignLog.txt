@@ -25,3 +25,8 @@
 - Added unit tests for GrodItem and Grod.
 - Removed GRIF2 and changed to just Grif.
 - Load test data from a GRIF file.
+
+- Added Dags.
+- Started on Dags.Process().
+- Copied over SplitTokens() from GRIF.
+- Test of "@write()" works for simple cases.
