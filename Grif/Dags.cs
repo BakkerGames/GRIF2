@@ -1,6 +1,6 @@
 ﻿namespace Grif;
 
-public record DagItem(int Type, string Value);
+public record DagsItem(int Type, string Value);
 
 public partial class Dags
 {
@@ -8,17 +8,31 @@ public partial class Dags
 
     public static string Version => _version;
 
-    public static async Task<List<DagItem>> Process(string script, Grod grod)
+    public static List<DagsItem> Process(string script, Grod grod)
     {
-        var result = new List<DagItem>();
-
-        if (string.IsNullOrWhiteSpace(script))
+        try
         {
-            return result; // Return empty list if script is null or empty
+            List<DagsItem> result = [];
+            var tokens = SplitTokens(script);
+            int index = 0;
+            do
+            {
+                var answer = ProcessOneCommand(tokens, ref index, grod);
+                foreach (var item in answer)
+                {
+                    if (item.Type == -1) // Error
+                    {
+                        return [item];
+                    }
+                    result.Add(item);
+                }
+
+            } while (index < tokens.Length);
+            return result;
         }
-
-        await ProcessOneItem(script, grod, result);
-
-        return result;
+        catch (Exception ex)
+        {
+            return [new DagsItem(-1, ex.Message)];
+        }
     }
 }

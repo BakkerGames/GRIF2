@@ -1,32 +1,15 @@
 ﻿
-using System.Linq;
-
 namespace Grif;
 
 public partial class Dags
 {
-    private static async Task ProcessOneItem(string script, Grod grod, List<DagItem> result)
+    private static List<DagsItem> ProcessOneCommand(string[] tokens, ref int index, Grod grod)
     {
-        if (!script.StartsWith('@'))
-        {
-            result.Add(new DagItem(0, script));
-            return;
-        }
+        List<DagsItem> result = [];
 
-        var tokens = SplitTokens(script);
-
-        int index = 0;
-        do
-        {
-            index = await ProcessTokens(tokens, index, grod, result);
-        } while (index < tokens.Length);
-    }
-
-    private static async Task<int> ProcessTokens(string[] tokens, int index, Grod grod, List<DagItem> result)
-    {
         if (index >= tokens.Length)
         {
-            return index; // Return if index is out of bounds
+            return result;
         }
 
         var token = tokens[index++];
@@ -34,8 +17,8 @@ public partial class Dags
         // static value
         if (!token.StartsWith('@'))
         {
-            result.Add(new DagItem(0, token));
-            return index;
+            result.Add(new DagsItem(1, token));
+            return result;
         }
 
         // tokens without parameters
@@ -44,20 +27,97 @@ public partial class Dags
         }
         else
         {
+            var p = GetParameters(tokens, ref index, grod);
             switch (token)
             {
+                case "@get(":
+                    CheckParameterCount(p, 1);
+                    var value = grod.Get(p[0].Value, true) ?? "";
+                    result.Add(new DagsItem(1, value));
+                    break;
+                case "@set(":
+                    CheckParameterCount(p, 2);
+                    grod.Set(p[0].Value, p[1].Value);
+                    break;
                 case "@write(":
-                    result.Add(new DagItem(0, tokens[index++]));
-                    index++; // Skip the closing parenthesis
+                    foreach (var item in p) // concatenate all parameters
+                    {
+                        switch (item.Type)
+                        {
+                            case 1: // Static value, change to writable
+                                result.Add(new DagsItem(0, item.Value));
+                                break;
+                            default: // return as is
+                                result.Add(item);
+                                break;
+                        }
+                    }
+                    break;
+                case "@writeline(":
+                    foreach (var item in p) // concatenate all parameters
+                    {
+                        switch (item.Type)
+                        {
+                            case 1: // Static value, change to writable
+                                result.Add(new DagsItem(0, item.Value));
+                                break;
+                            default: // return as is
+                                result.Add(item);
+                                break;
+                        }
+                    }
+                    result.Add(new DagsItem(0, "\\n")); // Add newline at the end
                     break;
                 default:
-                    result.Add(new DagItem(-1, $"Unknown token: {token}"));
-                    break;
+                    throw new SystemException($"Unknown token: {token}");
             }
         }
 
-        await Task.CompletedTask;
+        return result;
+    }
 
-        return index;
+    private static void CheckParameterCount(List<DagsItem> p, int count)
+    {
+        if (p.Count != count)
+        {
+            throw new ArgumentException($"Expected {count} parameters, but got {p.Count}");
+        }
+    }
+
+    private static List<DagsItem> GetParameters(string[] tokens, ref int index, Grod grod)
+    {
+        List<DagsItem> parameters = [];
+        while (index < tokens.Length && tokens[index] != ")")
+        {
+            var token = tokens[index++];
+            if (token.StartsWith('@'))
+            {
+                // Handle nested tokens
+                parameters.AddRange(ProcessOneCommand(tokens, ref index, grod));
+            }
+            else
+            {
+                // Add static value
+                parameters.Add(new DagsItem(1, token));
+            }
+            if (index < tokens.Length)
+            {
+                if (tokens[index] == ")")
+                {
+                    break; // End of parameters
+                }
+                if (tokens[index] != ",")
+                {
+                    throw new SystemException("Missing comma");
+                }
+                index++; // Skip the comma
+            }
+        }
+        if (index >= tokens.Length || tokens[index] != ")")
+        {
+            throw new SystemException("Missing closing parenthesis");
+        }
+        index++; // Skip the closing parenthesis
+        return parameters;
     }
 }
