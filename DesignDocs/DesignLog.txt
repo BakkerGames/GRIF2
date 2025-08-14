@@ -12,7 +12,7 @@
 
 2025-08-13
 
-- Changed GROD2 to just Grod.
+- Changed GROD2 project to just Grod class.
 - Added GrodItem class to represent items in the Grod.
 - Simplified Grod to be a smaller class with the base of a Dictionary.
 - Added methods to set values by key.
@@ -23,10 +23,18 @@
 - Added methods to get a list of all GrodItems, sorted and/or recursively.
 - Changed to return null if a key is not found instead of throwing an exception.
 - Added unit tests for GrodItem and Grod.
-- Removed GRIF2 and changed to just Grif.
+- Removed GRIF2 project and changed to just Grif.
 - Load test data from a GRIF file.
 
-- Added Dags.
+- Added Dags class and partials.
 - Started on Dags.Process().
 - Copied over SplitTokens() from GRIF.
 - Test of "@write()" works for simple cases.
+- Added @write() and @writeline() with concatenation.
+- Added parameter handling and count checking.
+- Added @get() and @set().
+- Added tests for all new methods.
+
+- Writable values are type 0.
+- Static values are type 1.
+- Script values are type 2.

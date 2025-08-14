@@ -1,5 +1,4 @@
-﻿
-namespace Grif;
+﻿namespace Grif;
 
 public partial class Dags
 {
@@ -28,12 +27,21 @@ public partial class Dags
         else
         {
             var p = GetParameters(tokens, ref index, grod);
-            switch (token)
+            switch (token.ToLower())
             {
                 case "@get(":
                     CheckParameterCount(p, 1);
                     var value = grod.Get(p[0].Value, true) ?? "";
-                    result.Add(new DagsItem(1, value));
+                    if (value.StartsWith('@'))
+                    {
+                        // script value
+                        result.Add(new DagsItem(2, value));
+                    }
+                    else
+                    {
+                        // static value
+                        result.Add(new DagsItem(1, value));
+                    }
                     break;
                 case "@set(":
                     CheckParameterCount(p, 2);
@@ -44,7 +52,7 @@ public partial class Dags
                     {
                         switch (item.Type)
                         {
-                            case 1: // Static value, change to writable
+                            case 1: // static value, change to writable
                                 result.Add(new DagsItem(0, item.Value));
                                 break;
                             default: // return as is
@@ -97,8 +105,7 @@ public partial class Dags
             }
             else
             {
-                // Add static value
-                parameters.Add(new DagsItem(1, token));
+                parameters.Add(new DagsItem(1, token)); // static value
             }
             if (index < tokens.Length)
             {
