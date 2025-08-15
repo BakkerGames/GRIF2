@@ -105,6 +105,17 @@ public class Grod
         return items;
     }
 
+    public void AddItems(IEnumerable<GrodItem> items)
+    {
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                Set(item);
+            }
+        }
+    }
+
     #region private methods
 
     private static void ValidateKey(string key)

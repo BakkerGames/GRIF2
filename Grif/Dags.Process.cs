@@ -1,4 +1,5 @@
-﻿namespace Grif;
+﻿
+namespace Grif;
 
 public partial class Dags
 {
@@ -23,6 +24,22 @@ public partial class Dags
         // tokens without parameters
         if (!token.EndsWith('('))
         {
+            switch (token.ToLower())
+            {
+                case "@if":
+                    result.AddRange(ProcessIf(tokens, ref index, grod));
+                    break;
+                case "@help":
+                    break;
+                case "@nl":
+                    result.Add(new DagsItem(0, "\\n")); // Add newline
+                    break;
+                case "@return":
+                    index = tokens.Length; // End processing
+                    break;
+                default:
+                    throw new SystemException($"Unknown token: {token}");
+            }
         }
         else
         {
@@ -82,49 +99,5 @@ public partial class Dags
         }
 
         return result;
-    }
-
-    private static void CheckParameterCount(List<DagsItem> p, int count)
-    {
-        if (p.Count != count)
-        {
-            throw new ArgumentException($"Expected {count} parameters, but got {p.Count}");
-        }
-    }
-
-    private static List<DagsItem> GetParameters(string[] tokens, ref int index, Grod grod)
-    {
-        List<DagsItem> parameters = [];
-        while (index < tokens.Length && tokens[index] != ")")
-        {
-            var token = tokens[index++];
-            if (token.StartsWith('@'))
-            {
-                // Handle nested tokens
-                parameters.AddRange(ProcessOneCommand(tokens, ref index, grod));
-            }
-            else
-            {
-                parameters.Add(new DagsItem(1, token)); // static value
-            }
-            if (index < tokens.Length)
-            {
-                if (tokens[index] == ")")
-                {
-                    break; // End of parameters
-                }
-                if (tokens[index] != ",")
-                {
-                    throw new SystemException("Missing comma");
-                }
-                index++; // Skip the comma
-            }
-        }
-        if (index >= tokens.Length || tokens[index] != ")")
-        {
-            throw new SystemException("Missing closing parenthesis");
-        }
-        index++; // Skip the closing parenthesis
-        return parameters;
     }
 }

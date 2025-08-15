@@ -65,4 +65,14 @@ public class TestDags
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(1, "value1") }));
     }
+
+    [Test]
+    public void TestIfCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @true @then @write(\"Condition met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Condition met") }));
+    }
 }

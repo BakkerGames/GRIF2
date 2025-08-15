@@ -143,4 +143,48 @@ public partial class Dags
         }
         return [.. result];
     }
+
+    private static List<DagsItem> GetParameters(string[] tokens, ref int index, Grod grod)
+    {
+        List<DagsItem> parameters = [];
+        while (index < tokens.Length && tokens[index] != ")")
+        {
+            var token = tokens[index++];
+            if (token.StartsWith('@'))
+            {
+                // Handle nested tokens
+                parameters.AddRange(ProcessOneCommand(tokens, ref index, grod));
+            }
+            else
+            {
+                parameters.Add(new DagsItem(1, token)); // static value
+            }
+            if (index < tokens.Length)
+            {
+                if (tokens[index] == ")")
+                {
+                    break; // End of parameters
+                }
+                if (tokens[index] != ",")
+                {
+                    throw new SystemException("Missing comma");
+                }
+                index++; // Skip the comma
+            }
+        }
+        if (index >= tokens.Length || tokens[index] != ")")
+        {
+            throw new SystemException("Missing closing parenthesis");
+        }
+        index++; // Skip the closing parenthesis
+        return parameters;
+    }
+
+    private static void CheckParameterCount(List<DagsItem> p, int count)
+    {
+        if (p.Count != count)
+        {
+            throw new ArgumentException($"Expected {count} parameters, but got {p.Count}");
+        }
+    }
 }

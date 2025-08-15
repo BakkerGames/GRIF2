@@ -38,3 +38,7 @@
 - Writable values are type 0.
 - Static values are type 1.
 - Script values are type 2.
+
+2025-08-14
+
+- Working on @if logic. Needs to handle nested conditions.

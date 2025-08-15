@@ -8,6 +8,7 @@ internal class Program
         //var grodOverlay = new Grod("overlay", grodBase);
         var lines = File.ReadAllLines("..\\..\\..\\..\\TestData\\test.grif");
         var key = string.Empty;
+        List<GrodItem> items = [];
         foreach (var line in lines)
         {
             if (!line.StartsWith('\t'))
@@ -21,9 +22,10 @@ internal class Program
                 {
                     continue; // Skip empty keys or values
                 }
-                grodBase.Set( key, value);
+                items.Add(new(key, value));
             }
         }
+        grodBase.AddItems(items);
         foreach (GrodItem item in grodBase.Items(false, true))
         {
             Console.WriteLine($"{item.Key}: {grodBase.Get(item.Key, false)}");
