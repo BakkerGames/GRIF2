@@ -73,6 +73,86 @@ public class TestDags
         string script = "@if @true @then @write(\"Condition met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Condition met") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
+    }
+
+    [Test]
+    public void TestIfNotCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @not @false @then @write(\"Condition met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
+    }
+
+    [Test]
+    public void TestIfWithAndCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @true @and @true @then @write(\"Condition met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
+    }
+
+    [Test]
+    public void TestIfWithOrCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @false @or @true @then @write(\"Condition met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
+    }
+
+    [Test]
+    public void TestIfWithOrShortCircuitCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @true @or @false @then @write(\"Condition met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
+    }
+
+    [Test]
+    public void TestIfWithElseCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition not met\"") }));
+    }
+
+    [Test]
+    public void TestIfWithAndFailsToElseCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @true @and @false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition not met\"") }));
+    }
+
+    [Test]
+    public void TestIfWithAndShortCircuitToElseCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @false @and @true @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition not met\"") }));
+    }
+
+    [Test]
+    public void TestIfWithElseIfCondition()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @false @then @write(\"Condition met\") @elseif @true @then @write(\"Second condition met\") @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Second condition met\"") }));
     }
 }

@@ -2,6 +2,9 @@
 
 public partial class Dags
 {
+    private static readonly StringComparison OIC = StringComparison.OrdinalIgnoreCase;
+    private const string _invalidIfSyntax = "Invalid @if syntax";
+
     // TODO ### needs to check for nested @if statements
 
     private static List<DagsItem> ProcessIf(string[] tokens, ref int index, Grod grod)
@@ -13,7 +16,7 @@ public partial class Dags
         {
             notFlag = false;
             while (index < tokens.Length &&
-                tokens[index].Equals("@not", StringComparison.OrdinalIgnoreCase))
+                tokens[index].Equals("@not", OIC))
             {
                 notFlag = !notFlag;
                 index++;
@@ -21,7 +24,7 @@ public partial class Dags
             var cond = GetCondition(tokens, ref index, grod);
             if (index >= tokens.Length)
             {
-                throw new SystemException("Invalid @if syntax");
+                throw new SystemException(_invalidIfSyntax);
             }
             if (notFlag)
             {
@@ -30,21 +33,41 @@ public partial class Dags
             token = tokens[index++].ToLower();
             if (token == "@then")
             {
+                if (!cond)
+                {
+                    SkipToElseEndif(tokens, ref index);
+                    if (tokens[index].Equals("@elseif", OIC))
+                    {
+                        index++;
+                        return ProcessIf(tokens, ref index, grod);
+                    }
+                    if (tokens[index].Equals("@endif", OIC))
+                    {
+                        index++;
+                        return [];
+                    }
+                    // @else
+                    index++;
+                }
                 break;
             }
             if (token == "@and")
             {
                 if (!cond)
                 {
-                    SkipToThen(tokens, ref index);
-                    index++;
+                    SkipOverThen(tokens, ref index);
                     SkipToElseEndif(tokens, ref index);
-                    if (index < tokens.Length && tokens[index].Equals("@elseif", StringComparison.CurrentCultureIgnoreCase))
+                    if (tokens[index].Equals("@elseif", OIC))
                     {
                         index++;
-                        ProcessIf(tokens, ref index, grod);
+                        return ProcessIf(tokens, ref index, grod);
+                    }
+                    if (tokens[index].Equals("@endif", OIC))
+                    {
+                        index++;
                         return [];
                     }
+                    // @else
                     index++;
                     break;
                 }
@@ -53,8 +76,7 @@ public partial class Dags
             {
                 if (cond)
                 {
-                    SkipToThen(tokens, ref index);
-                    index++;
+                    SkipOverThen(tokens, ref index);
                     break;
                 }
             }
@@ -63,45 +85,49 @@ public partial class Dags
                 throw new SystemException($"Unknown token in @if: {token}");
             }
         }
+        // process all commands in this section
         List<DagsItem> result = [];
         while (index < tokens.Length)
         {
             token = tokens[index].ToLower();
             if (token == "@else" || token == "@elseif" || token == "@endif")
             {
-                SkipToEndif(tokens, ref index);
-                index++;
-                break;
+                SkipOverEndif(tokens, ref index);
+                return result;
             }
             result.AddRange(ProcessOneCommand(tokens, ref index, grod));
         }
-        return result;
+        throw new SystemException(_invalidIfSyntax);
     }
 
-    private static void SkipToEndif(string[] tokens, ref int index)
+    private static void SkipOverEndif(string[] tokens, ref int index)
     {
         while (index < tokens.Length)
         {
-            var token = tokens[index].ToLower();
-            if (token == "@endif")
+            var token = tokens[index++];
+            if (token.Equals("@endif", OIC))
             {
                 return;
             }
-            index++;
+            if (token.Equals("@if", OIC))
+            {
+                SkipOverEndif(tokens, ref index);
+            }
         }
+        throw new SystemException("Missing @endif");
     }
 
-    private static void SkipToThen(string[] tokens, ref int index)
+    private static void SkipOverThen(string[] tokens, ref int index)
     {
         while (index < tokens.Length)
         {
-            var token = tokens[index].ToLower();
+            var token = tokens[index++].ToLower();
             if (token == "@then")
             {
                 return;
             }
-            index++;
         }
+        throw new SystemException("Missing @then");
     }
 
     private static void SkipToElseEndif(string[] tokens, ref int index)
@@ -115,6 +141,7 @@ public partial class Dags
             }
             index++;
         }
+        throw new SystemException(_invalidIfSyntax);
     }
 
     private static bool GetCondition(string[] tokens, ref int index, Grod grod)
@@ -122,11 +149,11 @@ public partial class Dags
         while (index < tokens.Length)
         {
             var token = tokens[index++];
-            if (token.Equals("@true", StringComparison.OrdinalIgnoreCase))
+            if (token.Equals("@true", OIC))
             {
                 return true;
             }
-            if (token.Equals("@false", StringComparison.OrdinalIgnoreCase))
+            if (token.Equals("@false", OIC))
             {
                 return false;
             }

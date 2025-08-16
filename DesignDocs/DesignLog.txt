@@ -42,3 +42,8 @@
 2025-08-14
 
 - Working on @if logic. Needs to handle nested conditions.
+
+2025-08-16
+
+- Finished @if logic with nesting.
+- Works with multiple conditions and nesting.
