@@ -70,7 +70,7 @@ public class TestDags
     public void TestIfCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @true @then @write(\"Condition met\") @endif";
+        string script = "@if true @then @write(\"Condition met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
@@ -80,7 +80,7 @@ public class TestDags
     public void TestIfNotCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @not @false @then @write(\"Condition met\") @endif";
+        string script = "@if @not false @then @write(\"Condition met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
@@ -90,7 +90,7 @@ public class TestDags
     public void TestIfWithAndCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @true @and @true @then @write(\"Condition met\") @endif";
+        string script = "@if true @and true @then @write(\"Condition met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
@@ -100,7 +100,7 @@ public class TestDags
     public void TestIfWithOrCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @false @or @true @then @write(\"Condition met\") @endif";
+        string script = "@if false @or true @then @write(\"Condition met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
@@ -110,7 +110,7 @@ public class TestDags
     public void TestIfWithOrShortCircuitCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @true @or @false @then @write(\"Condition met\") @endif";
+        string script = "@if true @or false @then @write(\"Condition met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition met\"") }));
@@ -120,7 +120,7 @@ public class TestDags
     public void TestIfWithElseCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        string script = "@if false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition not met\"") }));
@@ -130,7 +130,7 @@ public class TestDags
     public void TestIfWithAndFailsToElseCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @true @and @false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        string script = "@if true @and false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition not met\"") }));
@@ -140,7 +140,7 @@ public class TestDags
     public void TestIfWithAndShortCircuitToElseCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @false @and @true @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        string script = "@if false @and true @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Condition not met\"") }));
@@ -150,9 +150,179 @@ public class TestDags
     public void TestIfWithElseIfCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @false @then @write(\"Condition met\") @elseif @true @then @write(\"Second condition met\") @endif";
+        string script = "@if false @then @write(\"Condition met\") @elseif true @then @write(\"Second condition met\") @endif";
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Second condition met\"") }));
+    }
+
+    [Test]
+    public void TestIfNestedAnswer1()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if true @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif false @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Answer1") }));
+    }
+
+    [Test]
+    public void TestIfNestedAnswer2()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if true @then @if false @then @write(Answer1) @else @write(Answer2) @endif @elseif false @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Answer2") }));
+    }
+
+    [Test]
+    public void TestIfNestedAnswer3()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if false @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif true @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Answer3") }));
+    }
+
+    [Test]
+    public void TestIfNestedAnswer4()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if false @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif true @then @if false @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Answer4") }));
+    }
+
+    [Test]
+    public void TestIfNestedAnswer5()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if false @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif false @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Answer5") }));
+    }
+
+    [Test]
+    public void TestIfEQ()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @eq(1,1) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfEQString()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @eq(abc,abc) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfNE()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @ne(1,2) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfNEString()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @ne(abc,xyz) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfGT()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @gt(2,1) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfGTString()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @gt(xyz,abc) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfGE()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @ge(1,1) @and @ge(2,1) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfGEString()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @ge(abc,abc) @and @ge(xyz,abc) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfLT()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @lt(1,2) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfLTString()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @lt(abc,xyz) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfLE()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @le(1,1) @and @le(1,2) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestIfLEString()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @le(abc,abc) @and @le(abc,xyz) @then @write(answer) @endif";
+        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
     }
 }

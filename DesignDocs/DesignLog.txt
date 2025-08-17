@@ -47,3 +47,4 @@
 
 - Finished @if logic with nesting.
 - Works with multiple conditions and nesting.
+- Added conditionals for @true(), @false(), @null(), @eq(), @ne(), @gt(), @lt(), @ge(), @le().
