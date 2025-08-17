@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		TestData\test.grif = TestData\test.grif
+		TestData\test_out.grif = TestData\test_out.grif
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grif", "Grif\Grif.csproj", "{4E972CB9-2FFD-4364-9CFB-CCE34E443B65}"
@@ -23,6 +24,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DesignDocs", "DesignDocs", 
 		DesignDocs\DesignDocument.md = DesignDocs\DesignDocument.md
 		DesignDocs\DesignLog.txt = DesignDocs\DesignLog.txt
 		DesignDocs\Grod.md = DesignDocs\Grod.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CloakOfDarkness", "CloakOfDarkness", "{90D80F66-35A0-45DD-8CD6-B89E3F10CE53}"
+	ProjectSection(SolutionItems) = preProject
+		CloakOfDarkness\CloakOfDarkness.grif = CloakOfDarkness\CloakOfDarkness.grif
+		CloakOfDarkness\Specification.txt = CloakOfDarkness\Specification.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TicTacToe", "TicTacToe", "{52C3F49F-157B-4E00-9F10-8BFD23A1A02D}"
+	ProjectSection(SolutionItems) = preProject
+		TicTacToe\TicTacToe.grif = TicTacToe\TicTacToe.grif
 	EndProjectSection
 EndProject
 Global

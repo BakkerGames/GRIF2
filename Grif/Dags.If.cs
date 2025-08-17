@@ -1,8 +1,9 @@
-﻿namespace Grif;
+﻿using static Grif.Common;
+
+namespace Grif;
 
 public partial class Dags
 {
-    private static readonly StringComparison OIC = StringComparison.OrdinalIgnoreCase;
     private const string _invalidIfSyntax = "Invalid @if syntax";
     private const string NULL = "null";
 

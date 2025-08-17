@@ -1,34 +1,48 @@
-﻿namespace Grif;
+﻿using static Grif.Common;
+using static Grif.GrifIO;
+
+namespace Grif;
 
 internal class Program
 {
     static void Main(string[] _)
     {
+        //var filename = "..\\..\\..\\..\\TestData\\test.grif";
+        //var filename = "..\\..\\..\\..\\TicTacToe\\TicTacToe.grif";
+        var filename = "..\\..\\..\\..\\CloakOfDarkness\\CloakOfDarkness.grif";
         var grodBase = new Grod("base");
-        //var grodOverlay = new Grod("overlay", grodBase);
-        var lines = File.ReadAllLines("..\\..\\..\\..\\TestData\\test.grif");
-        var key = string.Empty;
-        List<GrodItem> items = [];
-        foreach (var line in lines)
+        List<GrodItem> items = ReadGrif(filename);
+        grodBase.AddItems(items);
+        // TODO ### for debugging purposes
+        var fileOutput = "..\\..\\..\\..\\TestData\\test_out.grif";
+        WriteGrif(fileOutput, grodBase.Items(false, true));
+        Console.WriteLine($"Loaded {grodBase.Count} items from {filename}");
+        Console.WriteLine($"Output written to {fileOutput}");
+        Console.WriteLine("Type 'exit' to quit, 'list' to list items, or any other command to process it.");
+        do
         {
-            if (!line.StartsWith('\t'))
+            Console.Write("> ");
+            var input = Console.ReadLine() ?? "";
+            if (input.Equals("exit", OIC) || input.Equals("quit", OIC))
             {
-                key = line.Trim();
+                break;
+            }
+            else if (input.Equals("list", OIC))
+            {
+                foreach (var item in grodBase.Items(false, true))
+                {
+                    Console.WriteLine($"{item.Key}: {item.Value.Trim()}");
+                }
             }
             else
             {
-                var value = line.Trim();
-                if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
+                var output = Dags.Process(input, grodBase);
+                if (output.Count > 0)
                 {
-                    continue; // Skip empty keys or values
+                    var textOutput = RenderOutput(output);
+                    Console.WriteLine(textOutput.ToString());
                 }
-                items.Add(new(key, value));
             }
-        }
-        grodBase.AddItems(items);
-        foreach (GrodItem item in grodBase.Items(false, true))
-        {
-            Console.WriteLine($"{item.Key}: {grodBase.Get(item.Key, false)}");
-        }
+        } while (true);
     }
 }

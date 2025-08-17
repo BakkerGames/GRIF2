@@ -4,7 +4,7 @@ public record GrodItem(string Key, string Value);
 
 public class Grod
 {
-    private const string _version = "2.2025.0813";
+    private const string _version = "2.2025.0817";
 
     private readonly Dictionary<string, string> _data = [];
 
@@ -24,6 +24,10 @@ public class Grod
     public string Name { get; set; }
 
     public Grod? Parent { get; set; }
+
+    public int Count { get { return _data.Count; } }
+
+    public int CountRecursive { get { return _data.Count + (Parent?.CountRecursive ?? 0); } }
 
     public string? Get(string key, bool recursive)
     {

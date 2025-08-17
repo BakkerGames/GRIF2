@@ -44,7 +44,8 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "@write(abc";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(-1, "Missing closing parenthesis") }));
+        var expected = new List<DagsItem> { new(-1, "Error processing command at index 2:\r\nMissing closing parenthesis\r\n0: @write(\r\n1: abc\r\n") };
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -53,7 +54,8 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "@write()";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { }));
+        var expected = new List<DagsItem> { new(-1, "Error processing command at index 2:\r\nExpected at least one parameter, but got 0\r\n0: @write(\r\n1: )\r\n") };
+        Assert.That(result, Is.EqualTo(expected));
     }
 
     [Test]
@@ -324,5 +326,56 @@ public class TestDags
         grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "answer") }));
+    }
+
+    [Test]
+    public void TestMsg()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("Hello", "Hello, World!");
+        string script = "@msg(Hello)";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "Hello, World!"), new(0, "\\n") }));
+    }
+
+    [Test]
+    public void TestParameterWithFunction()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("key1", "value1");
+        string script = "@write(@get(key1))";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "value1") }));
+    }
+
+    [Test]
+    public void TestParameterWithNestedFunction()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("key1", "value1");
+        grod.Set("key2", "key1");
+        string script = "@write(@get(@get(key2)))";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "value1") }));
+    }
+
+    [Test]
+    public void TestUnknownToken()
+    {
+        Grod grod = new("testGrod");
+        string script = "@unknown()";
+        var result = Dags.Process(script, grod);
+        var expected = new List<DagsItem> { new(-1, "Error processing command at index 2:\r\nUnknown token: @unknown(\r\n0: @unknown(\r\n1: )\r\n") };
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TestUserDefinedScript()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("@myScript", "@write(\"Hello from user-defined script!\")");
+        string script = "@myScript";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(0, "\"Hello from user-defined script!\"") }));
     }
 }

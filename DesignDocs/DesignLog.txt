@@ -48,3 +48,15 @@
 - Finished @if logic with nesting.
 - Works with multiple conditions and nesting.
 - Added conditionals for @true(), @false(), @null(), @eq(), @ne(), @gt(), @lt(), @ge(), @le().
+- Added unit tests for all @if variations.
+
+2025-08-17
+
+- Added Grod.Count and Grod.CountRecursive.
+- Added simple program game loop.
+- Added GrodRead and GrodWrite methods.
+- Added OutputText method to output text-only values, Type=0.
+- More readable output for script errors.
+- Added @msg() for messages.
+- Cleaned up WriteGrod for script formatting and newlines in text.
+- Adding user defined function support.
