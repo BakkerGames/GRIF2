@@ -342,7 +342,7 @@ public partial class Dags
             }
             else
             {
-                parameters.Add(new DagsItem(1, token)); // static value
+                parameters.Add(new DagsItem(DagsType.Intermediate, token));
                 index++;
             }
             if (index < tokens.Length)
@@ -380,5 +380,18 @@ public partial class Dags
         {
             throw new ArgumentException($"Expected at least one parameter, but got {p.Count}");
         }
+    }
+
+    private static int GetIntValue(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return 0; // Default to 0 if not found
+        }
+        if (!int.TryParse(value, out int value1))
+        {
+            throw new SystemException($"Invalid integer: {value}");
+        }
+        return value1;
     }
 }

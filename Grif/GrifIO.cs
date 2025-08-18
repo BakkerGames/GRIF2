@@ -87,10 +87,10 @@ public static class GrifIO
         {
             switch (item.Type)
             {
-                case 0:
+                case DagsType.Text:
                     output.Append(HandleText(item.Value));
                     break;
-                case -1:
+                case DagsType.Error:
                     output.AppendLine();
                     output.AppendLine($"ERROR: {HandleText(item.Value)}");
                     break;

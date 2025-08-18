@@ -1,6 +1,14 @@
 ﻿namespace Grif;
 
-public record DagsItem(int Type, string Value);
+public enum DagsType
+{
+    Error = 99,
+    Text = 100,
+    Intermediate = 101,
+    OutChannel = 102,
+}
+
+public record DagsItem(DagsType Type, string Value);
 
 public partial class Dags
 {
@@ -23,7 +31,7 @@ public partial class Dags
         }
         catch (Exception ex)
         {
-            result.Add(new DagsItem(-1, ex.Message));
+            result.Add(new DagsItem(DagsType.Error, ex.Message));
         }
         return result;
     }
