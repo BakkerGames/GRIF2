@@ -60,3 +60,9 @@
 - Added @msg() for messages.
 - Cleaned up WriteGrod for script formatting and newlines in text.
 - Adding user defined function support.
+
+2025-08-18
+
+- Handle @udf(x,y,z) and @udf user defined functions.
+- Changed GetCondition() to call ProcessOneCommand() and centralized them all.
+- Added TrueFalse() for returing proper "true" or "false" strings.
