@@ -90,6 +90,9 @@ public static class GrifIO
                 case DagsType.Text:
                     output.Append(HandleText(item.Value));
                     break;
+                case DagsType.Internal:
+                    output.AppendLine($"INTERNAL: {HandleText(item.Value)}");
+                    break;
                 case DagsType.Error:
                     output.AppendLine();
                     output.AppendLine($"ERROR: {HandleText(item.Value)}");

@@ -5,9 +5,6 @@ namespace Grif;
 public partial class Dags
 {
     private const string _invalidIfSyntax = "Invalid @if syntax";
-    private const string NULL = "null";
-
-    // TODO ### needs to check for nested @if statements
 
     private static List<DagsItem> ProcessIf(string[] tokens, ref int index, Grod grod)
     {
@@ -152,132 +149,13 @@ public partial class Dags
 
     private static bool GetCondition(string[] tokens, ref int index, Grod grod)
     {
-        int int1, int2;
-        while (index < tokens.Length)
+        var answer = ProcessOneCommand(tokens, ref index, grod);
+        if (answer.Count != 1
+            || (answer[0].Type != DagsType.Text && answer[0].Type != DagsType.Internal))
         {
-            var token = tokens[index++];
-            if (token.StartsWith('@'))
-            {
-                if (!token.EndsWith('('))
-                {
-                    throw new SystemException($"Unknown condition in @if: {token}");
-                }
-                else
-                {
-                    var p = GetParameters(tokens, ref index, grod);
-                    switch (token.ToLower())
-                    {
-                        case "@true(":
-                            CheckParameterCount(p, 1);
-                            return IsCondition(p[0].Value);
-                        case "@false(":
-                            CheckParameterCount(p, 1);
-                            return !IsCondition(p[0].Value);
-                        case "@null(":
-                            CheckParameterCount(p, 1);
-                            return p[0].Value == null || p[0].Value.Equals(NULL, OIC);
-                        case "@eq(":
-                            CheckParameterCount(p, 2);
-                            if ((p[0].Value == null || p[0].Value.Equals(NULL, OIC)) &&
-                                (p[1].Value == null || p[1].Value.Equals(NULL, OIC)))
-                            {
-                                return true; // both are null
-                            }
-                            if (p[0].Value == null || p[0].Value.Equals(NULL, OIC) ||
-                                p[1].Value == null || p[1].Value.Equals(NULL, OIC))
-                            {
-                                return false; // one is null
-                            }
-                            if (int.TryParse(p[0].Value, out int1) &&
-                                int.TryParse(p[1].Value, out int2))
-                            {
-                                return int1 == int2;
-                            }
-                            return p[0].Value.Equals(p[1].Value, OIC);
-                        case "@ne(":
-                            CheckParameterCount(p, 2);
-                            if ((p[0].Value == null || p[0].Value.Equals(NULL, OIC)) &&
-                                (p[1].Value == null || p[1].Value.Equals(NULL, OIC)))
-                            {
-                                return false; // both are null
-                            }
-                            if (p[0].Value == null || p[0].Value.Equals(NULL, OIC) ||
-                                p[1].Value == null || p[1].Value.Equals(NULL, OIC))
-                            {
-                                return true; // one is null
-                            }
-                            if (int.TryParse(p[0].Value, out int1) &&
-                                int.TryParse(p[1].Value, out int2))
-                            {
-                                return int1 != int2;
-                            }
-                            return !p[0].Value.Equals(p[1].Value, OIC);
-                        case "@gt(":
-                            CheckParameterCount(p, 2);
-                            if (p[0].Value == null || p[0].Value.Equals(NULL, OIC) ||
-                                p[1].Value == null || p[1].Value.Equals(NULL, OIC))
-                            {
-                                return false; // one or both are null
-                            }
-                            if (int.TryParse(p[0].Value, out int1) &&
-                                int.TryParse(p[1].Value, out int2))
-                            {
-                                return int1 > int2;
-                            }
-                            return string.Compare(p[0].Value, p[1].Value, OIC) > 0;
-                        case "@ge(":
-                            CheckParameterCount(p, 2);
-                            if (p[0].Value == null || p[0].Value.Equals(NULL, OIC) ||
-                                p[1].Value == null || p[1].Value.Equals(NULL, OIC))
-                            {
-                                return false; // one or both are null
-                            }
-                            if (int.TryParse(p[0].Value, out int1) &&
-                                int.TryParse(p[1].Value, out int2))
-                            {
-                                return int1 >= int2;
-                            }
-                            return string.Compare(p[0].Value, p[1].Value, OIC) >= 0;
-                        case "@lt(":
-                            CheckParameterCount(p, 2);
-                            if (p[0].Value == null || p[0].Value.Equals(NULL, OIC) ||
-                                p[1].Value == null || p[1].Value.Equals(NULL, OIC))
-                            {
-                                return false; // one or both are null
-                            }
-                            if (int.TryParse(p[0].Value, out int1) &&
-                                int.TryParse(p[1].Value, out int2))
-                            {
-                                return int1 < int2;
-                            }
-                            return string.Compare(p[0].Value, p[1].Value, OIC) < 0;
-                        case "@le(":
-                            CheckParameterCount(p, 2);
-                            if (p[0].Value == null || p[0].Value.Equals(NULL, OIC) ||
-                                p[1].Value == null || p[1].Value.Equals(NULL, OIC))
-                            {
-                                return false; // one or both are null
-                            }
-                            if (int.TryParse(p[0].Value, out int1) &&
-                                int.TryParse(p[1].Value, out int2))
-                            {
-                                return int1 <= int2;
-                            }
-                            return string.Compare(p[0].Value, p[1].Value, OIC) <= 0;
-                        default:
-                            throw new SystemException($"Unknown condition in @if: {token}");
-                    }
-                }
-            }
-            else
-            {
-                // static value
-                return IsCondition(token);
-            }
-
-            throw new SystemException("Unknown condition in @if");
+            throw new SystemException("Invalid condition in @if");
         }
-        throw new SystemException("Invalid condition in @if");
+        return IsCondition(answer[0].Value);
     }
 
     private static bool IsCondition(string? value)
@@ -288,8 +166,8 @@ public partial class Dags
         }
         return value.ToLower() switch
         {
-            "true" or "t" or "yes" or "y" or "1" or "-1" => true,
-            "false" or "f" or "no" or "n" or "0" or NULL or "" => false,
+            TRUE or "t" or "yes" or "y" or "1" or "-1" => true,
+            FALSE or "f" or "no" or "n" or "0" or NULL or "" => false,
             _ => throw new SystemException("Invalid condition in @if"),
         };
     }

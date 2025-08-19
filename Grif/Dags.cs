@@ -4,7 +4,7 @@ public enum DagsType
 {
     Error = 99,
     Text = 100,
-    Intermediate = 101,
+    Internal = 101,
     OutChannel = 102,
 }
 
@@ -12,7 +12,7 @@ public record DagsItem(DagsType Type, string Value);
 
 public partial class Dags
 {
-    private const string _version = "2.2025.0817";
+    private const string _version = "2.2025.0819";
 
     public static string Version => _version;
 

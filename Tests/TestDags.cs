@@ -65,7 +65,7 @@ public class TestDags
         grod.Set("key1", "value1");
         string script = "@get(key1)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "value1") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "value1") }));
     }
 
     [Test]
@@ -213,7 +213,15 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @eq(1,1) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
+    }
+
+    [Test]
+    public void TestIfEQNull()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @eq(null,null) @then @write(answer) @endif";
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -223,7 +231,6 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @eq(abc,abc) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -233,7 +240,15 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @ne(1,2) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
+    }
+
+    [Test]
+    public void TestIfNENull()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @ne(null,2) @then @write(answer) @endif";
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -243,7 +258,6 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @ne(abc,xyz) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -253,7 +267,15 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @gt(2,1) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
+    }
+
+    [Test]
+    public void TestIfGTNull()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @gt(2,null) @then @write(answer) @endif";
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -263,7 +285,6 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @gt(xyz,abc) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -273,7 +294,15 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @ge(1,1) @and @ge(2,1) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
+    }
+
+    [Test]
+    public void TestIfGENull()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @ge(null,null) @and @ge(2,null) @then @write(answer) @endif";
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -283,7 +312,6 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @ge(abc,abc) @and @ge(xyz,abc) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -293,7 +321,15 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @lt(1,2) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
+    }
+
+    [Test]
+    public void TestIfLTNull()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @lt(null,2) @then @write(answer) @endif";
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -303,7 +339,6 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @lt(abc,xyz) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -313,7 +348,15 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @le(1,1) @and @le(1,2) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
+    }
+
+    [Test]
+    public void TestIfLENull()
+    {
+        Grod grod = new("testGrod");
+        string script = "@if @le(null,null) @and @le(null,2) @then @write(answer) @endif";
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -323,7 +366,6 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         string script = "@if @le(abc,abc) @and @le(abc,xyz) @then @write(answer) @endif";
-        grod.Set("key1", "value1");
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "answer") }));
     }
@@ -386,7 +428,7 @@ public class TestDags
         grod.Set("counter", "5");
         string script = "@addto(counter,3)@get(counter)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "8") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "8") }));
     }
 
     [Test]
@@ -396,7 +438,7 @@ public class TestDags
         grod.Set("counter", "5");
         string script = "@subto(counter,2)@get(counter)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "3") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "3") }));
     }
 
     [Test]
@@ -406,7 +448,7 @@ public class TestDags
         grod.Set("counter", "5");
         string script = "@multo(counter,4)@get(counter)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "20") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "20") }));
     }
 
     [Test]
@@ -416,7 +458,7 @@ public class TestDags
         grod.Set("counter", "20");
         string script = "@divto(counter,4)@get(counter)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "5") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "5") }));
     }
 
     [Test]
@@ -448,7 +490,7 @@ public class TestDags
         grod.Set("counter", "20");
         string script = "@modto(counter,6)@get(counter)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "2") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "2") }));
     }
 
     [Test]
@@ -457,7 +499,7 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "@add(5,3)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "8") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "8") }));
     }
 
     [Test]
@@ -466,7 +508,7 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "@sub(5,3)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "2") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "2") }));
     }
 
     [Test]
@@ -475,7 +517,7 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "@mul(5,3)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "15") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "15") }));
     }
 
     [Test]
@@ -484,7 +526,7 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "@div(6,3)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "2") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "2") }));
     }
 
     [Test]
@@ -493,6 +535,6 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "@mod(20,6)";
         var result = Dags.Process(script, grod);
-        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Intermediate, "2") }));
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "2") }));
     }
 }

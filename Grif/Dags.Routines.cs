@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using static Grif.Common;
 
 namespace Grif;
 
@@ -342,7 +343,7 @@ public partial class Dags
             }
             else
             {
-                parameters.Add(new DagsItem(DagsType.Intermediate, token));
+                parameters.Add(new DagsItem(DagsType.Internal, token));
                 index++;
             }
             if (index < tokens.Length)
@@ -393,5 +394,52 @@ public partial class Dags
             throw new SystemException($"Invalid integer: {value}");
         }
         return value1;
+    }
+
+    private static List<DagsItem> GetUserDefinedFunctionValues(string token, List<DagsItem> p, Grod grod)
+    {
+        var keys = grod.Keys(true, true)
+            .Where(x => x.StartsWith(token, OIC))
+            .ToList();
+        if (keys.Count == 0)
+        {
+            throw new SystemException($"Unknown token: {token}");
+        }
+        if (keys.Count > 1)
+        {
+            throw new SystemException($"Multiple definitions found for {token}");
+        }
+        var key = keys.First();
+        if (!key.EndsWith(')'))
+        {
+            throw new SystemException($"Invalid key format: {key}");
+        }
+        var placeholders = key[(key.IndexOf('(') + 1)..^1].Split(',');
+        if (placeholders.Length != p.Count)
+        {
+            throw new SystemException($"Parameter count mismatch for {key}. Expected {placeholders.Length}, got {p.Count}");
+        }
+        var value = grod.Get(key, true)
+            ?? throw new SystemException($"Key not found: {keys.First()}");
+        for (int i = 0; i < placeholders.Length; i++)
+        {
+            var placeholder = placeholders[i].Trim();
+            value = value.Replace("$" + placeholder, p[i].Value, OIC);
+        }
+        var userResult = Process(value, grod);
+        return userResult;
+    }
+
+    private static bool IsNull(string? value)
+    {
+        return value == null || value.Equals(NULL, OIC);
+    }
+
+    /// <summary>
+    /// Convert a boolean value to the proper string representation.
+    /// </summary>
+    private static string TrueFalse(bool value)
+    {
+        return value ? TRUE : FALSE;
     }
 }
