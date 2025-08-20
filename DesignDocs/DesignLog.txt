@@ -66,3 +66,4 @@
 - Handle @udf(x,y,z) and @udf user defined functions.
 - Changed GetCondition() to call ProcessOneCommand() and centralized them all.
 - Added TrueFalse() for returing proper "true" or "false" strings.
+- Added @neg(), @negto(), @getvalue()

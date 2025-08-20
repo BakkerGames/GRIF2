@@ -2,10 +2,10 @@
 
 public enum DagsType
 {
-    Error = 99,
-    Text = 100,
-    Internal = 101,
-    OutChannel = 102,
+    Error = -1,
+    Text = 0,
+    Internal = 1,
+    OutChannel = 2,
 }
 
 public record DagsItem(DagsType Type, string Value);

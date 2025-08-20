@@ -537,4 +537,109 @@ public class TestDags
         var result = Dags.Process(script, grod);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "2") }));
     }
+
+    [Test]
+    public void TestDivByZero()
+    {
+        Grod grod = new("testGrod");
+        string script = "@div(6,0)";
+        var result = Dags.Process(script, grod);
+        var expected = new List<DagsItem> { new(DagsType.Error, "Error processing command at index 5:\r\nDivision by zero is not allowed.\r\n0: @div(\r\n1: 6\r\n2: ,\r\n3: 0\r\n4: )\r\n") };
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TestModByZero()
+    {
+        Grod grod = new("testGrod");
+        string script = "@mod(20,0)";
+        var result = Dags.Process(script, grod);
+        var expected = new List<DagsItem> { new(DagsType.Error, "Error processing command at index 5:\r\nAttempted to divide by zero.\r\n0: @mod(\r\n1: 20\r\n2: ,\r\n3: 0\r\n4: )\r\n") };
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TestInvalidCommand()
+    {
+        Grod grod = new("testGrod");
+        string script = "@invalidcommand()";
+        var result = Dags.Process(script, grod);
+        var expected = new List<DagsItem> { new(DagsType.Error, "Error processing command at index 2:\r\nUnknown token: @invalidcommand(\r\n0: @invalidcommand(\r\n1: )\r\n") };
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TestEmptyScript()
+    {
+        Grod grod = new("testGrod");
+        string script = "";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem>()));
+    }
+
+    [Test]
+    public void TestWhitespaceScript()
+    {
+        Grod grod = new("testGrod");
+        string script = "   ";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem>()));
+    }
+
+    [Test]
+    public void TestScriptWithOnlyComments()
+    {
+        Grod grod = new("testGrod");
+        string script = "@comment(\"This is a comment\n\") @comment(\"Another comment\")";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem>()));
+    }
+
+    [Test]
+    public void TestScriptWithMixedContent()
+    {
+        Grod grod = new("testGrod");
+        string script = "@comment(\"This is a comment\n\") @write(Hello) @comment(\"Another comment\") @write(World)";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "Hello"), new(DagsType.Text, "World") }));
+    }
+
+    [Test]
+    public void TestNeg()
+    {
+        Grod grod = new("testGrod");
+        string script = "@neg(5)";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "-5") }));
+    }
+
+    [Test]
+    public void TestNegZero()
+    {
+        Grod grod = new("testGrod");
+        string script = "@neg(0)";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "0") }));
+    }
+
+    [Test]
+    public void TestNegTo()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("counter", "5");
+        string script = "@negto(counter)@get(counter)";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "-5") }));
+    }
+
+    [Test]
+    public void TestGetValue()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("key1", "value1");
+        grod.Set("key2", "@get(key1)");
+        string script = "@getvalue(key2)";
+        var result = Dags.Process(script, grod);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "value1") }));
+    }
 }

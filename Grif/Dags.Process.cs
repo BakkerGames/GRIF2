@@ -160,7 +160,7 @@ public partial class Dags
                             result.Add(new DagsItem(DagsType.Internal, FALSE));
                         }
                         else if (int.TryParse(p[0].Value, out int1) &&
-                            int.TryParse(p[1].Value, out int2))
+                                 int.TryParse(p[1].Value, out int2))
                         {
                             result.Add(new DagsItem(DagsType.Internal, TrueFalse(int1 >= int2)));
                         }
@@ -173,6 +173,23 @@ public partial class Dags
                     case "@get(":
                         CheckParameterCount(p, 1);
                         value = grod.Get(p[0].Value, true) ?? "";
+                        result.Add(new DagsItem(DagsType.Internal, value));
+                        break;
+                    case "@getvalue(":
+                        CheckParameterCount(p, 1);
+                        value = grod.Get(p[0].Value, true) ?? "";
+                        while (value.StartsWith('@'))
+                        {
+                            var tempResult = Process(value, grod);
+                            value = "";
+                            foreach (var item in tempResult)
+                            {
+                                if (item.Type == DagsType.Text || item.Type == DagsType.Internal)
+                                {
+                                    value += item.Value;
+                                }
+                            }
+                        }
                         result.Add(new DagsItem(DagsType.Internal, value));
                         break;
                     case "@gt(":
@@ -195,6 +212,9 @@ public partial class Dags
                             result.Add(new DagsItem(DagsType.Internal,
                                 TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) > 0)));
                         }
+                        break;
+                    case "@label(":
+                        CheckParameterCount(p, 1);
                         break;
                     case "@le(":
                         CheckParameterCount(p, 2);
@@ -296,6 +316,18 @@ public partial class Dags
                             result.Add(new DagsItem(DagsType.Internal,
                                 TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) != 0)));
                         }
+                        break;
+                    case "@neg(":
+                        CheckParameterCount(p, 1);
+                        int1 = GetIntValue(p[0].Value);
+                        int1 = -int1;
+                        result.Add(new DagsItem(DagsType.Internal, int1.ToString()));
+                        break;
+                    case "@negto(":
+                        CheckParameterCount(p, 1);
+                        int1 = GetIntValue(grod.Get(p[0].Value, true));
+                        int1 = -int1;
+                        grod.Set(p[0].Value, int1.ToString());
                         break;
                     case "@null(":
                         CheckParameterCount(p, 1);
