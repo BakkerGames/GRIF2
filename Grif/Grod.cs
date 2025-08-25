@@ -1,12 +1,12 @@
 ﻿namespace Grif;
 
-public record GrodItem(string Key, string Value);
+public record GrodItem(string Key, string? Value);
 
 public class Grod
 {
-    private const string _version = "2.2025.0817";
+    private const string _version = "2.2025.0824";
 
-    private readonly Dictionary<string, string> _data = [];
+    private readonly Dictionary<string, string?> _data = [];
 
     public Grod(string name)
     {
@@ -43,12 +43,12 @@ public class Grod
         return null;
     }
 
-    public void Set(string key, string value)
+    public void Set(string key, string? value)
     {
         ValidateKey(key);
         if (!_data.TryAdd(key, value))
         {
-            _data[key] = value; // Update existing key
+            _data[key] = value;
         }
     }
 
@@ -101,10 +101,7 @@ public class Grod
         foreach (var key in keys)
         {
             var value = Get(key, recursive);
-            if (value != null)
-            {
-                items.Add(new GrodItem(key, value));
-            }
+            items.Add(new GrodItem(key, value));
         }
         return items;
     }

@@ -7,4 +7,6 @@ public static class Common
     public const string FALSE = "false";
     public const string NULL = "null";
     public const string TRUE = "true";
+
+    public const string INCHANNEL = "DagsInChannel";
 }

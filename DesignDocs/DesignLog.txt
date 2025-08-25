@@ -67,3 +67,15 @@
 - Changed GetCondition() to call ProcessOneCommand() and centralized them all.
 - Added TrueFalse() for returing proper "true" or "false" strings.
 - Added @neg(), @negto(), @getvalue()
+
+2025-08-24
+
+- Fixed nulls. They now can be saved into Grod and read back as null.
+- Null values are output as "null" in files, and converted back to null when read.
+- Setting a value to null hides the parent value.
+- Removing a key allows the parent value to be visible again.
+- Started working on @getinchannel. Should be single value only.
+- Fixed ReadGrif to ignore comments.
+- Added launch settings for working directory and starting filename.
+- Moved Program code to DebugGameFile.
+- Started parser.

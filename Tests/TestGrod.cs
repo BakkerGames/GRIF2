@@ -45,4 +45,91 @@ public class TestGrod
         grod.Clear(false);
         Assert.That(grod.Get("key4", false), Is.Null);
     }
+
+    [Test]
+    public void TestGrodCount()
+    {
+        var grod = new Grod("grod5");
+        grod.Set("key5", "value5");
+        grod.Set("key6", "value6");
+        Assert.That(grod.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    public void TestGrodCountRecursive()
+    {
+        var parentGrod = new Grod("parent2");
+        parentGrod.Set("key7", "value7");
+        var childGrod = new Grif.Grod("child2", parentGrod);
+        childGrod.Set("key8", "value8");
+        Assert.That(childGrod.CountRecursive, Is.EqualTo(2));
+    }
+
+    [Test]
+    public void TestGrodVersion()
+    {
+        Assert.That(Grod.Version, Is.EqualTo("2.2025.0824"));
+    }
+
+    [Test]
+    public void TestGrodInvalidKey()
+    {
+        var grod = new Grod("grod6");
+        Assert.Throws<ArgumentException>(() => grod.Set("", "value"));
+        Assert.Throws<ArgumentException>(() => grod.Get("", false));
+    }
+
+    [Test]
+    public void TestGrodSetNullValue()
+    {
+        var grod = new Grod("grod7");
+        grod.Set("key9", null);
+        Assert.That(grod.Get("key9", false), Is.Null);
+    }
+
+    [Test]
+    public void TestGrodSetGrodItem()
+    {
+        var grod = new Grod("grod8");
+        var item = new GrodItem("key10", "value10");
+        grod.Set(item);
+        Assert.That(grod.Get("key10", false), Is.EqualTo("value10"));
+    }
+
+    [Test]
+    public void TestGrodSetGrodItemNull()
+    {
+        var grod = new Grod("grod9");
+        Assert.Throws<ArgumentNullException>(() => grod.Set(null!));
+    }
+
+    [Test]
+    public void TestGrodParentNull()
+    {
+        var grod = new Grod("grod10", null);
+        grod.Set("key11", "value11");
+        Assert.That(grod.Get("key11", true), Is.EqualTo("value11"));
+    }
+
+    [Test]
+    public void TestGrodGetNonExistentKey()
+    {
+        var grod = new Grod("grod11");
+        Assert.That(grod.Get("nonExistentKey", false), Is.Null);
+    }
+
+    [Test]
+    public void TestGrodClearRecursive()
+    {
+        var parentGrod = new Grod("parent3");
+        parentGrod.Set("key13", "value13");
+        var childGrod = new Grod("child3", parentGrod);
+        childGrod.Set("key14", "value14");
+        childGrod.Clear(true);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(childGrod.Get("key14", false), Is.Null);
+            Assert.That(childGrod.Get("key13", true), Is.Null);
+        }
+    }
 }

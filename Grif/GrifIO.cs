@@ -11,7 +11,7 @@ public static class GrifIO
         foreach (var item in items)
         {
             writer.WriteLine(item.Key);
-            if (item.Value.StartsWith('@'))
+            if (item.Value != null && item.Value.StartsWith('@'))
             {
                 // If the value starts with '@', it is a script
                 writer.WriteLine(Dags.PrettyScript(item.Value, true));
@@ -20,6 +20,7 @@ public static class GrifIO
             {
                 // Otherwise, write the value without quotes
                 var value = item.Value;
+                value ??= NULL;
                 while (value.Length > 2 && value.Contains("\\n", OIC))
                 {
                     var pos = value.IndexOf("\\n", OIC);
@@ -40,39 +41,71 @@ public static class GrifIO
         string key = string.Empty;
         string value = string.Empty;
         List<GrodItem> items = [];
+        var inCommentBlock = false;
         foreach (var line in lines)
         {
+            var trimmedLine = line.Trim();
+            if (trimmedLine.StartsWith("//"))
+            {
+                // Comment line, ignore
+                continue;
+            }
+            if (trimmedLine.StartsWith("/*"))
+            {
+                inCommentBlock = true;
+            }
+            if (inCommentBlock)
+            {
+                if (trimmedLine.EndsWith("*/"))
+                {
+                    inCommentBlock = false;
+                }
+                continue;
+            }
             if (!line.StartsWith('\t') && !line.StartsWith(' '))
             {
-                if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
+                if (!string.IsNullOrWhiteSpace(key))
                 {
-                    items.Add(new(key, value));
+                    if (value == NULL)
+                    {
+                        items.Add(new(key, null));
+                    }
+                    else
+                    {
+                        items.Add(new(key, value));
+                    }
                 }
                 // New key found, reset value
-                key = line.Trim();
+                key = trimmedLine;
                 value = string.Empty;
             }
             else
             {
-                var lineTrimmed = line.Trim();
                 if (value.Length > 0)
                 {
                     if (!value.EndsWith("\\n") &&
                         !value.EndsWith("\\t") &&
                         !value.EndsWith("\\s") &&
-                        !lineTrimmed.StartsWith("\\n") &&
-                        !lineTrimmed.StartsWith("\\t") &&
-                        !lineTrimmed.StartsWith("\\s"))
+                        !trimmedLine.StartsWith("\\n") &&
+                        !trimmedLine.StartsWith("\\t") &&
+                        !trimmedLine.StartsWith("\\s"))
                     {
                         value += ' ';
                     }
                 }
-                value += lineTrimmed;
+                value += trimmedLine;
             }
         }
-        if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
+        if (!string.IsNullOrWhiteSpace(key))
         {
-            items.Add(new(key, value));
+            if (value == NULL)
+            {
+                items.Add(new(key, null));
+            }
+            else
+            {
+                items.Add(new(key, value));
+            }
         }
         return items;
     }

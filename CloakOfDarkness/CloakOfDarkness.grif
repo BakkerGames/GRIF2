@@ -556,13 +556,13 @@ value.messagescore
 value.room
 	foyer
 value.room.comment
-	/* current player location */
+	current player location
 value.score
 	0
 value.scuffed
 	0
 value.scuffed.comment
-	/* how scuffed is the message? */
+	how scuffed is the message?
 verb.down
 	down,d,descend
 verb.drop

@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Grif": {
+      "commandName": "Project",
+      "commandLineArgs": "\"CloakOfDarkness\\CloakOfDarkness.grif\"",
+      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+    }
+  }
+}

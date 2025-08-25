@@ -36,12 +36,16 @@ public partial class Dags
                     case "@help":
                         // TODO: Implement help command
                         break;
+                    case "@getinchannel":
+                        result.Add(new DagsItem(DagsType.Internal, grod.Get(INCHANNEL, true) ?? ""));
+                        grod.Remove(INCHANNEL); // Clear after reading
+                        break;
                     case "@nl":
                         result.Add(new DagsItem(DagsType.Text, "\\n")); // Add newline
                         break;
                     case "@return":
                         index = tokens.Length; // End processing
-                        break;
+                        return result;
                     default:
                         value = grod.Get(token, true);
                         if (value != null)
