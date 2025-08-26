@@ -53,7 +53,15 @@ internal class Program
                 break;
             }
             var parsed = ParseInput(input, grod);
-            var output = Dags.ProcessItems(parsed, grod);
+            List<DagsItem> output = [];
+            try
+            {
+                output = Dags.ProcessItems(parsed, grod);
+            }
+            catch (Exception ex)
+            {
+                output.Add(new DagsItem(DagsType.Error, ex.Message));
+            }
             if (output.Count > 0)
             {
                 var textOutput = RenderOutput(output);

@@ -27,7 +27,7 @@ public partial class Dags
                     }
                     else
                     {
-                        result.Add(token.ToString().Replace("\\\"", "\""));
+                        result.Add(TrimQuotes(token.ToString()));
                     }
                     token.Clear();
                     inQuote = false;
@@ -365,6 +365,16 @@ public partial class Dags
         }
         index++; // Skip the closing parenthesis
         return parameters;
+    }
+
+    private static string TrimQuotes(string value)
+    {
+        if (value.Length >= 2 && value.StartsWith('"') && value.EndsWith('"'))
+        {
+            value = value[1..^1]; // Remove surrounding quotes
+            value = value.Replace("\\\"", "\"");
+        }
+        return value;
     }
 
     private static void CheckParameterCount(List<DagsItem> p, int count)

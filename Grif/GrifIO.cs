@@ -149,10 +149,6 @@ public static class GrifIO
         var lastSlash = false;
         var inUnicode = false;
         unicodeDigits.Clear();
-        if (value.StartsWith('"') && value.EndsWith('"') && value.Length >= 2)
-        {
-            value = value[1..^1]; // Remove surrounding quotes
-        }
         foreach (char c in value)
         {
             if (inUnicode)

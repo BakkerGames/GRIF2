@@ -79,3 +79,8 @@
 - Added launch settings for working directory and starting filename.
 - Moved Program code to DebugGameFile.
 - Started parser.
+
+2025-08-25
+- Fixed error results
+- Fixed strings surrounded by quotes
+- Parse verbs and nouns using list of synonyms

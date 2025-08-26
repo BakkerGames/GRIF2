@@ -9,11 +9,11 @@ public partial class Dags
 {
     private static List<DagsItem> ProcessOneCommand(string[] tokens, ref int index, Grod grod)
     {
+        List<DagsItem> result = [];
         string? value;
         int int1, int2;
         try
         {
-            List<DagsItem> result = [];
             if (index >= tokens.Length)
             {
                 return result;
@@ -143,10 +143,6 @@ public partial class Dags
                     case "@exec(":
                         CheckParameterCount(p, 1);
                         value = p[0].Value;
-                        if (value.Length >= 2 && value.StartsWith('"') && value.EndsWith('"'))
-                        {
-                            value = value[1..^1]; // Remove surrounding quotes
-                        }
                         result.AddRange(Process(value, grod));
                         break;
                     case "@false(":
@@ -340,12 +336,11 @@ public partial class Dags
                     case "@script(":
                         CheckParameterCount(p, 1);
                         value = grod.Get(p[0].Value, true);
-                        if (value == null)
+                        if (!string.IsNullOrWhiteSpace(value))
                         {
-                            throw new SystemException($"Script not found: {p[0].Value}");
+                            var scriptResult = Process(value, grod);
+                            result.AddRange(scriptResult);
                         }
-                        var scriptResult = Process(value, grod);
-                        result.AddRange(scriptResult);
                         break;
                     case "@set(":
                         CheckParameterCount(p, 2);
@@ -427,7 +422,8 @@ public partial class Dags
                 }
                 error.AppendLine($"{i}: {token}");
             }
-            throw new SystemException(error.ToString());
+            result.Add(new DagsItem(DagsType.Error, error.ToString()));
+            return result;
         }
     }
 }
