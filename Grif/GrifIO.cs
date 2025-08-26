@@ -21,9 +21,9 @@ public static class GrifIO
                 // Otherwise, write the value without quotes
                 var value = item.Value;
                 value ??= NULL;
-                while (value.Length > 2 && value.Contains("\\n", OIC))
+                while (value.Length > 2 && value.Contains(NL, OIC))
                 {
-                    var pos = value.IndexOf("\\n", OIC);
+                    var pos = value.IndexOf(NL, OIC);
                     writer.WriteLine($"\t{value[..(pos + 2)]}");
                     value = value[(pos + 2)..]; // Skip the escape sequence
                 }
@@ -83,12 +83,12 @@ public static class GrifIO
             {
                 if (value.Length > 0)
                 {
-                    if (!value.EndsWith("\\n") &&
-                        !value.EndsWith("\\t") &&
-                        !value.EndsWith("\\s") &&
-                        !trimmedLine.StartsWith("\\n") &&
-                        !trimmedLine.StartsWith("\\t") &&
-                        !trimmedLine.StartsWith("\\s"))
+                    if (!value.EndsWith(NL, OIC) &&
+                        !value.EndsWith(TAB, OIC) &&
+                        !value.EndsWith(SPACE, OIC) &&
+                        !trimmedLine.StartsWith(NL, OIC) &&
+                        !trimmedLine.StartsWith(TAB, OIC) &&
+                        !trimmedLine.StartsWith(SPACE, OIC))
                     {
                         value += ' ';
                     }

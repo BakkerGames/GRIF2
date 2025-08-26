@@ -84,3 +84,10 @@
 - Fixed error results
 - Fixed strings surrounded by quotes
 - Parse verbs and nouns using list of synonyms
+
+2025-08-26
+- Added @for, @foreachkey, @foreachlist
+- Added @debug
+- Added NL, TAB, SPACE constants for multichar items
+- LOOK, INV, and directions work!
+- Parser sends the verb and noun as input values.

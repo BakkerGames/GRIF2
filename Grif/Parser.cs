@@ -7,6 +7,10 @@ public static class Parser
     public static List<DagsItem> ParseInput(string input, Grod grod)
     {
         var result = new List<DagsItem>();
+        string? verb;
+        string? verbWord;
+        string? noun = null;
+        string? nounWord = null;
         if (string.IsNullOrWhiteSpace(input))
         {
             return result;
@@ -16,24 +20,25 @@ public static class Parser
         {
             return result;
         }
-        var mwl = grod.Get("system.max_word_length", true);
+        var mwl = grod.Get("system.wordsize", true);
         if (mwl == null || !int.TryParse(mwl, out int maxWordLen))
         {
             maxWordLen = 0;
         }
-        string? verb = GetVerb(words[0], maxWordLen, grod);
+        verbWord = words[0];
+        verb = GetVerb(verbWord, maxWordLen, grod);
         if (verb == null)
         {
-            result.Add(new DagsItem(DagsType.Text, $"@system.unknown_verb({words[0]})"));
+            result.Add(new DagsItem(DagsType.Text, $"I don't know the verb \"{words[0]})\"."));
             return result;
         }
-        string? noun = null;
         if (words.Length > 1)
         {
-            noun = GetNoun(words[1], maxWordLen, grod);
+            nounWord = words[1];
+            noun = GetNoun(nounWord, maxWordLen, grod);
             if (noun == null)
             {
-                result.Add(new DagsItem(DagsType.Text, $"@system.unknown_noun({words[1]})"));
+                result.Add(new DagsItem(DagsType.Text, $"I don't know the word \"{words[1]}\"."));
                 return result;
             }
         }
@@ -41,13 +46,22 @@ public static class Parser
         if (noun != null)
         {
             command += $".{noun}";
+            if (grod.Get(command, true) == null)
+            {
+                command = $"command.{verb}.*"; // any noun
+            }
         }
         if (grod.Get(command, true) == null)
         {
-            result.Add(new DagsItem(DagsType.Text, $"@system.dont_understand(\"{input}\")"));
+            result.Add(new DagsItem(DagsType.Text, $"I don't understand \"{input}\"."));
             return result;
         }
-        result.Add(new DagsItem(DagsType.Text, $"@script({command})"));
+        result.Add(new DagsItem(DagsType.Internal, $"@set(input.full,\"{input}\")"));
+        result.Add(new DagsItem(DagsType.Internal, $"@set(input.verb,{verb})"));
+        result.Add(new DagsItem(DagsType.Internal, $"@set(input.verbword,{verbWord})"));
+        result.Add(new DagsItem(DagsType.Internal, $"@set(input.noun,{noun ?? "\"\""})"));
+        result.Add(new DagsItem(DagsType.Internal, $"@set(input.nounword,{nounWord ?? "\"\""})"));
+        result.Add(new DagsItem(DagsType.Internal, $"@script({command})"));
         return result;
     }
 

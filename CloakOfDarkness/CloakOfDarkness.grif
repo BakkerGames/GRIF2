@@ -119,7 +119,7 @@ command.drop.*
 		@else
 			@set(@concat("item.",@get(input.noun),".location"),@room)
 			@msg(message.ok)
-			@exec(@getvalue(@concat("item.",@get(input.noun),".afterdrop")))
+			@script(@concat("item.",@get(input.noun),".afterdrop"))
 		@endif
 	@else
 		@msg(message.dont_have)

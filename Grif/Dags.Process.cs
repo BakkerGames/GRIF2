@@ -41,7 +41,7 @@ public partial class Dags
                         grod.Remove(INCHANNEL); // Clear after reading
                         break;
                     case "@nl":
-                        result.Add(new DagsItem(DagsType.Text, "\\n")); // Add newline
+                        result.Add(new DagsItem(DagsType.Text, NL));
                         break;
                     case "@return":
                         index = tokens.Length; // End processing
@@ -97,6 +97,15 @@ public partial class Dags
                         }
                         result.Add(new DagsItem(DagsType.Internal, sb.ToString()));
                         break;
+                    case "@debug(":
+                        CheckParameterCount(p, 1);
+                        if (IsTrue(grod.Get("system.debug", true)))
+                        {
+                            result.Add(new DagsItem(DagsType.Text, "### "));
+                            result.Add(new DagsItem(DagsType.Text, p[0].Value));
+                            result.Add(new DagsItem(DagsType.Text, NL));
+                        }
+                        break;
                     case "@div(":
                         CheckParameterCount(p, 2);
                         int1 = GetIntValue(p[0].Value);
@@ -145,9 +154,35 @@ public partial class Dags
                         value = p[0].Value;
                         result.AddRange(Process(value, grod));
                         break;
+                    case "@exists(":
+                        CheckParameterCount(p, 1);
+                        value = grod.Get(p[0].Value, true);
+                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(!IsNull(value))));
+                        break;
                     case "@false(":
                         CheckParameterCount(p, 1);
-                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(!IsCondition(p[0].Value))));
+                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(!IsTrue(p[0].Value))));
+                        break;
+                    case "@for(":
+                        CheckParameterCount(p, 3);
+                        HandleFor(p, tokens, ref index, grod, result);
+                        break;
+                    case "@foreachkey(":
+                        CheckParameterCount(p, 3);
+                        HandleForEachKey(p, tokens, ref index, grod, result);
+                        break;
+                    case "@foreachlist(":
+                        CheckParameterCount(p, 3);
+                        HandleForEachList(p, tokens, ref index, grod, result);
+                        break;
+                    case "@format(":
+                        CheckParameterAtLeastOne(p);
+                        value = p[0].Value;
+                        for (int i = 1; i < p.Count; i++)
+                        {
+                            value = value.Replace($"{{{i - 1}}}", p[i].Value); // {0} = p[1]
+                        }
+                        result.Add(new DagsItem(DagsType.Internal, value));
                         break;
                     case "@ge(":
                         CheckParameterCount(p, 2);
@@ -211,6 +246,18 @@ public partial class Dags
                         {
                             result.Add(new DagsItem(DagsType.Internal,
                                 TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) > 0)));
+                        }
+                        break;
+                    case "@isscript(":
+                        CheckParameterCount(p, 1);
+                        value = grod.Get(p[0].Value, true);
+                        if (value == null)
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, FALSE));
+                        }
+                        else
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, TrueFalse(value.StartsWith('@'))));
                         }
                         break;
                     case "@label(":
@@ -280,7 +327,7 @@ public partial class Dags
                             throw new SystemException($"Message not found: {p[0].Value}");
                         }
                         result.Add(new DagsItem(DagsType.Text, value));
-                        result.Add(new DagsItem(DagsType.Text, "\\n"));
+                        result.Add(new DagsItem(DagsType.Text, NL));
                         break;
                     case "@mul(":
                         CheckParameterCount(p, 2);
@@ -366,7 +413,7 @@ public partial class Dags
                         break;
                     case "@true(":
                         CheckParameterCount(p, 1);
-                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(IsCondition(p[0].Value))));
+                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(IsTrue(p[0].Value))));
                         break;
                     case "@write(":
                         CheckParameterAtLeastOne(p);
@@ -397,7 +444,7 @@ public partial class Dags
                                     break;
                             }
                         }
-                        result.Add(new DagsItem(DagsType.Text, "\\n"));
+                        result.Add(new DagsItem(DagsType.Text, NL));
                         break;
                     default:
                         var userResult = GetUserDefinedFunctionValues(token, p, grod);

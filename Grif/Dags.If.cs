@@ -155,20 +155,6 @@ public partial class Dags
         {
             throw new SystemException("Invalid condition in @if");
         }
-        return IsCondition(answer[0].Value);
-    }
-
-    private static bool IsCondition(string? value)
-    {
-        if (value == null)
-        {
-            return false; // Treat null as false
-        }
-        return value.ToLower() switch
-        {
-            TRUE or "t" or "yes" or "y" or "1" or "-1" => true,
-            FALSE or "f" or "no" or "n" or "0" or NULL or "" => false,
-            _ => throw new SystemException("Invalid condition in @if"),
-        };
+        return IsTrue(answer[0].Value);
     }
 }

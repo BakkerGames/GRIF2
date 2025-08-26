@@ -8,5 +8,9 @@ public static class Common
     public const string TRUE = "true";
     public const string FALSE = "false";
 
+    public const string NL = "\\n";
+    public const string TAB = "\\t";
+    public const string SPACE = "\\s";
+
     public const string INCHANNEL = "DagsInChannel";
 }

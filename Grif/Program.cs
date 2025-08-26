@@ -70,6 +70,7 @@ internal class Program
         }
     }
 
+    /*
     private static void DebugGameFile(Grod grodBase)
     {
         var fileOutput = "TestData\\test_out.grif";
@@ -104,4 +105,5 @@ internal class Program
             }
         } while (true);
     }
+    */
 }
