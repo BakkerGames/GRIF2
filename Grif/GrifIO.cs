@@ -130,6 +130,9 @@ public static class GrifIO
                     output.AppendLine();
                     output.AppendLine($"ERROR: {HandleText(item.Value)}");
                     break;
+                case DagsType.OutChannel:
+
+                    break;
                 default:
                     output.AppendLine($"Unknown Item Type: {item.Type}");
                     output.AppendLine($"Value: {HandleText(item.Value)}");
@@ -254,5 +257,17 @@ public static class GrifIO
             output.Append('\\'); // If the last character was a backslash, append it
         }
         return output.ToString();
+    }
+
+    public static void HandleOutChannel(List<DagsItem> items)
+    {
+        foreach (var item in items)
+        {
+            if (item.Type != DagsType.OutChannel)
+            {
+                continue;
+            }
+            // ...
+        }
     }
 }

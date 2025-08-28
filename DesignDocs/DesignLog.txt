@@ -91,3 +91,6 @@
 - Added NL, TAB, SPACE constants for multichar items
 - LOOK, INV, and directions work!
 - Parser sends the verb and noun as input values.
+
+2025-08-27
+- Started work on OutChannel processing.
