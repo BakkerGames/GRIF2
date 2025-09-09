@@ -94,3 +94,13 @@
 
 2025-08-27
 - Started work on OutChannel processing.
+
+2025-09-08
+- More commands, including some list and array processing
+- List/Array empty items saved as "null"
+- Allow commas in list values, using FixListItemIn() and FixListItemOut()
+- Handle gameover outchannel command
+- Added prompt and after prompt with possible variable output
+- Added intro script and background scripts
+- Added output width handling
+- Fixed NL output handling

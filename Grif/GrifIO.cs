@@ -113,7 +113,7 @@ public static class GrifIO
     /// <summary>
     /// Renders the output from Dags.Process into a single string.
     /// </summary>
-    public static StringBuilder RenderOutput(List<DagsItem> items)
+    public static string RenderOutput(List<DagsItem> items, int outputWidth, ref bool gameOver)
     {
         StringBuilder output = new();
         foreach (var item in items)
@@ -121,25 +121,90 @@ public static class GrifIO
             switch (item.Type)
             {
                 case DagsType.Text:
-                    output.Append(HandleText(item.Value));
+                    var tempLine = HandleText(item.Value);
+                    output.Append(tempLine);
                     break;
                 case DagsType.Internal:
-                    output.AppendLine($"INTERNAL: {HandleText(item.Value)}");
+                    output.Append($"INTERNAL: {HandleText(item.Value)}");
                     break;
                 case DagsType.Error:
-                    output.AppendLine();
-                    output.AppendLine($"ERROR: {HandleText(item.Value)}");
+                    output.Append($"ERROR: {HandleText(item.Value)}");
                     break;
                 case DagsType.OutChannel:
-
+                    if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
+                    {
+                        gameOver = true;
+                        break;
+                    }
+                    output.Append($"OUTCHANNEL: {HandleText(item.Value)}");
                     break;
                 default:
-                    output.AppendLine($"Unknown Item Type: {item.Type}");
-                    output.AppendLine($"Value: {HandleText(item.Value)}");
+                    output.Append($"Unknown Item Type: {item.Type}");
+                    output.Append($"Value: {HandleText(item.Value)}");
                     break;
             }
         }
-        return output;
+        if (outputWidth > 0)
+        {
+            var tempOutput = output.ToString();
+            output.Clear();
+            while (tempOutput.Length > outputWidth)
+            {
+                var pos = tempOutput.IndexOf('\n');
+                if (pos >= 0 && pos <= outputWidth)
+                {
+                    var temp1 = tempOutput[..(pos + 1)];
+                    output.Append(temp1);
+                    if (pos + 1 >= tempOutput.Length)
+                    {
+                        tempOutput = "";
+                    }
+                    else
+                    {
+                        tempOutput = tempOutput[(pos + 1)..];
+                    }
+                    continue;
+                }
+                pos = tempOutput.IndexOf(' ');
+                if (pos >= 0 && pos <= outputWidth)
+                {
+                    pos = tempOutput.LastIndexOf(' ', outputWidth);
+                    var temp2 = tempOutput[..(pos + 1)].TrimEnd();
+                    output.Append(temp2);
+                    output.Append('\n');
+                    if (pos + 1 >= tempOutput.Length)
+                    {
+                        tempOutput = "";
+                    }
+                    else
+                    {
+                        tempOutput = tempOutput[(pos + 1)..];
+                    }
+                    continue;
+                }
+                if (tempOutput.Length > outputWidth)
+                {
+                    output.Append(tempOutput[..outputWidth]);
+                    output.Append('\n');
+                    if (outputWidth >= tempOutput.Length)
+                    {
+                        tempOutput = "";
+                    }
+                    else
+                    {
+                        tempOutput = tempOutput[outputWidth..];
+                    }
+                    continue;
+                }
+                output.Append(tempOutput);
+                tempOutput = "";
+            }
+            if (tempOutput.Length > 0)
+            {
+                output.Append(tempOutput);
+            }
+        }
+        return output.ToString();
     }
 
     /// <summary>

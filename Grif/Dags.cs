@@ -15,30 +15,43 @@ public record DagsItem(DagsType Type, string Value);
 
 public partial class Dags
 {
-    private const string _version = "2.2025.0826";
+    private const string _version = "2.2025.0908";
 
     public static string Version => _version;
 
-    public static List<DagsItem> Process(string script, Grod grod)
+    public static List<DagsItem> Process(Grod grod, string script)
     {
         List<DagsItem> items = [new DagsItem(DagsType.Text, script)];
-        return ProcessItems(items, grod);
+        return ProcessItems(grod, items);
     }
 
-    public static List<DagsItem> ProcessItems(List<DagsItem> items, Grod grod)
+    public static List<DagsItem> ProcessItems(Grod grod, List<DagsItem> items)
     {
         List<DagsItem> result = [];
         foreach (var item in items)
         {
+            if (item.Type == DagsType.Error)
+            {
+                result.Add(item);
+                continue;
+            }
             if (item.Type == DagsType.Text || item.Type == DagsType.Internal)
             {
-                var tokens = SplitTokens(item.Value);
-                int index = 0;
-                do
+                if (item.Value.StartsWith('@'))
                 {
-                    var answer = ProcessOneCommand(tokens, ref index, grod);
-                    result.AddRange(answer);
-                } while (index < tokens.Length);
+                    var tokens = SplitTokens(item.Value);
+                    int index = 0;
+                    do
+                    {
+                        var answer = ProcessOneCommand(tokens, ref index, grod);
+                        result.AddRange(answer);
+                    } while (index < tokens.Length);
+                }
+                else
+                {
+                    // plain text
+                    result.Add(item);
+                }
             }
             else if (item.Type == DagsType.InChannel)
             {

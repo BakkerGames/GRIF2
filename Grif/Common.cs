@@ -11,6 +11,7 @@ public static class Common
     public const string NL = "\\n";
     public const string TAB = "\\t";
     public const string SPACE = "\\s";
+    public const string COMMA_UTF = "\\u002c";
 
     public const string INCHANNEL = "#INCHANNEL;";
 

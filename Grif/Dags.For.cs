@@ -34,7 +34,7 @@ public partial class Dags
         for (int value = int.Parse(p[1].Value); value <= int.Parse(p[2].Value); value++)
         {
             var script = newTokens.ToString().Replace($"${p[0].Value}", value.ToString());
-            result.AddRange(Process(script, grod));
+            result.AddRange(Process(grod, script));
         }
     }
 
@@ -76,7 +76,7 @@ public partial class Dags
                 value = value[..^p[2].Value.Length];
             }
             var script = newTokens.ToString().Replace($"${p[0].Value}", value);
-            result.AddRange(Process(script, grod));
+            result.AddRange(Process(grod, script));
         }
     }
 
@@ -107,16 +107,17 @@ public partial class Dags
             newTokens.Append(token);
         } while (index < tokens.Length);
         // p[1] holds the name of the list
-        string list = grod.Get(p[1].Value, true) ?? "";
+        string? list = grod.Get(p[1].Value, true);
         if (!string.IsNullOrWhiteSpace(list))
         {
             var items = list.Split(',');
             foreach (string value in items)
             {
-                if (!string.IsNullOrEmpty(value))
+                var value2 = FixListItemOut(value);
+                if (!string.IsNullOrEmpty(value2))
                 {
-                    var script = newTokens.ToString().Replace($"${p[0].Value}", value);
-                    result.AddRange(Process(script, grod));
+                    var script = newTokens.ToString().Replace($"${p[0].Value}", value2);
+                    result.AddRange(Process(grod, script));
                 }
             }
         }

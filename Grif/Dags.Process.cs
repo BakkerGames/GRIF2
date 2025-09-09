@@ -12,6 +12,7 @@ public partial class Dags
         List<DagsItem> result = [];
         string? value;
         int int1, int2;
+        int intAnswer;
         try
         {
             if (index >= tokens.Length)
@@ -50,7 +51,7 @@ public partial class Dags
                         value = grod.Get(token, true);
                         if (value != null)
                         {
-                            var userResult = Process(value, grod);
+                            var userResult = Process(grod, value);
                             result.AddRange(userResult);
                             break;
                         }
@@ -75,15 +76,75 @@ public partial class Dags
                         CheckParameterCount(p, 2);
                         int1 = GetIntValue(p[0].Value);
                         int2 = GetIntValue(p[1].Value);
-                        int1 += int2;
-                        result.Add(new DagsItem(DagsType.Internal, int1.ToString()));
+                        intAnswer = int1 + int2;
+                        result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
+                        break;
+                    case "@addlist(":
+                        CheckParameterCount(p, 2);
+                        AddListItem(grod, p[0].Value, p[1].Value);
                         break;
                     case "@addto(":
                         CheckParameterCount(p, 2);
                         int1 = GetIntValue(grod.Get(p[0].Value, true));
                         int2 = GetIntValue(p[1].Value);
-                        int1 += int2;
-                        grod.Set(p[0].Value, int1.ToString());
+                        intAnswer = int1 + int2;
+                        grod.Set(p[0].Value, intAnswer.ToString());
+                        break;
+                    case "@bitwiseand(":
+                        CheckParameterCount(p, 2);
+                        int1 = GetIntValue(p[0].Value);
+                        int2 = GetIntValue(p[1].Value);
+                        if (int1 < 0 || int2 < 0)
+                        {
+                            throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        }
+                        intAnswer = int1 & int2;
+                        result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
+                        break;
+                    case "@bitwiseor(":
+                        CheckParameterCount(p, 2);
+                        int1 = GetIntValue(p[0].Value);
+                        int2 = GetIntValue(p[1].Value);
+                        if (int1 < 0 || int2 < 0)
+                        {
+                            throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        }
+                        intAnswer = int1 | int2;
+                        result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
+                        break;
+                    case "@bitwisexor(":
+                        CheckParameterCount(p, 2);
+                        int1 = GetIntValue(p[0].Value);
+                        int2 = GetIntValue(p[1].Value);
+                        if (int1 < 0 || int2 < 0)
+                        {
+                            throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        }
+                        intAnswer = int1 ^ int2;
+                        result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
+                        break;
+                    case "@cleararray(":
+                        CheckParameterCount(p, 1);
+                        ClearArray(grod, p[0].Value);
+                        break;
+                    case "@clearbit(":
+                        CheckParameterCount(p, 2);
+                        int1 = GetIntValue(p[0].Value);
+                        int2 = GetIntValue(p[1].Value);
+                        if (int1 < 0 || int2 < 0 || int2 > 30)
+                        {
+                            throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        }
+                        intAnswer = int1 ^ (int)Math.Pow(2, int2);
+                        result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
+                        break;
+                    case "@clearlist(":
+                        CheckParameterCount(p, 1);
+                        if (string.IsNullOrWhiteSpace(p[0].Value))
+                        {
+                            throw new SystemException($"{token}): List name cannot be blank");
+                        }
+                        grod.Set(p[0].Value, null);
                         break;
                     case "@comment(":
                         // Ignore comments
@@ -152,7 +213,7 @@ public partial class Dags
                     case "@exec(":
                         CheckParameterCount(p, 1);
                         value = p[0].Value;
-                        result.AddRange(Process(value, grod));
+                        result.AddRange(Process(grod, value));
                         break;
                     case "@exists(":
                         CheckParameterCount(p, 1);
@@ -210,12 +271,23 @@ public partial class Dags
                         value = grod.Get(p[0].Value, true) ?? "";
                         result.Add(new DagsItem(DagsType.Internal, value));
                         break;
+                    case "@getarray(":
+                        CheckParameterCount(p, 3);
+                        if (string.IsNullOrWhiteSpace(p[0].Value))
+                        {
+                            throw new SystemException("Array name cannot be blank");
+                        }
+                        int1 = GetIntValue(p[1].Value);
+                        int2 = GetIntValue(p[2].Value);
+                        value = GetArrayItem(grod, p[0].Value, int1, int2);
+                        result.Add(new DagsItem(DagsType.Internal, value ?? ""));
+                        break;
                     case "@getvalue(":
                         CheckParameterCount(p, 1);
                         value = grod.Get(p[0].Value, true) ?? "";
                         while (value.StartsWith('@'))
                         {
-                            var tempResult = Process(value, grod);
+                            var tempResult = Process(grod, value);
                             value = "";
                             foreach (var item in tempResult)
                             {
@@ -385,7 +457,7 @@ public partial class Dags
                         value = grod.Get(p[0].Value, true);
                         if (!string.IsNullOrWhiteSpace(value))
                         {
-                            var scriptResult = Process(value, grod);
+                            var scriptResult = Process(grod, value);
                             result.AddRange(scriptResult);
                         }
                         break;
@@ -458,8 +530,8 @@ public partial class Dags
         {
             // Handle exceptions and return error item
             StringBuilder error = new();
-            error.AppendLine($"Error processing command at index {index}:");
-            error.AppendLine(ex.Message);
+            error.Append($"Error processing command at index {index}:");
+            error.Append(ex.Message);
             for (int i = 0; i < tokens.Length; i++)
             {
                 var token = tokens[i];
@@ -467,10 +539,47 @@ public partial class Dags
                 {
                     token = string.Concat(token.AsSpan(0, 50), "...");
                 }
-                error.AppendLine($"{i}: {token}");
+                error.Append($"{i}: {token}");
             }
             result.Add(new DagsItem(DagsType.Error, error.ToString()));
             return result;
         }
+    }
+
+    private static string? GetArrayItem(Grod grod, string key, int y, int x)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (y < 0 || x < 0)
+        {
+            throw new SystemException($"Array indexes cannot be negative: {key}: {y},{x}");
+        }
+        var itemKey = $"{key}:{y}";
+        return GetListItem(grod, itemKey, x);
+    }
+
+    private static string? GetListItem(Grod grod, string key, int x)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (x < 0)
+        {
+            throw new SystemException($"List indexes cannot be negative: {key}: {x}");
+        }
+        var list = grod.Get(key, true);
+        if (string.IsNullOrWhiteSpace(list) || IsNull(list))
+        {
+            return null;
+        }
+        var items = list.Split(',');
+        if (x >= items.Length)
+        {
+            return null;
+        }
+        return FixListItemOut(items[x]);
     }
 }

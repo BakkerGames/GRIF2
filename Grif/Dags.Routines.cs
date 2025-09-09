@@ -13,7 +13,6 @@ public partial class Dags
         bool inQuote = false;
         bool inAtFunction = false;
         bool lastSlash = false;
-        bool allowsEmpty = false;
         foreach (char c in script)
         {
             if (inQuote)
@@ -437,7 +436,7 @@ public partial class Dags
             var placeholder = placeholders[i].Trim();
             value = value.Replace("$" + placeholder, p[i].Value, OIC);
         }
-        var userResult = Process(value, grod);
+        var userResult = Process(grod, value);
         return userResult;
     }
 
@@ -463,5 +462,55 @@ public partial class Dags
             FALSE or "f" or "no" or "n" or "0" or NULL or "" => false,
             _ => throw new SystemException($"Non-boolean value: {value}"),
         };
+    }
+
+    private static void AddListItem(Grod grod, string key, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        value = FixListItemIn(value);
+        var existing = grod.Get(key, true);
+        if (string.IsNullOrEmpty(existing) || IsNull(existing))
+        {
+            grod.Set(key, value);
+        }
+        else
+        {
+            grod.Set(key, existing + "," + value);
+        }
+    }
+
+    private static void ClearArray(Grod grod, string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        var list = grod.Keys(true, true)
+            .Where(x => x.StartsWith(key + ":", OIC));
+        foreach (var item in list)
+        {
+            grod.Set(item, null);
+        }
+    }
+
+    private static string FixListItemIn(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return NULL;
+        if (value.Contains(','))
+            value = value.Replace(",", COMMA_UTF);
+        return value;
+    }
+
+    private static string? FixListItemOut(string value)
+    {
+        if (value == NULL)
+            return null;
+        if (value.Contains(COMMA_UTF))
+            value = value.Replace(COMMA_UTF, ",");
+        return value;
     }
 }

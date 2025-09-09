@@ -6,104 +6,83 @@ namespace Grif;
 
 internal class Program
 {
-    private const string _version = "2.2025.0824";
+    private const string _version = "2.2025.0908";
 
     public static string Version => _version;
 
     static void Main(string[] args)
     {
-        Console.WriteLine($"GRIF version {Version}");
-        Console.WriteLine($"DAGS version {Dags.Version}");
-        Console.WriteLine($"GROD version {Grod.Version}");
-
         string filename;
         if (args.Length == 0)
         {
             Console.WriteLine("Please specify a GRIF filename.");
             return;
         }
-        else
+        filename = args[0];
+        if (!File.Exists(filename))
         {
-            filename = args[0];
-            if (!File.Exists(filename))
-            {
-                Console.WriteLine($"File not found: {filename}");
-                return;
-            }
+            Console.WriteLine($"File not found: {filename}");
+            return;
         }
-
         var grodBase = new Grod("base");
         List<GrodItem> items = ReadGrif(filename);
         grodBase.AddItems(items);
-        Console.WriteLine($"Loaded {grodBase.Count} items from {filename}");
-
-        //DebugGameFile(grodBase);
-
-        RunGame(grodBase);
+        var grod = new Grod("overlay", grodBase);
+        RunGame(grod);
     }
 
     private static void RunGame(Grod grod)
     {
-        while (true)
+        try
         {
-            Console.Write("> ");
-            var input = Console.ReadLine() ?? "";
-            if (input.Equals("exit", OIC) || input.Equals("quit", OIC))
+            var gameOver = false;
+            int outputWidth = 0;
+            if (int.TryParse(grod.Get("system.output_width", true), out int ow))
             {
-                break;
+                outputWidth = ow;
             }
-            var parsed = ParseInput(input, grod);
-            List<DagsItem> output = [];
-            try
+            var intro = grod.Get("system.intro", true);
+            if (!string.IsNullOrWhiteSpace(intro))
             {
-                output = Dags.ProcessItems(parsed, grod);
+                var introOutput = Dags.Process(grod, intro);
+                var textOutput = RenderOutput(introOutput, outputWidth, ref gameOver);
+                Console.Write(textOutput.ToString());
             }
-            catch (Exception ex)
+            while (!gameOver)
             {
-                output.Add(new DagsItem(DagsType.Error, ex.Message));
-            }
-            if (output.Count > 0)
-            {
-                var textOutput = RenderOutput(output);
-                Console.WriteLine(textOutput.ToString());
+                // run background scripts
+                var backgroundKeys = grod.Keys(true, true)
+                    .Where(x => x.StartsWith("background.", OIC));
+                foreach (var bgKey in backgroundKeys)
+                {
+                    var bgValue = grod.Get(bgKey, true) ?? "";
+                    var bgProcess = Dags.Process(grod, bgValue);
+                    var bgOutput = RenderOutput(bgProcess, outputWidth, ref gameOver);
+                    Console.Write(bgOutput);
+                    if (gameOver) { return; }
+                }
+                // prompt
+                var prompt = grod.Get("system.prompt", true) ?? "> ";
+                var promptProcess = Dags.Process(grod, prompt);
+                var promptOutput = RenderOutput(promptProcess, outputWidth, ref gameOver);
+                Console.Write(promptOutput);
+                // input
+                var input = Console.ReadLine() ?? "";
+                // after prompt
+                var afterPrompt = grod.Get("system.after_prompt", true) ?? "";
+                var afterProcess = Dags.Process(grod, afterPrompt);
+                var afterOutput = RenderOutput(afterProcess, outputWidth, ref gameOver);
+                Console.Write(afterOutput);
+                // process input
+                var parsed = ParseInput(input, grod);
+                var output = Dags.ProcessItems(grod, parsed);
+                var textOutput = RenderOutput(output, outputWidth, ref gameOver);
+                Console.Write(textOutput);
             }
         }
-    }
-
-    /*
-    private static void DebugGameFile(Grod grodBase)
-    {
-        var fileOutput = "TestData\\test_out.grif";
-        WriteGrif(fileOutput, grodBase.Items(false, true));
-        Console.WriteLine($"Output written to {fileOutput}");
-        Console.WriteLine();
-
-        Console.WriteLine("Type 'exit' to quit, 'list' to list items, or any other command to process it.");
-        do
+        catch (Exception ex)
         {
-            Console.Write("> ");
-            var input = Console.ReadLine() ?? "";
-            if (input.Equals("exit", OIC) || input.Equals("quit", OIC))
-            {
-                break;
-            }
-            else if (input.Equals("list", OIC))
-            {
-                foreach (var item in grodBase.Items(false, true))
-                {
-                    Console.WriteLine($"{item.Key}: {item.Value?.Trim()}");
-                }
-            }
-            else
-            {
-                var output = Dags.Process(input, grodBase);
-                if (output.Count > 0)
-                {
-                    var textOutput = RenderOutput(output);
-                    Console.WriteLine(textOutput.ToString());
-                }
-            }
-        } while (true);
+            Console.WriteLine($"Fatal error: {ex.Message}");
+        }
     }
-    */
 }

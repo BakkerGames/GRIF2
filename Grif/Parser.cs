@@ -29,7 +29,7 @@ public static class Parser
         verb = GetVerb(verbWord, maxWordLen, grod);
         if (verb == null)
         {
-            result.Add(new DagsItem(DagsType.Text, $"I don't know the verb \"{words[0]})\"."));
+            result.Add(new DagsItem(DagsType.Text, $"I don't know the verb \"{words[0]}\".\\n"));
             return result;
         }
         if (words.Length > 1)
@@ -38,7 +38,7 @@ public static class Parser
             noun = GetNoun(nounWord, maxWordLen, grod);
             if (noun == null)
             {
-                result.Add(new DagsItem(DagsType.Text, $"I don't know the word \"{words[1]}\"."));
+                result.Add(new DagsItem(DagsType.Text, $"I don't know the word \"{words[1]}\".\\n"));
                 return result;
             }
         }
@@ -53,7 +53,7 @@ public static class Parser
         }
         if (grod.Get(command, true) == null)
         {
-            result.Add(new DagsItem(DagsType.Text, $"I don't understand \"{input}\"."));
+            result.Add(new DagsItem(DagsType.Text, $"I don't understand \"{input}\".\\n"));
             return result;
         }
         result.Add(new DagsItem(DagsType.Internal, $"@set(input.full,\"{input}\")"));
