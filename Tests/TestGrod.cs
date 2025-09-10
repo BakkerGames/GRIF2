@@ -33,7 +33,7 @@ public class TestGrod
     {
         var grod = new Grod("grod3");
         grod.Set("key3", "value3");
-        grod.Remove("key3");
+        grod.Remove("key3", false);
         Assert.That(grod.Get("key3", false), Is.Null);
     }
 
@@ -52,7 +52,7 @@ public class TestGrod
         var grod = new Grod("grod5");
         grod.Set("key5", "value5");
         grod.Set("key6", "value6");
-        Assert.That(grod.Count, Is.EqualTo(2));
+        Assert.That(grod.Count(true), Is.EqualTo(2));
     }
 
     [Test]
@@ -62,7 +62,7 @@ public class TestGrod
         parentGrod.Set("key7", "value7");
         var childGrod = new Grif.Grod("child2", parentGrod);
         childGrod.Set("key8", "value8");
-        Assert.That(childGrod.CountRecursive, Is.EqualTo(2));
+        Assert.That(childGrod.Count(true), Is.EqualTo(2));
     }
 
     [Test]

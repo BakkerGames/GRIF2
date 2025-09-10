@@ -125,10 +125,10 @@ public static class GrifIO
                     output.Append(tempLine);
                     break;
                 case DagsType.Internal:
-                    output.Append($"INTERNAL: {HandleText(item.Value)}");
+                    output.AppendLine($"INTERNAL: {HandleText(item.Value)}");
                     break;
                 case DagsType.Error:
-                    output.Append($"ERROR: {HandleText(item.Value)}");
+                    output.AppendLine($"ERROR: {HandleText(item.Value)}");
                     break;
                 case DagsType.OutChannel:
                     if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
@@ -136,11 +136,11 @@ public static class GrifIO
                         gameOver = true;
                         break;
                     }
-                    output.Append($"OUTCHANNEL: {HandleText(item.Value)}");
+                    output.AppendLine($"OUTCHANNEL: {HandleText(item.Value)}");
                     break;
                 default:
-                    output.Append($"Unknown Item Type: {item.Type}");
-                    output.Append($"Value: {HandleText(item.Value)}");
+                    output.AppendLine($"Unknown Item Type: {item.Type}");
+                    output.AppendLine($"Value: {HandleText(item.Value)}");
                     break;
             }
         }

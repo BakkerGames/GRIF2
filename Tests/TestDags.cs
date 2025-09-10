@@ -595,7 +595,7 @@ public class TestDags
         Grod grod = new("testGrod");
         string script = "   ";
         var result = Dags.Process(grod, script);
-        Assert.That(result, Is.EqualTo(new List<DagsItem>()));
+        Assert.That(result, Is.EqualTo(new List<DagsItem>() { new(DagsType.Text, script) }));
     }
 
     [Test]

@@ -393,6 +393,25 @@ public partial class Dags
         }
     }
 
+    private static string GetValue(Grod grod, string? value)
+    {
+        if (IsNull(value))
+        {
+            return "";
+        }
+        if (!value!.StartsWith('@'))
+        {
+            return value;
+        }
+        var resultItems = Process(grod, value);
+        if (resultItems.Count == 1 &&
+            (resultItems[0].Type == DagsType.Text || resultItems[0].Type == DagsType.Internal))
+        {
+            return GetValue(grod, resultItems[0].Value);
+        }
+        throw new SystemException("Expected a single text result.");
+    }
+
     private static int GetIntValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))

@@ -39,7 +39,7 @@ public partial class Dags
                         break;
                     case "@getinchannel":
                         result.Add(new DagsItem(DagsType.Internal, grod.Get(INCHANNEL, true) ?? ""));
-                        grod.Remove(INCHANNEL); // Clear after reading
+                        grod.Remove(INCHANNEL, false); // Clear after reading
                         break;
                     case "@nl":
                         result.Add(new DagsItem(DagsType.Text, NL));
@@ -284,19 +284,7 @@ public partial class Dags
                         break;
                     case "@getvalue(":
                         CheckParameterCount(p, 1);
-                        value = grod.Get(p[0].Value, true) ?? "";
-                        while (value.StartsWith('@'))
-                        {
-                            var tempResult = Process(grod, value);
-                            value = "";
-                            foreach (var item in tempResult)
-                            {
-                                if (item.Type == DagsType.Text || item.Type == DagsType.Internal)
-                                {
-                                    value += item.Value;
-                                }
-                            }
-                        }
+                        value = GetValue(grod, grod.Get(p[0].Value, true));
                         result.Add(new DagsItem(DagsType.Internal, value));
                         break;
                     case "@gt(":
@@ -323,13 +311,13 @@ public partial class Dags
                     case "@isscript(":
                         CheckParameterCount(p, 1);
                         value = grod.Get(p[0].Value, true);
-                        if (value == null)
+                        if (IsNull(value))
                         {
                             result.Add(new DagsItem(DagsType.Internal, FALSE));
                         }
                         else
                         {
-                            result.Add(new DagsItem(DagsType.Internal, TrueFalse(value.StartsWith('@'))));
+                            result.Add(new DagsItem(DagsType.Internal, TrueFalse(value!.StartsWith('@'))));
                         }
                         break;
                     case "@label(":
@@ -393,11 +381,7 @@ public partial class Dags
                         break;
                     case "@msg(":
                         CheckParameterCount(p, 1);
-                        value = grod.Get(p[0].Value, true);
-                        if (value == null)
-                        {
-                            throw new SystemException($"Message not found: {p[0].Value}");
-                        }
+                        value = GetValue(grod, grod.Get(p[0].Value, true));
                         result.Add(new DagsItem(DagsType.Text, value));
                         result.Add(new DagsItem(DagsType.Text, NL));
                         break;
@@ -491,30 +475,16 @@ public partial class Dags
                         CheckParameterAtLeastOne(p);
                         foreach (var item in p) // concatenate all parameters
                         {
-                            switch (item.Type)
-                            {
-                                case DagsType.Internal:
-                                    result.Add(new DagsItem(DagsType.Text, item.Value));
-                                    break;
-                                default: // return as is
-                                    result.Add(item);
-                                    break;
-                            }
+                            value = GetValue(grod, item.Value);
+                            result.Add(new DagsItem(DagsType.Text, value));
                         }
                         break;
                     case "@writeline(":
                         CheckParameterAtLeastOne(p);
                         foreach (var item in p) // concatenate all parameters
                         {
-                            switch (item.Type)
-                            {
-                                case DagsType.Internal:
-                                    result.Add(new DagsItem(DagsType.Text, item.Value));
-                                    break;
-                                default: // return as is
-                                    result.Add(item);
-                                    break;
-                            }
+                            value = GetValue(grod, item.Value);
+                            result.Add(new DagsItem(DagsType.Text, value));
                         }
                         result.Add(new DagsItem(DagsType.Text, NL));
                         break;
@@ -530,8 +500,8 @@ public partial class Dags
         {
             // Handle exceptions and return error item
             StringBuilder error = new();
-            error.Append($"Error processing command at index {index}:");
-            error.Append(ex.Message);
+            error.AppendLine($"Error processing command at index {index}:");
+            error.AppendLine(ex.Message);
             for (int i = 0; i < tokens.Length; i++)
             {
                 var token = tokens[i];
@@ -539,7 +509,7 @@ public partial class Dags
                 {
                     token = string.Concat(token.AsSpan(0, 50), "...");
                 }
-                error.Append($"{i}: {token}");
+                error.AppendLine($"{i}: {token}");
             }
             result.Add(new DagsItem(DagsType.Error, error.ToString()));
             return result;

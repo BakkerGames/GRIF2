@@ -37,20 +37,23 @@ public partial class Dags
             }
             if (item.Type == DagsType.Text || item.Type == DagsType.Internal)
             {
-                if (item.Value.StartsWith('@'))
+                if (!string.IsNullOrEmpty(item.Value)) // whitespace is allowed
                 {
-                    var tokens = SplitTokens(item.Value);
-                    int index = 0;
-                    do
+                    if (item.Value.StartsWith('@'))
                     {
-                        var answer = ProcessOneCommand(tokens, ref index, grod);
-                        result.AddRange(answer);
-                    } while (index < tokens.Length);
-                }
-                else
-                {
-                    // plain text
-                    result.Add(item);
+                        var tokens = SplitTokens(item.Value);
+                        int index = 0;
+                        do
+                        {
+                            var answer = ProcessOneCommand(tokens, ref index, grod);
+                            result.AddRange(answer);
+                        } while (index < tokens.Length);
+                    }
+                    else
+                    {
+                        // plain text
+                        result.Add(item);
+                    }
                 }
             }
             else if (item.Type == DagsType.InChannel)

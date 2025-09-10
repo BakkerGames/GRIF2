@@ -104,3 +104,12 @@
 - Added intro script and background scripts
 - Added output width handling
 - Fixed NL output handling
+
+2025-09-09
+- Added GetValue() (not working yet)
+- Added unit tests from GRIF
+- All TestGrod, TestDags, and UnitTestGrod tests pass
+- Cloak of Darkness works, except for "examine hook"
+- Fixed Grod keys to be case insensitive
+- Fixed Grod to have recursive Clear and Remove
+- Added Grod.ContainsKey and Grod.ContainsKey

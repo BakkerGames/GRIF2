@@ -6,7 +6,7 @@ public class Grod
 {
     private const string _version = "2.2025.0824";
 
-    private readonly Dictionary<string, string?> _data = [];
+    private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
 
     public Grod(string name)
     {
@@ -25,13 +25,18 @@ public class Grod
 
     public Grod? Parent { get; set; }
 
-    public int Count { get { return _data.Count; } }
-
-    public int CountRecursive { get { return _data.Count + (Parent?.CountRecursive ?? 0); } }
+    public int Count(bool recursive)
+    {
+        if (recursive && Parent != null)
+        {
+            return _data.Count + Parent.Count(recursive);
+        }
+        return _data.Count;
+    }
 
     public string? Get(string key, bool recursive)
     {
-        ValidateKey(key);
+        ValidateKey(ref key);
         if (_data.TryGetValue(key, out var value))
         {
             return value;
@@ -45,7 +50,7 @@ public class Grod
 
     public void Set(string key, string? value)
     {
-        ValidateKey(key);
+        ValidateKey(ref key);
         if (!_data.TryAdd(key, value))
         {
             _data[key] = value;
@@ -58,10 +63,14 @@ public class Grod
         Set(item.Key, item.Value);
     }
 
-    public void Remove(string key)
+    public void Remove(string key, bool recursive)
     {
-        ValidateKey(key);
+        ValidateKey(ref key);
         _data.Remove(key);
+        if (recursive && Parent != null)
+        {
+            Parent.Remove(key, recursive);
+        }
     }
 
     public void Clear(bool recursive)
@@ -71,6 +80,20 @@ public class Grod
         {
             Parent.Clear(recursive);
         }
+    }
+
+    public bool ContainsKey(string key, bool recursive)
+    {
+        ValidateKey(ref key);
+        if (_data.ContainsKey(key))
+        {
+            return true;
+        }
+        if (recursive && Parent != null)
+        {
+            return Parent.ContainsKey(key, recursive);
+        }
+        return false;
     }
 
     public List<string> Keys(bool recursive, bool sorted)
@@ -119,16 +142,13 @@ public class Grod
 
     #region private methods
 
-    private static void ValidateKey(string key)
+    private static void ValidateKey(ref string key)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
             throw new ArgumentException("Key cannot be null or whitespace.", nameof(key));
         }
-        if (key.Trim().Length != key.Length)
-        {
-            throw new ArgumentException("Key cannot contain leading or trailing whitespace.", nameof(key));
-        }
+        key = key.Trim();
     }
 
     #endregion
