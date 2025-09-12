@@ -3,8 +3,6 @@ using static Grif.Common;
 
 namespace Grif;
 
-// IsNull() is equal to another IsNull(), and is less than any other value.
-
 public partial class Dags
 {
     private static List<DagsItem> ProcessOneCommand(string[] tokens, ref int index, Grod grod)
@@ -218,7 +216,7 @@ public partial class Dags
                     case "@exists(":
                         CheckParameterCount(p, 1);
                         value = grod.Get(p[0].Value, true);
-                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(!IsNull(value))));
+                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(!IsNullOrEmpty(value))));
                         break;
                     case "@false(":
                         CheckParameterCount(p, 1);
@@ -229,11 +227,14 @@ public partial class Dags
                         HandleFor(p, tokens, ref index, grod, result);
                         break;
                     case "@foreachkey(":
-                        CheckParameterCount(p, 3);
+                        if (p.Count != 2 && p.Count != 3)
+                        {
+                            CheckParameterCount(p, 3);
+                        }
                         HandleForEachKey(p, tokens, ref index, grod, result);
                         break;
                     case "@foreachlist(":
-                        CheckParameterCount(p, 3);
+                        CheckParameterCount(p, 2);
                         HandleForEachList(p, tokens, ref index, grod, result);
                         break;
                     case "@format(":
@@ -280,6 +281,16 @@ public partial class Dags
                         int1 = GetIntValue(p[1].Value);
                         int2 = GetIntValue(p[2].Value);
                         value = GetArrayItem(grod, p[0].Value, int1, int2);
+                        result.Add(new DagsItem(DagsType.Internal, value ?? ""));
+                        break;
+                    case "@getlist(":
+                        CheckParameterCount(p, 2);
+                        if (string.IsNullOrWhiteSpace(p[0].Value))
+                        {
+                            throw new SystemException("List name cannot be blank");
+                        }
+                        int1 = GetIntValue(p[1].Value);
+                        value = GetListItem(grod, p[0].Value, int1);
                         result.Add(new DagsItem(DagsType.Internal, value ?? ""));
                         break;
                     case "@getvalue(":
@@ -434,7 +445,12 @@ public partial class Dags
                         break;
                     case "@null(":
                         CheckParameterCount(p, 1);
-                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(IsNull(p[0].Value))));
+                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(IsNullOrEmpty(p[0].Value))));
+                        break;
+                    case "@removeatlist(":
+                        CheckParameterCount(p, 2);
+                        int1 = GetIntValue(p[1].Value);
+                        RemoveAtListItem(grod, p[0].Value, int1);
                         break;
                     case "@script(":
                         CheckParameterCount(p, 1);
@@ -448,6 +464,11 @@ public partial class Dags
                     case "@set(":
                         CheckParameterCount(p, 2);
                         grod.Set(p[0].Value, p[1].Value);
+                        break;
+                    case "@setlist(":
+                        CheckParameterCount(p, 3);
+                        int1 = GetIntValue(p[1].Value);
+                        SetListItem(grod, p[0].Value, int1, p[2].Value);
                         break;
                     case "@setoutchannel(":
                         CheckParameterCount(p, 1);
@@ -514,42 +535,5 @@ public partial class Dags
             result.Add(new DagsItem(DagsType.Error, error.ToString()));
             return result;
         }
-    }
-
-    private static string? GetArrayItem(Grod grod, string key, int y, int x)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new SystemException("Key cannot be null or empty.");
-        }
-        if (y < 0 || x < 0)
-        {
-            throw new SystemException($"Array indexes cannot be negative: {key}: {y},{x}");
-        }
-        var itemKey = $"{key}:{y}";
-        return GetListItem(grod, itemKey, x);
-    }
-
-    private static string? GetListItem(Grod grod, string key, int x)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new SystemException("Key cannot be null or empty.");
-        }
-        if (x < 0)
-        {
-            throw new SystemException($"List indexes cannot be negative: {key}: {x}");
-        }
-        var list = grod.Get(key, true);
-        if (string.IsNullOrWhiteSpace(list) || IsNull(list))
-        {
-            return null;
-        }
-        var items = list.Split(',');
-        if (x >= items.Length)
-        {
-            return null;
-        }
-        return FixListItemOut(items[x]);
     }
 }

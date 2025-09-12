@@ -27,7 +27,7 @@ public partial class Dags
                     }
                     else
                     {
-                        result.Add(TrimQuotes(token.ToString()));
+                        result.Add(token.ToString());
                     }
                     token.Clear();
                     inQuote = false;
@@ -343,7 +343,7 @@ public partial class Dags
             }
             else
             {
-                parameters.Add(new DagsItem(DagsType.Internal, token));
+                parameters.Add(new DagsItem(DagsType.Internal, TrimQuotes(token)));
                 index++;
             }
             if (index < tokens.Length)
@@ -464,6 +464,11 @@ public partial class Dags
         return value == null || value.Equals(NULL, OIC);
     }
 
+    private static bool IsNullOrEmpty(string? value)
+    {
+        return value == null || value.Equals(NULL, OIC) || value == "";
+    }
+
     private static string TrueFalse(bool value)
     {
         return value ? TRUE : FALSE;
@@ -531,5 +536,90 @@ public partial class Dags
         if (value.Contains(COMMA_UTF))
             value = value.Replace(COMMA_UTF, ",");
         return value;
+    }
+
+    private static string? GetArrayItem(Grod grod, string key, int y, int x)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (y < 0 || x < 0)
+        {
+            throw new SystemException($"Array indexes cannot be negative: {key}: {y},{x}");
+        }
+        var itemKey = $"{key}:{y}";
+        return GetListItem(grod, itemKey, x);
+    }
+
+    private static string? GetListItem(Grod grod, string key, int x)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (x < 0)
+        {
+            throw new SystemException($"List indexes cannot be negative: {key}: {x}");
+        }
+        var list = grod.Get(key, true);
+        if (string.IsNullOrWhiteSpace(list) || IsNull(list))
+        {
+            return null;
+        }
+        var items = list.Split(',');
+        if (x >= items.Length)
+        {
+            return null;
+        }
+        return FixListItemOut(items[x]);
+    }
+
+    private static void SetListItem(Grod grod, string key, int x, string value)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (x < 0)
+        {
+            throw new SystemException($"List indexes cannot be negative: {key}: {x}");
+        }
+        var list = grod.Get(key, true);
+        if (string.IsNullOrWhiteSpace(list) || IsNull(list))
+        {
+            list = NULL;
+        }
+        var items = list.Split(',').ToList();
+        while (x >= items.Count)
+        {
+            items.Add(NULL);
+        }
+        items[x] = FixListItemIn(value);
+        grod.Set(key, string.Join(',', items));
+    }
+
+    private static void RemoveAtListItem(Grod grod, string key, int x)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (x < 0)
+        {
+            throw new SystemException($"List indexes cannot be negative: {key}: {x}");
+        }
+        var list = grod.Get(key, true);
+        if (string.IsNullOrWhiteSpace(list) || IsNull(list))
+        {
+            list = NULL;
+        }
+        var items = list.Split(',').ToList();
+        while (x >= items.Count)
+        {
+            return; // Nothing to remove
+        }
+        items.RemoveAt(x);
+        grod.Set(key, string.Join(',', items));
     }
 }
