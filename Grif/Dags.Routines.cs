@@ -36,7 +36,7 @@ public partial class Dags
                 }
                 if (c == '"' && lastSlash)
                 {
-                    token.Append("\\\\\"");
+                    token.Append("\\\"");
                     lastSlash = false;
                     continue;
                 }
@@ -377,6 +377,11 @@ public partial class Dags
         return value;
     }
 
+    private static string AddQuotes(string value)
+    {
+        return "\"" + value.Replace("\"", "\\\"") + "\"";
+    }
+
     private static void CheckParameterCount(List<DagsItem> p, int count)
     {
         if (p.Count != count)
@@ -552,6 +557,20 @@ public partial class Dags
         return GetListItem(grod, itemKey, x);
     }
 
+    private static void SetArrayItem(Grod grod, string key, int y, int x, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (y < 0 || x < 0)
+        {
+            throw new SystemException($"Array indexes cannot be negative: {key}: {y},{x}");
+        }
+        var itemKey = $"{key}:{y}";
+        SetListItem(grod, itemKey, x, value);
+    }
+
     private static string? GetListItem(Grod grod, string key, int x)
     {
         if (string.IsNullOrWhiteSpace(key))
@@ -575,7 +594,7 @@ public partial class Dags
         return FixListItemOut(items[x]);
     }
 
-    private static void SetListItem(Grod grod, string key, int x, string value)
+    private static void SetListItem(Grod grod, string key, int x, string? value)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -596,6 +615,30 @@ public partial class Dags
             items.Add(NULL);
         }
         items[x] = FixListItemIn(value);
+        grod.Set(key, string.Join(',', items));
+    }
+
+    private static void InsertAtListItem(Grod grod, string key, int x, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new SystemException("Key cannot be null or empty.");
+        }
+        if (x < 0)
+        {
+            throw new SystemException($"List indexes cannot be negative: {key}: {x}");
+        }
+        var list = grod.Get(key, true);
+        if (string.IsNullOrWhiteSpace(list) || IsNull(list))
+        {
+            list = NULL;
+        }
+        var items = list.Split(',').ToList();
+        while (x >= items.Count)
+        {
+            items.Add(NULL);
+        }
+        items.Insert(x, FixListItemIn(value));
         grod.Set(key, string.Join(',', items));
     }
 

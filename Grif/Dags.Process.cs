@@ -11,6 +11,7 @@ public partial class Dags
         string? value;
         int int1, int2;
         int intAnswer;
+        bool boolAnswer;
         try
         {
             if (index >= tokens.Length)
@@ -220,7 +221,15 @@ public partial class Dags
                         break;
                     case "@false(":
                         CheckParameterCount(p, 1);
-                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(!IsTrue(p[0].Value))));
+                        try
+                        {
+                            boolAnswer = IsTrue(p[0].Value);
+                            result.Add(new DagsItem(DagsType.Internal, TrueFalse(!boolAnswer)));
+                        }
+                        catch (Exception)
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, TrueFalse(false)));
+                        }
                         break;
                     case "@for(":
                         CheckParameterCount(p, 3);
@@ -283,6 +292,21 @@ public partial class Dags
                         value = GetArrayItem(grod, p[0].Value, int1, int2);
                         result.Add(new DagsItem(DagsType.Internal, value ?? ""));
                         break;
+                    case "@getbit(":
+                        CheckParameterCount(p, 2);
+                        int1 = GetIntValue(p[0].Value);
+                        int2 = GetIntValue(p[1].Value);
+                        if (int1 < 0 || int2 < 0 || int2 > 30)
+                        {
+                            throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        }
+                        intAnswer = int1 & (int)Math.Pow(2, int2);
+                        if (intAnswer != 0)
+                        {
+                            intAnswer = 1;
+                        }
+                        result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
+                        break;
                     case "@getlist(":
                         CheckParameterCount(p, 2);
                         if (string.IsNullOrWhiteSpace(p[0].Value))
@@ -297,6 +321,16 @@ public partial class Dags
                         CheckParameterCount(p, 1);
                         value = GetValue(grod, grod.Get(p[0].Value, true));
                         result.Add(new DagsItem(DagsType.Internal, value));
+                        break;
+                    case "@golabel(":
+                        CheckParameterCount(p, 1);
+                        for (int i = 0; i < tokens.Length - 1; i++)
+                        {
+                            if (tokens[i] == "@label(" && tokens[i + 1] == p[0].Value && tokens[i + 2] == ")")
+                            {
+                                index = i + 3;
+                            }
+                        }
                         break;
                     case "@gt(":
                         CheckParameterCount(p, 2);
@@ -317,6 +351,34 @@ public partial class Dags
                         {
                             result.Add(new DagsItem(DagsType.Internal,
                                 TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) > 0)));
+                        }
+                        break;
+                    case "@insertatlist(":
+                        CheckParameterCount(p, 3);
+                        int1 = GetIntValue(p[1].Value);
+                        InsertAtListItem(grod, p[0].Value, int1, p[2].Value);
+                        break;
+                    case "@isbool(":
+                        CheckParameterCount(p, 1);
+                        try
+                        {
+                            boolAnswer = IsTrue(p[0].Value);
+                            result.Add(new DagsItem(DagsType.Internal, TRUE));
+                        }
+                        catch (Exception)
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, FALSE));
+                        }
+                        break;
+                    case "@isnumber(":
+                        CheckParameterCount(p, 1);
+                        if (int.TryParse(p[0].Value, out _))
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, TRUE));
+                        }
+                        else
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, FALSE));
                         }
                         break;
                     case "@isscript(":
@@ -355,6 +417,27 @@ public partial class Dags
                                 TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) <= 0)));
                         }
                         break;
+                    case "@listlength(":
+                        CheckParameterCount(p, 1);
+                        if (string.IsNullOrWhiteSpace(p[0].Value))
+                        {
+                            throw new SystemException($"{token}): List name cannot be blank");
+                        }
+                        value = grod.Get(p[0].Value, true);
+                        if (IsNullOrEmpty(value))
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, "0"));
+                        }
+                        else
+                        {
+                            var listItems = value!.Split(',');
+                            result.Add(new DagsItem(DagsType.Internal, listItems.Length.ToString()));
+                        }
+                        break;
+                    case "@lower(":
+                        CheckParameterCount(p, 1);
+                        result.Add(new DagsItem(DagsType.Internal, p[0].Value.ToLower()));
+                        break;
                     case "@lt(":
                         CheckParameterCount(p, 2);
                         if (IsNull(p[0].Value) && !IsNull(p[1].Value))
@@ -392,8 +475,18 @@ public partial class Dags
                         break;
                     case "@msg(":
                         CheckParameterCount(p, 1);
-                        value = GetValue(grod, grod.Get(p[0].Value, true));
-                        result.Add(new DagsItem(DagsType.Text, value));
+                        var tempResult = Dags.Process(grod, grod.Get(p[0].Value, true));
+                        foreach (var msgItem in tempResult)
+                        {
+                            if (msgItem.Type == DagsType.Text || msgItem.Type == DagsType.Internal)
+                            {
+                                value = msgItem.Value;
+                                if (!string.IsNullOrEmpty(value)) // whitespace is allowed
+                                {
+                                    result.Add(new DagsItem(DagsType.Text, value));
+                                }
+                            }
+                        }
                         result.Add(new DagsItem(DagsType.Text, NL));
                         break;
                     case "@mul(":
@@ -447,10 +540,26 @@ public partial class Dags
                         CheckParameterCount(p, 1);
                         result.Add(new DagsItem(DagsType.Internal, TrueFalse(IsNullOrEmpty(p[0].Value))));
                         break;
+                    case "@rand(":
+                        CheckParameterCount(p, 1);
+                        int1 = GetIntValue(p[0].Value);
+                        int2 = _random.Next(100);
+                        boolAnswer = int2 < int1;
+                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(boolAnswer)));
+                        break;
                     case "@removeatlist(":
                         CheckParameterCount(p, 2);
                         int1 = GetIntValue(p[1].Value);
                         RemoveAtListItem(grod, p[0].Value, int1);
+                        break;
+                    case "@replace(":
+                        CheckParameterCount(p, 3);
+                        result.Add(new DagsItem(DagsType.Internal, p[0].Value.Replace(p[1].Value, p[2].Value, OIC)));
+                        break;
+                    case "@rnd(":
+                        CheckParameterCount(p, 1);
+                        int1 = GetIntValue(p[0].Value);
+                        result.Add(new DagsItem(DagsType.Internal, _random.Next(int1).ToString()));
                         break;
                     case "@script(":
                         CheckParameterCount(p, 1);
@@ -464,6 +573,27 @@ public partial class Dags
                     case "@set(":
                         CheckParameterCount(p, 2);
                         grod.Set(p[0].Value, p[1].Value);
+                        break;
+                    case "@setarray(":
+                        CheckParameterCount(p, 4);
+                        if (string.IsNullOrWhiteSpace(p[0].Value))
+                        {
+                            throw new SystemException("Array name cannot be blank");
+                        }
+                        int1 = GetIntValue(p[1].Value); // y
+                        int2 = GetIntValue(p[2].Value); // x
+                        SetArrayItem(grod, p[0].Value, int1, int2, p[3].Value);
+                        break;
+                    case "@setbit(":
+                        CheckParameterCount(p, 2);
+                        int1 = GetIntValue(p[0].Value);
+                        int2 = GetIntValue(p[1].Value);
+                        if (int1 < 0 || int2 < 0 || int2 > 30)
+                        {
+                            throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        }
+                        intAnswer = int1 | (int)Math.Pow(2, int2);
+                        result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
                         break;
                     case "@setlist(":
                         CheckParameterCount(p, 3);
@@ -481,6 +611,16 @@ public partial class Dags
                         int1 -= int2;
                         result.Add(new DagsItem(DagsType.Internal, int1.ToString()));
                         break;
+                    case "@substring(":
+                        CheckParameterCount(p, 3);
+                        int1 = GetIntValue(p[1].Value);
+                        int2 = GetIntValue(p[2].Value);
+                        if (int1 < 0 || int2 < 0 || int1 + int2 > p[0].Value.Length)
+                        {
+                            throw new SystemException($"{token}{p[0].Value},{int1},{int2}): Invalid parameters");
+                        }
+                        result.Add(new DagsItem(DagsType.Internal, p[0].Value.Substring(int1, int2)));
+                        break;
                     case "@subto(":
                         CheckParameterCount(p, 2);
                         int1 = GetIntValue(grod.Get(p[0].Value, true));
@@ -488,9 +628,41 @@ public partial class Dags
                         int1 -= int2;
                         grod.Set(p[0].Value, int1.ToString());
                         break;
+                    case "@swap(":
+                        CheckParameterCount(p, 2);
+                        value = grod.Get(p[0].Value, true);
+                        grod.Set(p[0].Value, grod.Get(p[1].Value, true));
+                        grod.Set(p[1].Value, value);
+                        break;
+                    case "@tobinary(":
+                        CheckParameterCount(p, 1);
+                        int1 = GetIntValue(p[0].Value);
+                        result.Add(new DagsItem(DagsType.Internal, Convert.ToString(int1, 2)));
+                        break;
+                    case "@tointeger(":
+                        CheckParameterCount(p, 1);
+                        int1 = Convert.ToInt32(p[0].Value, 2);
+                        result.Add(new DagsItem(DagsType.Internal, int1.ToString()));
+                        break;
+                    case "@trim(":
+                        CheckParameterCount(p, 1);
+                        result.Add(new DagsItem(DagsType.Internal, p[0].Value.Trim()));
+                        break;
                     case "@true(":
                         CheckParameterCount(p, 1);
-                        result.Add(new DagsItem(DagsType.Internal, TrueFalse(IsTrue(p[0].Value))));
+                        try
+                        {
+                            boolAnswer = IsTrue(p[0].Value);
+                            result.Add(new DagsItem(DagsType.Internal, TrueFalse(boolAnswer)));
+                        }
+                        catch (Exception)
+                        {
+                            result.Add(new DagsItem(DagsType.Internal, TrueFalse(false)));
+                        }
+                        break;
+                    case "@upper(":
+                        CheckParameterCount(p, 1);
+                        result.Add(new DagsItem(DagsType.Internal, p[0].Value.ToUpper()));
                         break;
                     case "@write(":
                         CheckParameterAtLeastOne(p);

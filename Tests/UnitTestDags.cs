@@ -526,7 +526,7 @@ public class UnitTestDags
     public void Test_Rand()
     {
         result = Dags.Process(grod, "@rand(30)");
-        Assert.That(result.ToString() == "true" || result.ToString() == "false");
+        Assert.That(result[0].Value == "true" || result[0].Value == "false");
     }
 
     [Test]
@@ -606,6 +606,8 @@ public class UnitTestDags
         Assert.That(Squash(result), Is.EqualTo("false"));
         result = Dags.Process(grod, "@write(@true(1))");
         Assert.That(Squash(result), Is.EqualTo("true"));
+        result = Dags.Process(grod, "@write(@true(abc))");
+        Assert.That(Squash(result), Is.EqualTo("false"));
     }
 
     [Test]
@@ -728,7 +730,7 @@ public class UnitTestDags
         result = Dags.Process(grod, $"@isnumber({value2})");
         Assert.That(Squash(result), Is.EqualTo("false"));
         result = Dags.Process(grod, $"@isnumber({value3})");
-        Assert.That(Squash(result)[..5], Is.EqualTo("ERROR"));
+        Assert.That(result[0].Type, Is.EqualTo(DagsType.Error));
     }
 
     [Test]
