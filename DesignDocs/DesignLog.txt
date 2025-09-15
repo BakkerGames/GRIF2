@@ -113,3 +113,15 @@
 - Fixed Grod keys to be case insensitive
 - Fixed Grod to have recursive Clear and Remove
 - Added Grod.ContainsKey and Grod.ContainsKey
+
+2025-09-11
+- Fixed Cloak of Darkness "examine hook".
+- Working on unit tests. Added all from GRIF.
+
+2025-09-12
+- All unit tests working! All required functions added.
+
+2025-09-14
+- Working on RenderOutput, so it can be interleaved.
+- Added WriteOutput. If writing to log file, add that in here.
+- Starting HandleOutchannel(). Only checks for game over.

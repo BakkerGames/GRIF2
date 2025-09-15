@@ -33,10 +33,11 @@ internal class Program
 
     private static void RunGame(Grod grod)
     {
+        var gameOver = false;
+        int outputWidth = 0;
+        int currPos = 0;
         try
         {
-            var gameOver = false;
-            int outputWidth = 0;
             if (int.TryParse(grod.Get("system.output_width", true), out int ow))
             {
                 outputWidth = ow;
@@ -45,8 +46,7 @@ internal class Program
             if (!string.IsNullOrWhiteSpace(intro))
             {
                 var introOutput = Dags.Process(grod, intro);
-                var textOutput = RenderOutput(introOutput, outputWidth, ref gameOver);
-                Console.Write(textOutput.ToString());
+                RenderOutput(introOutput, outputWidth, ref currPos, ref gameOver);
             }
             while (!gameOver)
             {
@@ -57,32 +57,28 @@ internal class Program
                 {
                     var bgValue = grod.Get(bgKey, true) ?? "";
                     var bgProcess = Dags.Process(grod, bgValue);
-                    var bgOutput = RenderOutput(bgProcess, outputWidth, ref gameOver);
-                    Console.Write(bgOutput);
+                    RenderOutput(bgProcess, outputWidth, ref currPos, ref gameOver);
                     if (gameOver) { return; }
                 }
                 // prompt
                 var prompt = grod.Get("system.prompt", true) ?? "> ";
                 var promptProcess = Dags.Process(grod, prompt);
-                var promptOutput = RenderOutput(promptProcess, outputWidth, ref gameOver);
-                Console.Write(promptOutput);
+                RenderOutput(promptProcess, outputWidth, ref currPos, ref gameOver);
                 // input
                 var input = Console.ReadLine() ?? "";
                 // after prompt
                 var afterPrompt = grod.Get("system.after_prompt", true) ?? "";
                 var afterProcess = Dags.Process(grod, afterPrompt);
-                var afterOutput = RenderOutput(afterProcess, outputWidth, ref gameOver);
-                Console.Write(afterOutput);
+                RenderOutput(afterProcess, outputWidth, ref currPos, ref gameOver);
                 // process input
                 var parsed = ParseInput(input, grod);
                 var output = Dags.ProcessItems(grod, parsed);
-                var textOutput = RenderOutput(output, outputWidth, ref gameOver);
-                Console.Write(textOutput);
+                RenderOutput(output, outputWidth, ref currPos, ref gameOver);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Fatal error: {ex.Message}");
+            WriteOutput($"\\nFatal error: {ex.Message}", outputWidth, ref currPos);
         }
     }
 }

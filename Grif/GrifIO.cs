@@ -113,98 +113,114 @@ public static class GrifIO
     /// <summary>
     /// Renders the output from Dags.Process into a single string.
     /// </summary>
-    public static string RenderOutput(List<DagsItem> items, int outputWidth, ref bool gameOver)
+    public static void RenderOutput(List<DagsItem> items, int outputWidth, ref int currPos, ref bool gameOver)
     {
-        StringBuilder output = new();
         foreach (var item in items)
         {
             switch (item.Type)
             {
                 case DagsType.Text:
                     var tempLine = HandleText(item.Value);
-                    output.Append(tempLine);
+                    WriteOutput(tempLine, outputWidth, ref currPos);
                     break;
                 case DagsType.Internal:
-                    output.AppendLine($"INTERNAL: {HandleText(item.Value)}");
+                    WriteOutput($"INTERNAL: {HandleText(item.Value)}", outputWidth, ref currPos);
                     break;
                 case DagsType.Error:
-                    output.AppendLine($"ERROR: {HandleText(item.Value)}");
+                    WriteOutput($"ERROR: {HandleText(item.Value)}", outputWidth, ref currPos);
                     break;
                 case DagsType.OutChannel:
-                    if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
-                    {
-                        gameOver = true;
-                        break;
-                    }
-                    output.AppendLine($"OUTCHANNEL: {HandleText(item.Value)}");
+                    HandleOutChannel(item, outputWidth, ref currPos, ref gameOver);
                     break;
                 default:
-                    output.AppendLine($"Unknown Item Type: {item.Type}");
-                    output.AppendLine($"Value: {HandleText(item.Value)}");
+                    WriteOutput($"Unknown Item Type: {item.Type}", outputWidth, ref currPos);
+                    WriteOutput($"Value: {HandleText(item.Value)}", outputWidth, ref currPos);
                     break;
             }
+            if (gameOver)
+            {
+                break;
+            }
         }
-        if (outputWidth > 0)
+    }
+
+    public static void WriteOutput(string value, int outputWidth, ref int currPos)
+    {
+        if (outputWidth <= 0)
         {
-            var tempOutput = output.ToString();
-            output.Clear();
-            while (tempOutput.Length > outputWidth)
+            Console.Write(value);
+        }
+        var tempOutput = value;
+        var output = new StringBuilder();
+        output.Clear();
+        while (currPos + tempOutput.Length > outputWidth)
+        {
+            var pos = tempOutput.IndexOf('\n');
+            if (pos >= 0 && pos <= outputWidth)
             {
-                var pos = tempOutput.IndexOf('\n');
-                if (pos >= 0 && pos <= outputWidth)
+                var temp1 = tempOutput[..(pos + 1)];
+                output.Append(temp1);
+                currPos = 0;
+                if (pos + 1 >= tempOutput.Length)
                 {
-                    var temp1 = tempOutput[..(pos + 1)];
-                    output.Append(temp1);
-                    if (pos + 1 >= tempOutput.Length)
-                    {
-                        tempOutput = "";
-                    }
-                    else
-                    {
-                        tempOutput = tempOutput[(pos + 1)..];
-                    }
-                    continue;
+                    tempOutput = "";
                 }
-                pos = tempOutput.IndexOf(' ');
-                if (pos >= 0 && pos <= outputWidth)
+                else
                 {
-                    pos = tempOutput.LastIndexOf(' ', outputWidth);
-                    var temp2 = tempOutput[..(pos + 1)].TrimEnd();
-                    output.Append(temp2);
-                    output.Append('\n');
-                    if (pos + 1 >= tempOutput.Length)
-                    {
-                        tempOutput = "";
-                    }
-                    else
-                    {
-                        tempOutput = tempOutput[(pos + 1)..];
-                    }
-                    continue;
+                    tempOutput = tempOutput[(pos + 1)..];
                 }
-                if (tempOutput.Length > outputWidth)
-                {
-                    output.Append(tempOutput[..outputWidth]);
-                    output.Append('\n');
-                    if (outputWidth >= tempOutput.Length)
-                    {
-                        tempOutput = "";
-                    }
-                    else
-                    {
-                        tempOutput = tempOutput[outputWidth..];
-                    }
-                    continue;
-                }
-                output.Append(tempOutput);
-                tempOutput = "";
+                continue;
             }
-            if (tempOutput.Length > 0)
+            pos = tempOutput.IndexOf(' ');
+            if (pos >= 0 && pos + currPos <= outputWidth)
             {
-                output.Append(tempOutput);
+                pos = tempOutput.LastIndexOf(' ', outputWidth);
+                var temp2 = tempOutput[..(pos + 1)].TrimEnd();
+                output.Append(temp2);
+                output.Append('\n');
+                currPos = 0;
+                if (pos + 1 >= tempOutput.Length)
+                {
+                    tempOutput = "";
+                }
+                else
+                {
+                    tempOutput = tempOutput[(pos + 1)..];
+                }
+                continue;
+            }
+            if (tempOutput.Length > outputWidth)
+            {
+                output.Append(tempOutput[..outputWidth]);
+                output.Append('\n');
+                currPos = 0;
+                if (outputWidth >= tempOutput.Length)
+                {
+                    tempOutput = "";
+                }
+                else
+                {
+                    tempOutput = tempOutput[outputWidth..];
+                }
+                continue;
+            }
+            output.Append(tempOutput);
+            currPos += tempOutput.Length;
+            tempOutput = "";
+        }
+        if (tempOutput.Length > 0)
+        {
+            output.Append(tempOutput);
+            if (tempOutput.Contains('\n'))
+            {
+                currPos = tempOutput.Length - tempOutput.LastIndexOf('\n') - 1;
+            }
+            else
+            {
+                currPos += tempOutput.Length;
             }
         }
-        return output.ToString();
+        Console.Write(output.ToString());
     }
 
     /// <summary>
@@ -324,15 +340,13 @@ public static class GrifIO
         return output.ToString();
     }
 
-    public static void HandleOutChannel(List<DagsItem> items)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter")]
+    public static void HandleOutChannel(DagsItem item, int outputWidth, ref int currPos, ref bool gameOver)
     {
-        foreach (var item in items)
+        if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
         {
-            if (item.Type != DagsType.OutChannel)
-            {
-                continue;
-            }
-            // ...
+            gameOver = true;
+            return;
         }
     }
 }

@@ -2,7 +2,16 @@
   "profiles": {
     "Grif": {
       "commandName": "Project",
+      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+    },
+    "Cloak of Darkness": {
+      "commandName": "Project",
       "commandLineArgs": "\"CloakOfDarkness\\CloakOfDarkness.grif\"",
+      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+    },
+    "TicTacToe": {
+      "commandName": "Project",
+      "commandLineArgs": "\"TicTacToe\\TicTacToe.grif\"",
       "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
     }
   }
