@@ -464,12 +464,12 @@ public partial class Dags
         return userResult;
     }
 
-    private static bool IsNull(string? value)
+    public static bool IsNull(string? value)
     {
         return value == null || value.Equals(NULL, OIC);
     }
 
-    private static bool IsNullOrEmpty(string? value)
+    public static bool IsNullOrEmpty(string? value)
     {
         return value == null || value.Equals(NULL, OIC) || value == "";
     }

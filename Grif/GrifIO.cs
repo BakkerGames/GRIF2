@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using static Grif.Common;
+using static Grif.Parser;
 
 namespace Grif;
 
@@ -113,7 +114,7 @@ public static class GrifIO
     /// <summary>
     /// Renders the output from Dags.Process into a single string.
     /// </summary>
-    public static void RenderOutput(List<DagsItem> items, int outputWidth, ref int currPos, ref bool gameOver)
+    public static void RenderOutput(Grod grod, List<DagsItem> items, int outputWidth, ref int currPos, ref bool gameOver)
     {
         foreach (var item in items)
         {
@@ -130,7 +131,7 @@ public static class GrifIO
                     WriteOutput($"ERROR: {HandleText(item.Value)}", outputWidth, ref currPos);
                     break;
                 case DagsType.OutChannel:
-                    HandleOutChannel(item, outputWidth, ref currPos, ref gameOver);
+                    HandleOutChannel(grod, item, outputWidth, ref currPos, ref gameOver);
                     break;
                 default:
                     WriteOutput($"Unknown Item Type: {item.Type}", outputWidth, ref currPos);
@@ -149,6 +150,7 @@ public static class GrifIO
         if (outputWidth <= 0)
         {
             Console.Write(value);
+            return;
         }
         var tempOutput = value;
         var output = new StringBuilder();
@@ -224,7 +226,8 @@ public static class GrifIO
     }
 
     /// <summary>
-    /// Interpret escape sequences. Handles "\s" as space and "\"" as a literal quote. Handles unicode escape sequences "\uXXXX".
+    /// Interpret escape sequences. Handles "\s" as space and "\"" as a literal quote.
+    /// Handles unicode escape sequences "\uXXXX".
     /// </summary>
     public static string HandleText(string value)
     {
@@ -340,13 +343,45 @@ public static class GrifIO
         return output.ToString();
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter")]
-    public static void HandleOutChannel(DagsItem item, int outputWidth, ref int currPos, ref bool gameOver)
+    public static void Prompt(Grod grod, int outputWidth, ref int currPos, ref bool gameOver)
+    {
+        var prompt = grod.Get("system.prompt", true) ?? "> ";
+        var promptProcess = Dags.Process(grod, prompt);
+        RenderOutput(grod, promptProcess, outputWidth, ref currPos, ref gameOver);
+    }
+
+    public static void AfterPrompt(Grod grod, int outputWidth, ref int currPos, ref bool gameOver)
+    {
+        var afterPrompt = grod.Get("system.after_prompt", true) ?? "";
+        var afterProcess = Dags.Process(grod, afterPrompt);
+        RenderOutput(grod, afterProcess, outputWidth, ref currPos, ref gameOver);
+    }
+
+    public static void HandleOutChannel(Grod grod, DagsItem item, int outputWidth, ref int currPos, ref bool gameOver)
     {
         if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
         {
             gameOver = true;
             return;
         }
+        if (item.Value.Equals(OUTCHANNEL_ASK, OIC))
+        {
+            Prompt(grod, outputWidth, ref currPos, ref gameOver);
+            var input = Console.ReadLine() ?? "";
+            AfterPrompt(grod, outputWidth, ref currPos, ref gameOver);
+            if (!Dags.IsNull(grod.Get(INCHANNEL, false)))
+            {
+                throw new Exception("DagsInChannel value is not empty.");
+            }
+            grod.Set(INCHANNEL, input);
+            return;
+        }
+        if (item.Value.StartsWith('@'))
+        {
+            var output = Dags.ProcessItems(grod, [new DagsItem(DagsType.Internal, item.Value)]);
+            RenderOutput(grod, output, outputWidth, ref currPos, ref gameOver);
+            return;
+        }
+        throw new Exception($"Unknown OutChannel command {item.Value}");
     }
 }

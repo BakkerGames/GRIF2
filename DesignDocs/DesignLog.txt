@@ -125,3 +125,7 @@
 - Working on RenderOutput, so it can be interleaved.
 - Added WriteOutput. If writing to log file, add that in here.
 - Starting HandleOutchannel(). Only checks for game over.
+
+2025-09-16
+- OutChannel ASK and run script.
+- Moved Prompt and AfterPrompt to their own routines.

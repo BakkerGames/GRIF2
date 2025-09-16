@@ -6,7 +6,7 @@ namespace Grif;
 
 internal class Program
 {
-    private const string _version = "2.2025.0908";
+    private const string _version = "2.2025.0916";
 
     public static string Version => _version;
 
@@ -46,7 +46,7 @@ internal class Program
             if (!string.IsNullOrWhiteSpace(intro))
             {
                 var introOutput = Dags.Process(grod, intro);
-                RenderOutput(introOutput, outputWidth, ref currPos, ref gameOver);
+                RenderOutput(grod, introOutput, outputWidth, ref currPos, ref gameOver);
             }
             while (!gameOver)
             {
@@ -57,23 +57,17 @@ internal class Program
                 {
                     var bgValue = grod.Get(bgKey, true) ?? "";
                     var bgProcess = Dags.Process(grod, bgValue);
-                    RenderOutput(bgProcess, outputWidth, ref currPos, ref gameOver);
+                    RenderOutput(grod, bgProcess, outputWidth, ref currPos, ref gameOver);
                     if (gameOver) { return; }
                 }
-                // prompt
-                var prompt = grod.Get("system.prompt", true) ?? "> ";
-                var promptProcess = Dags.Process(grod, prompt);
-                RenderOutput(promptProcess, outputWidth, ref currPos, ref gameOver);
                 // input
+                Prompt(grod, outputWidth, ref currPos, ref gameOver);
                 var input = Console.ReadLine() ?? "";
-                // after prompt
-                var afterPrompt = grod.Get("system.after_prompt", true) ?? "";
-                var afterProcess = Dags.Process(grod, afterPrompt);
-                RenderOutput(afterProcess, outputWidth, ref currPos, ref gameOver);
+                AfterPrompt(grod, outputWidth, ref currPos, ref gameOver);
                 // process input
-                var parsed = ParseInput(input, grod);
+                var parsed = ParseInput(grod, input);
                 var output = Dags.ProcessItems(grod, parsed);
-                RenderOutput(output, outputWidth, ref currPos, ref gameOver);
+                RenderOutput(grod, output, outputWidth, ref currPos, ref gameOver);
             }
         }
         catch (Exception ex)

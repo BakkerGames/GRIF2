@@ -4,7 +4,7 @@ namespace Grif;
 
 public static class Parser
 {
-    public static List<DagsItem> ParseInput(string input, Grod grod)
+    public static List<DagsItem> ParseInput(Grod grod, string input)
     {
         var result = new List<DagsItem>();
         string? verb;
