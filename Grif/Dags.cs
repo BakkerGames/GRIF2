@@ -15,7 +15,7 @@ public record DagsItem(DagsType Type, string Value);
 
 public partial class Dags
 {
-    private const string _version = "2.2025.0912";
+    private const string _version = "2.2025.0916";
 
     public static string Version => _version;
 

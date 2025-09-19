@@ -2,7 +2,7 @@
 
 namespace Grif;
 
-public static class Parser
+public static partial class Grif
 {
     public static List<DagsItem> ParseInput(Grod grod, string input)
     {
