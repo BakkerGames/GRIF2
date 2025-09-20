@@ -65,7 +65,8 @@ public partial class Grif
             {
                 // run background scripts
                 var backgroundKeys = grod.Keys(true, true)
-                    .Where(x => x.StartsWith("background.", OIC));
+                    .Where(x => x.StartsWith("background.", OIC))
+                    .ToList();
                 foreach (var bgKey in backgroundKeys)
                 {
                     var bgValue = grod.Get(bgKey, true) ?? "";

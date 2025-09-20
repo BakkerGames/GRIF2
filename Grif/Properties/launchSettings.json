@@ -16,7 +16,7 @@
     },
     "Castlequest": {
       "commandName": "Project",
-      "commandLineArgs": "\"..\\Castlequest_GRIF\\Castlequest.grif\" -i \"..\\Castlequest_GRIF\\Walkthrough\\happypath.txt\" -o \"..\\Castlequest_GRIF\\Walkthrough\\happypathtest.log\"",
+      "commandLineArgs": "\"..\\Castlequest_GRIF\\Castlequest.grif\" -i \"..\\Castlequest_GRIF\\Walkthrough\\happypath.txt\" -o \"..\\Castlequest_GRIF\\Walkthrough\\happypathtest.log\" -m \"..\\Castlequest_GRIF\\Mods\\norandom.grif\" -m \"..\\Castlequest_GRIF\\Mods\\corrections.grif\"",
       "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
     }
   }

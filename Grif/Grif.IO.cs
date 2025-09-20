@@ -357,13 +357,16 @@ public static partial class Grif
     public static string GetInput(Grod grod)
     {
         string result = "";
-        if (InputIndex < InputLines.Count)
+        while (InputIndex < InputLines.Count && string.IsNullOrWhiteSpace(result))
         {
-            result = InputLines[InputIndex++];
-            while (string.IsNullOrWhiteSpace(result) || result.StartsWith("//"))
+            result = InputLines[InputIndex++].Trim();
+            if (result.Contains("//"))
             {
-                result = InputLines[InputIndex++];
+                result = result[..result.IndexOf("//")].Trim();
             }
+        }
+        if (!string.IsNullOrWhiteSpace(result))
+        {
             Console.Write(result + Environment.NewLine);
         }
         while (string.IsNullOrWhiteSpace(result))

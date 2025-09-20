@@ -46,6 +46,12 @@ public static partial class Grif
         if (noun != null)
         {
             command += $".{noun}";
+            if (grod.Get(command, true) == null && int.TryParse(nounWord, out int nounNumber))
+            {
+                command = $"command.{verb}.#"; // numeric noun
+                noun = "#";
+                nounWord = nounNumber.ToString();
+            }
             if (grod.Get(command, true) == null)
             {
                 command = $"command.{verb}.*"; // any noun
@@ -119,6 +125,10 @@ public static partial class Grif
                     return key.ToLower();
                 }
             }
+        }
+        if (int.TryParse(noun, out var number))
+        {
+            return "#"; // check if handled as generic number
         }
         return null;
     }
