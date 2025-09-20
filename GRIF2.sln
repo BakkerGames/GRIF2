@@ -29,6 +29,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CloakOfDarkness", "CloakOfDarkness", "{90D80F66-35A0-45DD-8CD6-B89E3F10CE53}"
 	ProjectSection(SolutionItems) = preProject
 		CloakOfDarkness\CloakOfDarkness.grif = CloakOfDarkness\CloakOfDarkness.grif
+		CloakOfDarkness\Input.txt = CloakOfDarkness\Input.txt
+		CloakOfDarkness\Output.txt = CloakOfDarkness\Output.txt
 		CloakOfDarkness\Specification.txt = CloakOfDarkness\Specification.txt
 	EndProjectSection
 EndProject

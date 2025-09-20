@@ -110,10 +110,7 @@ public static partial class Grif
         return items;
     }
 
-    /// <summary>
-    /// Renders the output from Dags.Process into a single string.
-    /// </summary>
-    public static void RenderOutput(Grod grod, List<DagsItem> items, int outputWidth, ref int currPos, ref bool gameOver)
+    public static void RenderOutput(Grod grod, List<DagsItem> items)
     {
         foreach (var item in items)
         {
@@ -121,47 +118,48 @@ public static partial class Grif
             {
                 case DagsType.Text:
                     var tempLine = HandleText(item.Value);
-                    WriteOutput(tempLine, outputWidth, ref currPos);
+                    WriteOutput(tempLine);
                     break;
                 case DagsType.Internal:
-                    WriteOutput($"INTERNAL: {HandleText(item.Value)}", outputWidth, ref currPos);
+                    WriteOutput($"INTERNAL: {HandleText(item.Value)}");
                     break;
                 case DagsType.Error:
-                    WriteOutput($"ERROR: {HandleText(item.Value)}", outputWidth, ref currPos);
+                    WriteOutput($"ERROR: {HandleText(item.Value)}");
                     break;
                 case DagsType.OutChannel:
-                    HandleOutChannel(grod, item, outputWidth, ref currPos, ref gameOver);
+                    HandleOutChannel(grod, item);
                     break;
                 default:
-                    WriteOutput($"Unknown Item Type: {item.Type}", outputWidth, ref currPos);
-                    WriteOutput($"Value: {HandleText(item.Value)}", outputWidth, ref currPos);
+                    WriteOutput($"Unknown Item Type: {item.Type}");
+                    WriteOutput($"Value: {HandleText(item.Value)}");
                     break;
             }
-            if (gameOver)
+            if (GameOver)
             {
                 break;
             }
         }
     }
 
-    public static void WriteOutput(string value, int outputWidth, ref int currPos)
+    public static void WriteOutput(string value)
     {
-        if (outputWidth <= 0)
+        if (OutputWidth <= 0)
         {
             Console.Write(value);
+            OutStream?.Write(value.Replace("\n", Environment.NewLine));
             return;
         }
         var tempOutput = value;
         var output = new StringBuilder();
         output.Clear();
-        while (currPos + tempOutput.Length > outputWidth)
+        while (CurrOutputPos + tempOutput.Length > OutputWidth)
         {
             var pos = tempOutput.IndexOf('\n');
-            if (pos >= 0 && pos <= outputWidth)
+            if (pos >= 0 && pos <= OutputWidth)
             {
                 var temp1 = tempOutput[..(pos + 1)];
                 output.Append(temp1);
-                currPos = 0;
+                CurrOutputPos = 0;
                 if (pos + 1 >= tempOutput.Length)
                 {
                     tempOutput = "";
@@ -173,13 +171,13 @@ public static partial class Grif
                 continue;
             }
             pos = tempOutput.IndexOf(' ');
-            if (pos >= 0 && pos + currPos <= outputWidth)
+            if (pos >= 0 && pos + CurrOutputPos <= OutputWidth)
             {
-                pos = tempOutput.LastIndexOf(' ', outputWidth);
+                pos = tempOutput.LastIndexOf(' ', OutputWidth);
                 var temp2 = tempOutput[..(pos + 1)].TrimEnd();
                 output.Append(temp2);
                 output.Append('\n');
-                currPos = 0;
+                CurrOutputPos = 0;
                 if (pos + 1 >= tempOutput.Length)
                 {
                     tempOutput = "";
@@ -190,23 +188,23 @@ public static partial class Grif
                 }
                 continue;
             }
-            if (tempOutput.Length > outputWidth)
+            if (tempOutput.Length > OutputWidth)
             {
-                output.Append(tempOutput[..outputWidth]);
+                output.Append(tempOutput[..OutputWidth]);
                 output.Append('\n');
-                currPos = 0;
-                if (outputWidth >= tempOutput.Length)
+                CurrOutputPos = 0;
+                if (OutputWidth >= tempOutput.Length)
                 {
                     tempOutput = "";
                 }
                 else
                 {
-                    tempOutput = tempOutput[outputWidth..];
+                    tempOutput = tempOutput[OutputWidth..];
                 }
                 continue;
             }
             output.Append(tempOutput);
-            currPos += tempOutput.Length;
+            CurrOutputPos += tempOutput.Length;
             tempOutput = "";
         }
         if (tempOutput.Length > 0)
@@ -214,22 +212,22 @@ public static partial class Grif
             output.Append(tempOutput);
             if (tempOutput.Contains('\n'))
             {
-                currPos = tempOutput.Length - tempOutput.LastIndexOf('\n') - 1;
+                CurrOutputPos = tempOutput.Length - tempOutput.LastIndexOf('\n') - 1;
             }
             else
             {
-                currPos += tempOutput.Length;
+                CurrOutputPos += tempOutput.Length;
             }
         }
         Console.Write(output.ToString());
+        OutStream?.Write(output.ToString().Replace("\n", Environment.NewLine));
     }
 
-    /// <summary>
-    /// Interpret escape sequences. Handles "\s" as space and "\"" as a literal quote.
-    /// Handles unicode escape sequences "\uXXXX".
-    /// </summary>
     public static string HandleText(string value)
     {
+        // Interpret escape sequences.
+        // Handles "\s" as space and "\"" as a literal quote.
+        // Handles unicode escape sequences "\uXXXX".
         StringBuilder output = new();
         StringBuilder unicodeDigits = new();
         var lastSlash = false;
@@ -342,17 +340,41 @@ public static partial class Grif
         return output.ToString();
     }
 
-    public static void Prompt(Grod grod, int outputWidth, ref int currPos, ref bool gameOver)
+    public static void Prompt(Grod grod)
     {
         var prompt = grod.Get("system.prompt", true) ?? "> ";
         var promptProcess = Dags.Process(grod, prompt);
-        RenderOutput(grod, promptProcess, outputWidth, ref currPos, ref gameOver);
+        RenderOutput(grod, promptProcess);
     }
 
-    public static void AfterPrompt(Grod grod, int outputWidth, ref int currPos, ref bool gameOver)
+    public static void AfterPrompt(Grod grod)
     {
         var afterPrompt = grod.Get("system.after_prompt", true) ?? "";
         var afterProcess = Dags.Process(grod, afterPrompt);
-        RenderOutput(grod, afterProcess, outputWidth, ref currPos, ref gameOver);
+        RenderOutput(grod, afterProcess);
+    }
+
+    public static string GetInput(Grod grod)
+    {
+        string result = "";
+        if (InputIndex < InputLines.Count)
+        {
+            result = InputLines[InputIndex++];
+            while (string.IsNullOrWhiteSpace(result) || result.StartsWith("//"))
+            {
+                result = InputLines[InputIndex++];
+            }
+            Console.Write(result + Environment.NewLine);
+        }
+        while (string.IsNullOrWhiteSpace(result))
+        {
+            result = Console.ReadLine() ?? "";
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                Prompt(grod);
+            }
+        }
+        OutStream?.Write(result.Replace("\n", Environment.NewLine) + Environment.NewLine);
+        return result;
     }
 }

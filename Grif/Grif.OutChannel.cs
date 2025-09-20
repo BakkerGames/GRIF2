@@ -4,18 +4,18 @@ namespace Grif;
 
 public static partial class Grif
 {
-    public static void HandleOutChannel(Grod grod, DagsItem item, int outputWidth, ref int currPos, ref bool gameOver)
+    public static void HandleOutChannel(Grod grod, DagsItem item)
     {
         if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
         {
-            gameOver = true;
+            GameOver = true;
             return;
         }
         if (item.Value.Equals(OUTCHANNEL_ASK, OIC))
         {
-            Prompt(grod, outputWidth, ref currPos, ref gameOver);
-            var input = Console.ReadLine() ?? "";
-            AfterPrompt(grod, outputWidth, ref currPos, ref gameOver);
+            Prompt(grod);
+            var input = GetInput(grod);
+            AfterPrompt(grod);
             if (!Dags.IsNull(grod.Get(INCHANNEL, false)))
             {
                 throw new Exception("DagsInChannel value is not empty.");
@@ -26,7 +26,7 @@ public static partial class Grif
         if (item.Value.StartsWith('@'))
         {
             var output = Dags.ProcessItems(grod, [new DagsItem(DagsType.Internal, item.Value)]);
-            RenderOutput(grod, output, outputWidth, ref currPos, ref gameOver);
+            RenderOutput(grod, output);
             return;
         }
         throw new Exception($"Unknown OutChannel command {item.Value}");

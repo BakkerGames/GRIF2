@@ -6,12 +6,17 @@
     },
     "Cloak of Darkness": {
       "commandName": "Project",
-      "commandLineArgs": "\"CloakOfDarkness\\CloakOfDarkness.grif\"",
+      "commandLineArgs": "\"CloakOfDarkness\\CloakOfDarkness.grif\" -i \"CloakOfDarkness\\Input.txt\" -o \"CloakOfDarkness\\Output.txt\"",
       "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
     },
     "TicTacToe": {
       "commandName": "Project",
       "commandLineArgs": "\"TicTacToe\\TicTacToe.grif\"",
+      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+    },
+    "Castlequest": {
+      "commandName": "Project",
+      "commandLineArgs": "\"..\\Castlequest_GRIF\\Castlequest.grif\" -i \"..\\Castlequest_GRIF\\Walkthrough\\happypath.txt\" -o \"..\\Castlequest_GRIF\\Walkthrough\\happypathtest.log\"",
       "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
     }
   }

@@ -1,0 +1,22 @@
+n
+e
+s
+n
+w
+w
+s
+inv
+examine cloak
+examine hook
+drop cloak
+inv
+hang cloak
+inv
+look
+examine hook
+e
+s
+w
+s
+e
+read message

@@ -132,3 +132,10 @@
 
 2025-09-18
 - Consolidated Grif routines into single class (but separate files)
+
+2025-09-20
+- Added Syntax().
+- Implemented all command-line options.
+- Implemented multiple files, mod files, output log, input lines.
+- Moved some Grif parameters to properties.
+- Added input, output on CloakOfDarkness
