@@ -357,9 +357,16 @@ public static partial class Grif
     public static string GetInput(Grod grod)
     {
         string result = "";
+        string resultRaw = "";
         while (InputIndex < InputLines.Count && string.IsNullOrWhiteSpace(result))
         {
-            result = InputLines[InputIndex++].Trim();
+            resultRaw = InputLines[InputIndex++].Trim();
+            if (resultRaw.StartsWith("//"))
+            {
+                Console.Write(resultRaw + Environment.NewLine);
+                OutStream?.Write(resultRaw.Replace("\n", Environment.NewLine) + Environment.NewLine);
+            }
+            result = resultRaw.Trim();
             if (result.Contains("//"))
             {
                 result = result[..result.IndexOf("//")].Trim();
@@ -367,7 +374,7 @@ public static partial class Grif
         }
         if (!string.IsNullOrWhiteSpace(result))
         {
-            Console.Write(result + Environment.NewLine);
+            Console.Write(resultRaw + Environment.NewLine);
         }
         while (string.IsNullOrWhiteSpace(result))
         {
@@ -377,7 +384,7 @@ public static partial class Grif
                 Prompt(grod);
             }
         }
-        OutStream?.Write(result.Replace("\n", Environment.NewLine) + Environment.NewLine);
+        OutStream?.Write(resultRaw.Replace("\n", Environment.NewLine) + Environment.NewLine);
         return result;
     }
 }

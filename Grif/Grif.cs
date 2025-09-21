@@ -63,12 +63,14 @@ public partial class Grif
             }
             while (!GameOver)
             {
+                var start = DateTimeOffset.UtcNow;
                 // run background scripts
                 var backgroundKeys = grod.Keys(true, true)
                     .Where(x => x.StartsWith("background.", OIC))
                     .ToList();
                 foreach (var bgKey in backgroundKeys)
                 {
+                    var _before = DateTimeOffset.UtcNow;
                     var bgValue = grod.Get(bgKey, true) ?? "";
                     var bgProcess = Dags.Process(grod, bgValue);
                     RenderOutput(grod, bgProcess);
@@ -76,15 +78,27 @@ public partial class Grif
                     {
                         return;
                     }
+                    var _after = DateTimeOffset.UtcNow;
+                    Console.WriteLine($"Background: {bgKey} - {_after.Subtract(_before)}");
                 }
+                var backDone = DateTimeOffset.UtcNow;
                 // input
                 Prompt(grod);
                 var input = GetInput(grod);
                 AfterPrompt(grod);
+                var inputDone = DateTimeOffset.UtcNow;
                 // process input
                 var parsed = ParseInput(grod, input);
+                var parseDone = DateTimeOffset.UtcNow;
                 var output = Dags.ProcessItems(grod, parsed);
+                var processDone = DateTimeOffset.UtcNow;
                 RenderOutput(grod, output);
+                var renderDone = DateTimeOffset.UtcNow;
+                Console.WriteLine("BackDone:    " + backDone.Subtract(start).ToString());
+                //Console.WriteLine("InputDone:   " + inputDone.Subtract(backDone).ToString());
+                //Console.WriteLine("ParseDone:   " + parseDone.Subtract(inputDone).ToString());
+                Console.WriteLine("ProcessDone: " + processDone.Subtract(parseDone).ToString());
+                //Console.WriteLine("RenderDone:  " + renderDone.Subtract(processDone).ToString());
             }
         }
         catch (Exception ex)

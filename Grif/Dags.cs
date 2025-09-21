@@ -39,37 +39,38 @@ public partial class Dags
             }
             if (item.Type == DagsType.Text || item.Type == DagsType.Internal)
             {
-                if (!string.IsNullOrEmpty(item.Value)) // whitespace is allowed
+                if (string.IsNullOrEmpty(item.Value))
                 {
-                    if (item.Value.StartsWith('@'))
-                    {
-                        var tokens = SplitTokens(item.Value);
-                        int index = 0;
-                        do
-                        {
-                            var answer = ProcessOneCommand(tokens, ref index, grod);
-                            result.AddRange(answer);
-                        } while (index < tokens.Length);
-                    }
-                    else
-                    {
-                        // plain text
-                        result.Add(item);
-                    }
+                    continue;
                 }
+                if (item.Value.StartsWith('@'))
+                {
+                    var tokens = SplitTokens(item.Value);
+                    int index = 0;
+                    do
+                    {
+                        var answer = ProcessOneCommand(tokens, ref index, grod);
+                        if (answer.Count > 0)
+                        {
+                            result.AddRange(answer);
+                        }
+                    } while (index < tokens.Length);
+                    continue;
+                }
+                // plain text
+                result.Add(item);
+                continue;
             }
-            else if (item.Type == DagsType.InChannel)
+            if (item.Type == DagsType.InChannel)
             {
                 if (!IsNull(grod.Get(INCHANNEL, true)))
                 {
                     throw new Exception("DagsInChannel value is not empty.");
                 }
                 grod.Set(INCHANNEL, item.Value);
+                continue;
             }
-            else
-            {
-                throw new Exception($"Unsupported DagsType: {item.Type}");
-            }
+            throw new Exception($"Unsupported DagsType: {item.Type}");
         }
         return result;
     }

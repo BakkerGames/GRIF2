@@ -8,7 +8,8 @@ public partial class Dags
     private static void HandleFor(List<DagsItem> p, string[] tokens, ref int index, Grod grod, List<DagsItem> result)
     {
         // @for(i,<start>,<end inclusive>)=...$i...@endfor
-        var newTokens = new StringBuilder();
+        var iterator = "$" + p[0].Value;
+        var newTokens = new List<string>();
         var level = 0;
         do
         {
@@ -25,16 +26,34 @@ public partial class Dags
                 }
                 level--;
             }
-            if (newTokens.Length > 0)
-            {
-                newTokens.Append(' ');
-            }
-            newTokens.Append(token);
+            newTokens.Add(token);
         } while (index < tokens.Length);
-        for (int value = int.Parse(p[1].Value); value <= int.Parse(p[2].Value); value++)
+        var int1 = int.Parse(p[1].Value);
+        var int2 = int.Parse(p[2].Value);
+        for (int value = int1; value <= int2; value++)
         {
-            var script = newTokens.ToString().Replace($"${p[0].Value}", value.ToString());
-            result.AddRange(Process(grod, script));
+            List<string> loopTokens = [];
+            foreach (var token in newTokens)
+            {
+                if (token.Equals(iterator, OIC))
+                {
+                    loopTokens.Add(value.ToString());
+                }
+                else
+                {
+                    loopTokens.Add(token);
+                }
+            }
+            string[] loopArray = [.. loopTokens];
+            var loopIndex = 0;
+            do
+            {
+                var answer = ProcessOneCommand(loopArray, ref loopIndex, grod);
+                if (answer.Count > 0)
+                {
+                    result.AddRange(answer);
+                }
+            } while (loopIndex < loopArray.Length);
         }
     }
 

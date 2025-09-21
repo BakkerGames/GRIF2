@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text;
+using static Grif.Common;
 
 namespace Grif;
 
@@ -27,8 +28,8 @@ internal class Program
                     Syntax();
                     return;
                 }
-                if (args[index].Equals("-i", StringComparison.OrdinalIgnoreCase) ||
-                    args[index].Equals("--input", StringComparison.OrdinalIgnoreCase))
+                if (args[index].Equals("-i", OIC) ||
+                    args[index].Equals("--input", OIC))
                 {
                     index++;
                     inputFilename = args[index++];
@@ -39,8 +40,8 @@ internal class Program
                         return;
                     }
                 }
-                else if (args[index].Equals("-o", StringComparison.OrdinalIgnoreCase) ||
-                    args[index].Equals("--output", StringComparison.OrdinalIgnoreCase))
+                else if (args[index].Equals("-o", OIC) ||
+                    args[index].Equals("--output", OIC))
                 {
                     index++;
                     outputFilename = args[index++];
@@ -57,8 +58,8 @@ internal class Program
                         return;
                     }
                 }
-                else if (args[index].Equals("-m", StringComparison.OrdinalIgnoreCase) ||
-                    args[index].Equals("--mod", StringComparison.OrdinalIgnoreCase))
+                else if (args[index].Equals("-m", OIC) ||
+                    args[index].Equals("--mod", OIC))
                 {
                     index++;
                     var modFilename = args[index++];
