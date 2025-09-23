@@ -117,6 +117,23 @@ public class Grod
         return keys;
     }
 
+    public List<string> Keys(string prefix, bool recursive, bool sorted)
+    {
+        var keys = new List<string>(_data.Keys).Where(x => x.StartsWith(prefix)).ToList();
+        if (recursive && Parent != null)
+        {
+            var parentKeys = Parent.Keys(recursive, sorted).Where(x => x.StartsWith(prefix)).ToList();
+            foreach (var parentKey in parentKeys)
+            {
+                if (!keys.Contains(parentKey, StringComparer.OrdinalIgnoreCase))
+                {
+                    keys.Add(parentKey);
+                }
+            }
+        }
+        return keys;
+    }
+
     public List<GrodItem> Items(bool recursive, bool sorted)
     {
         var keys = Keys(recursive, sorted);

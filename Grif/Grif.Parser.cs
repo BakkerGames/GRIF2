@@ -77,9 +77,8 @@ public static partial class Grif
         {
             verb = verb[..maxWordLen];
         }
-        var verbs = grod.Keys(true, true)
-            .Where(k => k.StartsWith("verb.", OIC))
-            .Select(k => k[5..].ToLower())
+        var verbs = grod.Keys("verb.", true, true)
+            .Select(k => k["verb.".Length..].ToLower())
             .ToHashSet();
         foreach (var key in verbs)
         {
@@ -106,9 +105,8 @@ public static partial class Grif
         {
             noun = noun[..maxWordLen];
         }
-        var nouns = grod.Keys(true, true)
-            .Where(k => k.StartsWith("noun.", OIC))
-            .Select(k => k[5..].ToLower())
+        var nouns = grod.Keys("noun.", true, true)
+            .Select(k => k["noun.".Length..].ToLower())
             .ToHashSet();
         foreach (var key in nouns)
         {

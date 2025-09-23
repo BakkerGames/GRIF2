@@ -432,9 +432,7 @@ public partial class Dags
 
     private static List<DagsItem> GetUserDefinedFunctionValues(string token, List<DagsItem> p, Grod grod)
     {
-        var keys = grod.Keys(true, true)
-            .Where(x => x.StartsWith(token, OIC))
-            .ToList();
+        var keys = grod.Keys(token, true, true);
         if (keys.Count == 0)
         {
             throw new SystemException($"Unknown token: {token}");
@@ -517,8 +515,7 @@ public partial class Dags
         {
             throw new SystemException("Key cannot be null or empty.");
         }
-        var list = grod.Keys(true, true)
-            .Where(x => x.StartsWith(key + ":", OIC));
+        var list = grod.Keys(key + ":", true, true);
         foreach (var item in list)
         {
             grod.Set(item, null);

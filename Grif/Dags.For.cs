@@ -9,7 +9,7 @@ public partial class Dags
     {
         // @for(i,<start>,<end inclusive>)=...$i...@endfor
         var iterator = "$" + p[0].Value;
-        var newTokens = new List<string>();
+        var startIndex = index;
         var level = 0;
         do
         {
@@ -26,23 +26,21 @@ public partial class Dags
                 }
                 level--;
             }
-            newTokens.Add(token);
         } while (index < tokens.Length);
+        var endIndex = index - 2;
         var int1 = int.Parse(p[1].Value);
         var int2 = int.Parse(p[2].Value);
         for (int value = int1; value <= int2; value++)
         {
             List<string> loopTokens = [];
-            foreach (var token in newTokens)
+            for (int i = startIndex; i <= endIndex; i++)
             {
-                if (token.Equals(iterator, OIC))
+                var token = tokens[i];
+                if (token.Contains(iterator, OIC))
                 {
-                    loopTokens.Add(value.ToString());
+                    token = token.Replace(iterator, value.ToString());
                 }
-                else
-                {
-                    loopTokens.Add(token);
-                }
+                loopTokens.Add(token);
             }
             string[] loopArray = [.. loopTokens];
             var loopIndex = 0;
@@ -83,8 +81,7 @@ public partial class Dags
             }
             newTokens.Append(token);
         } while (index < tokens.Length);
-        var keys = grod.Keys(true, true)
-            .Where(x => x.StartsWith(p[1].Value, OIC));
+        var keys = grod.Keys(p[1].Value, true, true);
         foreach (string key in keys)
         {
             var value = key[p[1].Value.Length..];

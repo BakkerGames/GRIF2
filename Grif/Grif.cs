@@ -65,9 +65,7 @@ public partial class Grif
             {
                 var start = DateTimeOffset.UtcNow;
                 // run background scripts
-                var backgroundKeys = grod.Keys(true, true)
-                    .Where(x => x.StartsWith("background.", OIC))
-                    .ToList();
+                var backgroundKeys = grod.Keys("background.", true, true);
                 foreach (var bgKey in backgroundKeys)
                 {
                     var _before = DateTimeOffset.UtcNow;
