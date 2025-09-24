@@ -15,6 +15,21 @@ public static class Common
 
     public const string INCHANNEL = "#INCHANNEL;";
 
+    public const string APP_NAME = "GRIF";
+    public const string DATA_EXTENSION = ".grif";
+    public const string SAVE_FILENAME = "save";
+    public const string SAVE_EXTENSION = ".dat";
+
+    public const string AFTER_PROMPT = "system.after_prompt";
+    public const string DONT_UNDERSTAND = "system.dont_understand";
+    public const string GAMENAME = "system.gamename";
+    public const string INTRO = "system.intro";
+    public const string OUTPUT_WIDTH = "system.output_width";
+    public const string PROMPT = "system.prompt";
+    public const string UPPERCASE = "system.uppercase";
+    public const string DEBUG = "system.debug";
+    public const string WORDSIZE = "system.wordsize";
+
     // OutChannel constants used by GRIF
 
     public const string OUTCHANNEL_ASK = "#ASK;";

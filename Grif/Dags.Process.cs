@@ -160,7 +160,7 @@ public partial class Dags
                     break;
                 case "@debug(":
                     CheckParameterCount(p, 1);
-                    if (IsTrue(grod.Get("system.debug", true)))
+                    if (IsTrue(grod.Get(DEBUG, true)))
                     {
                         result.Add(new DagsItem(DagsType.Text, "### "));
                         result.Add(new DagsItem(DagsType.Text, p[0].Value));

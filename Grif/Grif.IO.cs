@@ -342,14 +342,14 @@ public static partial class Grif
 
     public static void Prompt(Grod grod)
     {
-        var prompt = grod.Get("system.prompt", true) ?? "> ";
+        var prompt = grod.Get(PROMPT, true) ?? "> ";
         var promptProcess = Dags.Process(grod, prompt);
         RenderOutput(grod, promptProcess);
     }
 
     public static void AfterPrompt(Grod grod)
     {
-        var afterPrompt = grod.Get("system.after_prompt", true) ?? "";
+        var afterPrompt = grod.Get(AFTER_PROMPT, true) ?? "";
         var afterProcess = Dags.Process(grod, afterPrompt);
         RenderOutput(grod, afterProcess);
     }
@@ -385,6 +385,19 @@ public static partial class Grif
             }
         }
         OutStream?.Write(resultRaw.Replace("\n", Environment.NewLine) + Environment.NewLine);
+        return result;
+    }
+
+    public static string GetSavePath(Grod grod, string filebase, string fileext)
+    {
+        var result = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        result = Path.Combine(result, APP_NAME);
+        result = Path.Combine(result, grod.Get(GAMENAME, true)!);
+        if (!Directory.Exists(result))
+        {
+            Directory.CreateDirectory(result);
+        }
+        result = Path.Combine(result, filebase + fileext);
         return result;
     }
 }

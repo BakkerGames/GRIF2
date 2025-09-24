@@ -11,6 +11,34 @@ public static partial class Grif
             GameOver = true;
             return;
         }
+        if (item.Value.Equals(OUTCHANNEL_EXISTS_SAVE, OIC))
+        {
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_EXISTS_SAVE_NAME, OIC))
+        {
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_SAVE, OIC))
+        {
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_SAVE_NAME, OIC))
+        {
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_RESTORE, OIC))
+        {
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_RESTORE_NAME, OIC))
+        {
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_RESTART, OIC))
+        {
+            return;
+        }
         if (item.Value.Equals(OUTCHANNEL_ASK, OIC))
         {
             Prompt(grod);
@@ -21,6 +49,10 @@ public static partial class Grif
                 throw new Exception("DagsInChannel value is not empty.");
             }
             grod.Set(INCHANNEL, input);
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_ENTER, OIC))
+        {
             return;
         }
         if (item.Value.StartsWith('@'))

@@ -39,6 +39,14 @@ public partial class Grif
     /// </summary>
     private static int CurrOutputPos { get; set; } = 0;
 
+    public static void VerifyGame(Grod grod)
+    {
+        if (grod.Get(GAMENAME, true) == null)
+        {
+            throw new Exception($"Missing value: {GAMENAME}");
+        }
+    }
+
     public static void RunGame(Grod grod, string? inFile, string? outFile)
     {
         if (!string.IsNullOrWhiteSpace(outFile))
@@ -51,11 +59,11 @@ public partial class Grif
             {
                 InputLines = [.. File.ReadAllLines(inFile)];
             }
-            if (int.TryParse(grod.Get("system.output_width", true), out int ow))
+            if (int.TryParse(grod.Get(OUTPUT_WIDTH, true), out int ow))
             {
                 OutputWidth = ow;
             }
-            var intro = grod.Get("system.intro", true);
+            var intro = grod.Get(INTRO, true);
             if (!string.IsNullOrWhiteSpace(intro))
             {
                 var introOutput = Dags.Process(grod, intro);
@@ -77,7 +85,6 @@ public partial class Grif
                         return;
                     }
                     var _after = DateTimeOffset.UtcNow;
-                    Console.WriteLine($"Background: {bgKey} - {_after.Subtract(_before)}");
                 }
                 var backDone = DateTimeOffset.UtcNow;
                 // input
@@ -92,11 +99,6 @@ public partial class Grif
                 var processDone = DateTimeOffset.UtcNow;
                 RenderOutput(grod, output);
                 var renderDone = DateTimeOffset.UtcNow;
-                Console.WriteLine("BackDone:    " + backDone.Subtract(start).ToString());
-                //Console.WriteLine("InputDone:   " + inputDone.Subtract(backDone).ToString());
-                //Console.WriteLine("ParseDone:   " + parseDone.Subtract(inputDone).ToString());
-                Console.WriteLine("ProcessDone: " + processDone.Subtract(parseDone).ToString());
-                //Console.WriteLine("RenderDone:  " + renderDone.Subtract(processDone).ToString());
             }
         }
         catch (Exception ex)

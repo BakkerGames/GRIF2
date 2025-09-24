@@ -211,12 +211,12 @@ public class UnitTestDags
     [Test]
     public void Test_Debug()
     {
-        grod.Set("system.debug", "true");
+        grod.Set(DEBUG, "true");
         result = Dags.Process(grod, "@debug(\"this is a comment\")");
         Assert.That(Squash(result), Is.EqualTo("### this is a comment" + NL));
         result = Dags.Process(grod, "@debug(@add(123,456))");
         Assert.That(Squash(result), Is.EqualTo("### 579" + NL));
-        grod.Set("system.debug", "false");
+        grod.Set(DEBUG, "false");
         result = Dags.Process(grod, "@debug(\"this is a comment\")");
         Assert.That(Squash(result), Is.EqualTo(""));
     }

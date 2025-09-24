@@ -67,13 +67,13 @@ internal class Program
                     {
                         fileList.Add(modFilename);
                     }
-                    else if (File.Exists(modFilename + ".grif"))
+                    else if (File.Exists(modFilename + DATA_EXTENSION))
                     {
-                        fileList.Add(modFilename + ".grif");
+                        fileList.Add(modFilename + DATA_EXTENSION);
                     }
                     else if (Directory.Exists(modFilename))
                     {
-                        foreach (string file in Directory.GetFiles(modFilename, "*.grif"))
+                        foreach (string file in Directory.GetFiles(modFilename, "*" + DATA_EXTENSION))
                         {
                             fileList.Add(file);
                         }
@@ -97,13 +97,13 @@ internal class Program
                 {
                     fileList.Add(filename);
                 }
-                else if (File.Exists(filename + ".grif"))
+                else if (File.Exists(filename + DATA_EXTENSION))
                 {
-                    fileList.Add(filename + ".grif");
+                    fileList.Add(filename + DATA_EXTENSION);
                 }
                 else if (Directory.Exists(filename))
                 {
-                    foreach (string file in Directory.GetFiles(filename, "*.grif"))
+                    foreach (string file in Directory.GetFiles(filename, "*" + DATA_EXTENSION))
                     {
                         fileList.Add(file);
                     }
@@ -131,6 +131,15 @@ internal class Program
             parentGrod = currentGrod;
         }
         var grod = new Grod("userdata", currentGrod);
+        try
+        {
+            Grif.VerifyGame(grod);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return;
+        }
         Grif.RunGame(grod, inputFilename, outputFilename);
     }
 

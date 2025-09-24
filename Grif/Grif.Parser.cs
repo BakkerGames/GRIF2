@@ -20,7 +20,7 @@ public static partial class Grif
         {
             return result;
         }
-        var mwl = grod.Get("system.wordsize", true);
+        var mwl = grod.Get(WORDSIZE, true);
         if (mwl == null || !int.TryParse(mwl, out int maxWordLen))
         {
             maxWordLen = 0;
