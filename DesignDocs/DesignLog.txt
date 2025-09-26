@@ -139,3 +139,17 @@
 - Implemented multiple files, mod files, output log, input lines.
 - Moved some Grif parameters to properties.
 - Added input, output on CloakOfDarkness
+
+2025-09-21
+- Discovered @for is slow, trying variations
+
+2025-09-22
+- Fixed @for to be faster, others may need fixing too
+
+2025-09-23
+- Added system constants
+- Added some OUTCHANNEL logic, more to go.
+
+2025-09-26
+- Added OUTCHANNEL commands for save, restore, enter
+- Allow saving and restoring in GRIF or JSON format

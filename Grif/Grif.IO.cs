@@ -5,33 +5,80 @@ namespace Grif;
 
 public static partial class Grif
 {
-    public static void WriteGrif(string filePath, List<GrodItem> items)
+    public static void WriteGrif(string filePath, List<GrodItem> items, bool jsonFormat)
     {
+        var needsComma = false;
+        string value;
         using var writer = new StreamWriter(filePath);
+        writer.Write(HeaderComment(filePath, jsonFormat));
+        if (jsonFormat)
+        {
+            writer.WriteLine("{");
+        }
         foreach (var item in items)
         {
-            writer.WriteLine(item.Key);
-            if (item.Value != null && item.Value.StartsWith('@'))
+            if (jsonFormat)
             {
-                // If the value starts with '@', it is a script
-                writer.WriteLine(Dags.PrettyScript(item.Value, true));
+                if (needsComma)
+                {
+                    writer.WriteLine(",");
+                }
+                writer.Write('\t');
+                writer.Write('\"');
+                writer.Write(EncodeString(item.Key));
+                writer.Write("\":");
             }
             else
             {
-                // Otherwise, write the value without quotes
-                var value = item.Value;
-                value ??= NULL;
-                while (value.Length > 2 && value.Contains(NL, OIC))
+                writer.WriteLine(item.Key);
+            }
+            if (item.Value != null && item.Value.StartsWith('@'))
+            {
+                // If the value starts with '@', it is a script
+                if (jsonFormat)
                 {
-                    var pos = value.IndexOf(NL, OIC);
-                    writer.WriteLine($"\t{value[..(pos + 2)]}");
-                    value = value[(pos + 2)..]; // Skip the escape sequence
+                    writer.Write(" \"");
+                    value = Dags.CompressScript(item.Value);
+                    writer.Write(EncodeString(value));
+                    writer.Write('\"');
+                    needsComma = true;
                 }
-                if (value.Length > 0)
+                else
                 {
-                    writer.WriteLine($"\t{value}");
+                    writer.WriteLine(Dags.PrettyScript(item.Value, true));
                 }
             }
+            else
+            {
+                value = item.Value ?? NULL;
+                if (jsonFormat)
+                {
+                    writer.Write(" \"");
+                    writer.Write(EncodeString(value));
+                    writer.Write('\"');
+                    needsComma = true;
+                }
+                else
+                {
+                    // Otherwise, write the value without quotes
+                    if (value == "") value = "\"\"";
+                    while (value.Length > 2 && value.Contains(NL, OIC))
+                    {
+                        var pos = value.IndexOf(NL, OIC);
+                        writer.WriteLine($"\t{value[..(pos + 2)]}");
+                        value = value[(pos + 2)..]; // Skip the escape sequence
+                    }
+                    if (value.Length > 0)
+                    {
+                        writer.WriteLine($"\t{value}");
+                    }
+                }
+            }
+        }
+        if (jsonFormat)
+        {
+            writer.WriteLine();
+            writer.WriteLine("}");
         }
     }
 
@@ -42,6 +89,7 @@ public static partial class Grif
         string value = string.Empty;
         List<GrodItem> items = [];
         var inCommentBlock = false;
+        var jsonFormat = false;
         foreach (var line in lines)
         {
             var trimmedLine = line.Trim();
@@ -62,38 +110,63 @@ public static partial class Grif
                 }
                 continue;
             }
-            if (!line.StartsWith('\t') && !line.StartsWith(' '))
+            if (trimmedLine == "{" && items.Count == 0)
             {
-                if (!string.IsNullOrWhiteSpace(key))
+                jsonFormat = true;
+                continue;
+            }
+            if (jsonFormat && trimmedLine == "}")
+            {
+                continue;
+            }
+            if (jsonFormat)
+            {
+                if (trimmedLine.EndsWith(','))
                 {
-                    if (value == NULL)
-                    {
-                        items.Add(new(key, null));
-                    }
-                    else
-                    {
-                        items.Add(new(key, value));
-                    }
+                    trimmedLine = trimmedLine[..^1];
                 }
-                // New key found, reset value
-                key = trimmedLine;
-                value = string.Empty;
+                var pos = trimmedLine.IndexOf("\": \"");
+                key = trimmedLine[..pos].Trim()[1..];
+                value = trimmedLine[(pos + 4)..].Trim()[..^1];
+                items.Add(new(key, value));
+                key = "";
+                value = "";
             }
             else
             {
-                if (value.Length > 0)
+                if (!line.StartsWith('\t') && !line.StartsWith(' '))
                 {
-                    if (!value.EndsWith(NL, OIC) &&
-                        !value.EndsWith(TAB, OIC) &&
-                        !value.EndsWith(SPACE, OIC) &&
-                        !trimmedLine.StartsWith(NL, OIC) &&
-                        !trimmedLine.StartsWith(TAB, OIC) &&
-                        !trimmedLine.StartsWith(SPACE, OIC))
+                    if (!string.IsNullOrWhiteSpace(key))
                     {
-                        value += ' ';
+                        if (value == NULL)
+                        {
+                            items.Add(new(key, null));
+                        }
+                        else
+                        {
+                            items.Add(new(key, value));
+                        }
                     }
+                    // New key found, reset value
+                    key = trimmedLine;
+                    value = string.Empty;
                 }
-                value += trimmedLine;
+                else
+                {
+                    if (value.Length > 0)
+                    {
+                        if (!value.EndsWith(NL, OIC) &&
+                            !value.EndsWith(TAB, OIC) &&
+                            !value.EndsWith(SPACE, OIC) &&
+                            !trimmedLine.StartsWith(NL, OIC) &&
+                            !trimmedLine.StartsWith(TAB, OIC) &&
+                            !trimmedLine.StartsWith(SPACE, OIC))
+                        {
+                            value += ' ';
+                        }
+                    }
+                    value += trimmedLine;
+                }
             }
         }
         if (!string.IsNullOrWhiteSpace(key))
@@ -112,8 +185,10 @@ public static partial class Grif
 
     public static void RenderOutput(Grod grod, List<DagsItem> items)
     {
-        foreach (var item in items)
+        int index = 0;
+        while (index < items.Count)
         {
+            var item = items[index];
             switch (item.Type)
             {
                 case DagsType.Text:
@@ -127,7 +202,7 @@ public static partial class Grif
                     WriteOutput($"ERROR: {HandleText(item.Value)}");
                     break;
                 case DagsType.OutChannel:
-                    HandleOutChannel(grod, item);
+                    HandleOutChannel(grod, items, ref index);
                     break;
                 default:
                     WriteOutput($"Unknown Item Type: {item.Type}");
@@ -138,6 +213,7 @@ public static partial class Grif
             {
                 break;
             }
+            index++;
         }
     }
 
@@ -400,4 +476,59 @@ public static partial class Grif
         result = Path.Combine(result, filebase + fileext);
         return result;
     }
+
+    private static string EncodeString(string value)
+    {
+        StringBuilder result = new();
+        var isScript = value.StartsWith('@');
+        foreach (char c in value)
+        {
+            if (c < ' ' || c > '~')
+            {
+                if (isScript && (c == '\r' || c == '\n' || c == '\t'))
+                {
+                    result.Append(c);
+                }
+                else if (c == '\r')
+                {
+                    result.Append(@"\r");
+                }
+                else if (c == '\n')
+                {
+                    result.Append(@"\n");
+                }
+                else if (c == '\t')
+                {
+                    result.Append(@"\t");
+                }
+                else
+                {
+                    result.Append(@"\u");
+                    result.Append($"{(int)c:x4}");
+                }
+            }
+            else if (c == '"' || c == '\\')
+            {
+                result.Append('\\');
+                result.Append(c);
+            }
+            else
+            {
+                result.Append(c);
+            }
+        }
+        return result.ToString();
+    }
+
+    private static string HeaderComment(string path, bool jsonFormat)
+    {
+        StringBuilder result = new();
+        result.Append("// ");
+        result.Append(Path.GetFileName(path));
+        result.Append(" - ");
+        result.Append(jsonFormat ? "JSON format" : "GRIF format");
+        result.AppendLine();
+        return result.ToString();
+    }
+
 }

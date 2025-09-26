@@ -330,6 +330,39 @@ public partial class Dags
         return result.ToString();
     }
 
+    /// <summary>
+    /// Format the script in a single line with minimal spaces.
+    /// </summary>
+    public static string CompressScript(string script)
+    {
+        if (!script.TrimStart().StartsWith('@'))
+        {
+            return script;
+        }
+
+        StringBuilder result = new();
+        var tokens = SplitTokens(script);
+        char lastChar = ',';
+        bool addSpace;
+
+        foreach (string s in tokens)
+        {
+            addSpace = false;
+            if (s.StartsWith('@'))
+            {
+                if (lastChar != '(' && lastChar != ',')
+                    addSpace = true;
+            }
+            if (addSpace)
+            {
+                result.Append(' ');
+            }
+            result.Append(s);
+            lastChar = s[^1];
+        }
+        return result.ToString();
+    }
+
     private static List<DagsItem> GetParameters(string[] tokens, ref int index, Grod grod)
     {
         List<DagsItem> parameters = [];
