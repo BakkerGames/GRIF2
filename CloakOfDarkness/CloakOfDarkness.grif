@@ -206,6 +206,15 @@ command.read.message
 		@else
 			@if @lt(@get(value.scuffed),2) @then
 				@msg(message.readable)
+				@write(".")
+				@setoutchannel("#SLEEP;")
+				@setoutchannel(1000)
+				@write(".")
+				@setoutchannel("#SLEEP;")
+				@setoutchannel(1000)
+				@write(".")
+				@setoutchannel("#SLEEP;")
+				@setoutchannel(1000)
 				@nl
 				@msg(message.you_won)
 				@nl
@@ -213,6 +222,15 @@ command.read.message
 				@set(value.messagescore,0)
 			@else
 				@msg(message.unreadable)
+				@write(".")
+				@setoutchannel("#SLEEP;")
+				@setoutchannel(1000)
+				@write(".")
+				@setoutchannel("#SLEEP;")
+				@setoutchannel(1000)
+				@write(".")
+				@setoutchannel("#SLEEP;")
+				@setoutchannel(1000)
 				@nl
 				@msg(message.you_lost)
 			@endif

@@ -21,7 +21,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grif", "Grif\Grif.csproj", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DesignDocs", "DesignDocs", "{33C059D6-BBE3-492A-9228-DB14EC641B5C}"
 	ProjectSection(SolutionItems) = preProject
-		DesignDocs\DesignDocument.md = DesignDocs\DesignDocument.md
 		DesignDocs\DesignLog.txt = DesignDocs\DesignLog.txt
 		DesignDocs\Grod.md = DesignDocs\Grod.md
 	EndProjectSection

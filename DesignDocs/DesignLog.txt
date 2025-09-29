@@ -153,3 +153,11 @@
 2025-09-26
 - Added OUTCHANNEL commands for save, restore, enter
 - Allow saving and restoring in GRIF or JSON format
+
+2025-09-29
+- OUTCHANNEL_EXISTS_SAVE and OUTCHANNEL_EXISTS_SAVE_NAME
+- INCHANNEL should be only one value due to unknown order of execution
+- OUTCHANNEL_SLEEP
+- May need async/await?
+- Added sleep to end of CloakOfDarkness before saying lost/won
+- Quietly ignore future OUTCHANNEL enhancements
