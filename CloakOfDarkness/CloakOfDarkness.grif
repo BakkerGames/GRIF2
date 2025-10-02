@@ -205,7 +205,7 @@ command.read.message
 			@addto(value.scuffed,1)
 		@else
 			@if @lt(@get(value.scuffed),2) @then
-				@msg(message.readable)
+				@write(@get(message.readable))
 				@write(".")
 				@setoutchannel("#SLEEP;")
 				@setoutchannel(1000)
@@ -215,13 +215,14 @@ command.read.message
 				@write(".")
 				@setoutchannel("#SLEEP;")
 				@setoutchannel(1000)
+				@nl
 				@nl
 				@msg(message.you_won)
 				@nl
 				@addscore(@get(value.messagescore))
 				@set(value.messagescore,0)
 			@else
-				@msg(message.unreadable)
+				@write(@get(message.unreadable))
 				@write(".")
 				@setoutchannel("#SLEEP;")
 				@setoutchannel(1000)
@@ -231,6 +232,7 @@ command.read.message
 				@write(".")
 				@setoutchannel("#SLEEP;")
 				@setoutchannel(1000)
+				@nl
 				@nl
 				@msg(message.you_lost)
 			@endif
@@ -415,7 +417,7 @@ message.ok
 message.otherdark
 	In the dark? You could easily disturb something!
 message.readable
-	The message, neatly marked in the sawdust, reads...
+	The message, neatly marked in the sawdust, reads
 message.read_what
 	Read what?
 message.restore_complete
@@ -433,7 +435,7 @@ message.take_what
 message.too_dark
 	It is completely dark in here. You can't see a thing.
 message.unreadable
-	The message has been carelessly trampled, making it difficult to read. You can just distinguish the words...
+	The message has been carelessly trampled, making it difficult to read. You can just distinguish the words
 message.yorn_error
 	Please enter Yes or No.
 message.you_lost
