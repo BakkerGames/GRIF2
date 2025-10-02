@@ -4,7 +4,7 @@ public record GrodItem(string Key, string? Value);
 
 public class Grod
 {
-    private const string _version = "2.2025.0824";
+    private const string _version = "2.2025.1001";
 
     private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
 
@@ -27,11 +27,8 @@ public class Grod
 
     public int Count(bool recursive)
     {
-        if (recursive && Parent != null)
-        {
-            return _data.Count + Parent.Count(recursive);
-        }
-        return _data.Count;
+        var keys = Keys(recursive, false);
+        return keys.Count;
     }
 
     public string? Get(string key, bool recursive)
@@ -101,14 +98,8 @@ public class Grod
         var keys = new List<string>(_data.Keys);
         if (recursive && Parent != null)
         {
-            var parentKeys = Parent.Keys(recursive, sorted);
-            foreach (var parentKey in parentKeys)
-            {
-                if (!keys.Contains(parentKey, StringComparer.OrdinalIgnoreCase))
-                {
-                    keys.Add(parentKey);
-                }
-            }
+            var parentKeys = Parent.Keys(recursive, false);
+            keys = [.. keys.Union(parentKeys, StringComparer.OrdinalIgnoreCase)];
         }
         if (sorted)
         {
@@ -119,17 +110,19 @@ public class Grod
 
     public List<string> Keys(string prefix, bool recursive, bool sorted)
     {
-        var keys = new List<string>(_data.Keys).Where(x => x.StartsWith(prefix)).ToList();
+        var keys = new List<string>(_data.Keys)
+            .Where(x => x.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            .ToList();
         if (recursive && Parent != null)
         {
-            var parentKeys = Parent.Keys(recursive, sorted).Where(x => x.StartsWith(prefix)).ToList();
-            foreach (var parentKey in parentKeys)
-            {
-                if (!keys.Contains(parentKey, StringComparer.OrdinalIgnoreCase))
-                {
-                    keys.Add(parentKey);
-                }
-            }
+            var parentKeys = Parent.Keys(recursive, false)
+                .Where(x => x.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            keys = [.. keys.Union(parentKeys, StringComparer.OrdinalIgnoreCase)];
+        }
+        if (sorted)
+        {
+            keys.Sort(StringComparer.OrdinalIgnoreCase);
         }
         return keys;
     }
@@ -137,6 +130,18 @@ public class Grod
     public List<GrodItem> Items(bool recursive, bool sorted)
     {
         var keys = Keys(recursive, sorted);
+        List<GrodItem> items = [];
+        foreach (var key in keys)
+        {
+            var value = Get(key, recursive);
+            items.Add(new GrodItem(key, value));
+        }
+        return items;
+    }
+
+    public List<GrodItem> Items(string prefix, bool recursive, bool sorted)
+    {
+        var keys = Keys(prefix, recursive, sorted);
         List<GrodItem> items = [];
         foreach (var key in keys)
         {

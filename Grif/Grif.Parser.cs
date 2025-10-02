@@ -1,9 +1,24 @@
-﻿using static Grif.Common;
+﻿using System.Diagnostics.CodeAnalysis;
+using static Grif.Common;
 
 namespace Grif;
 
 public static partial class Grif
 {
+    private static List<GrodItem> _verbs = [];
+    private static List<GrodItem> _nouns = [];
+
+    [SuppressMessage("Style", "IDE0305:Simplify collection initialization")]
+    public static void ParseInit(Grod grod)
+    {
+        _verbs = grod.Items("verb.", true, true)
+            .Select(x => new GrodItem(x.Key["verb.".Length..], x.Value))
+            .ToList();
+        _nouns = grod.Items("noun.", true, true)
+            .Select(x => new GrodItem(x.Key["noun.".Length..], x.Value))
+            .ToList();
+    }
+
     public static List<DagsItem> ParseInput(Grod grod, string input)
     {
         var result = new List<DagsItem>();
@@ -26,7 +41,7 @@ public static partial class Grif
             maxWordLen = 0;
         }
         verbWord = words[0];
-        verb = GetVerb(verbWord, maxWordLen, grod);
+        verb = GetVerb(verbWord, maxWordLen);
         if (verb == null)
         {
             result.Add(new DagsItem(DagsType.Text, $"I don't know the verb \"{words[0]}\".\\n"));
@@ -35,7 +50,7 @@ public static partial class Grif
         if (words.Length > 1)
         {
             nounWord = words[1];
-            noun = GetNoun(nounWord, maxWordLen, grod);
+            noun = GetNoun(nounWord, maxWordLen);
             if (noun == null)
             {
                 result.Add(new DagsItem(DagsType.Text, $"I don't know the word \"{words[1]}\".\\n"));
@@ -71,18 +86,15 @@ public static partial class Grif
         return result;
     }
 
-    private static string? GetVerb(string verb, int maxWordLen, Grod grod)
+    private static string? GetVerb(string verb, int maxWordLen)
     {
         if (maxWordLen > 0 && verb.Length > maxWordLen)
         {
             verb = verb[..maxWordLen];
         }
-        var verbs = grod.Keys("verb.", true, true)
-            .Select(k => k["verb.".Length..].ToLower())
-            .ToHashSet();
-        foreach (var key in verbs)
+        foreach (var item in _verbs)
         {
-            var verbWords = grod.Get($"verb.{key}", true)?.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var verbWords = item.Value?.Split(',', StringSplitOptions.RemoveEmptyEntries);
             foreach (var syn in verbWords ?? [])
             {
                 var synWord = syn;
@@ -92,25 +104,22 @@ public static partial class Grif
                 }
                 if (verb.Equals(synWord, OIC))
                 {
-                    return key.ToLower();
+                    return item.Key.ToLower();
                 }
             }
         }
         return null;
     }
 
-    private static string? GetNoun(string noun, int maxWordLen, Grod grod)
+    private static string? GetNoun(string noun, int maxWordLen)
     {
         if (maxWordLen > 0 && noun.Length > maxWordLen)
         {
             noun = noun[..maxWordLen];
         }
-        var nouns = grod.Keys("noun.", true, true)
-            .Select(k => k["noun.".Length..].ToLower())
-            .ToHashSet();
-        foreach (var key in nouns)
+        foreach (var item in _nouns)
         {
-            var nounWords = grod.Get($"noun.{key}", true)?.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var nounWords = item.Value?.Split(',', StringSplitOptions.RemoveEmptyEntries);
             foreach (var syn in nounWords ?? [])
             {
                 var synWord = syn;
@@ -120,11 +129,11 @@ public static partial class Grif
                 }
                 if (noun.Equals(synWord, OIC))
                 {
-                    return key.ToLower();
+                    return item.Key.ToLower();
                 }
             }
         }
-        if (int.TryParse(noun, out var number))
+        if (int.TryParse(noun, out var _))
         {
             return "#"; // check if handled as generic number
         }

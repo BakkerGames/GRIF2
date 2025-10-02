@@ -60,15 +60,17 @@ public class TestGrod
     {
         var parentGrod = new Grod("parent2");
         parentGrod.Set("key7", "value7");
+        parentGrod.Set("key8", "value8");
         var childGrod = new Grif.Grod("child2", parentGrod);
-        childGrod.Set("key8", "value8");
-        Assert.That(childGrod.Count(true), Is.EqualTo(2));
+        childGrod.Set("key8", "value8duplicate");
+        childGrod.Set("key9", "value9");
+        Assert.That(childGrod.Count(true), Is.EqualTo(3));
     }
 
     [Test]
     public void TestGrodVersion()
     {
-        Assert.That(Grod.Version, Is.EqualTo("2.2025.0824"));
+        Assert.That(Grod.Version, Is.EqualTo("2.2025.1001"));
     }
 
     [Test]

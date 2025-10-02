@@ -119,7 +119,7 @@ You can't go that direction.
 >read message
 
 The message, neatly marked in the sawdust, reads...
-
+...
 "You have won!"
 
 Your score has gone up by 1 point.

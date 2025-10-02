@@ -161,3 +161,10 @@
 - May need async/await?
 - Added sleep to end of CloakOfDarkness before saying lost/won
 - Quietly ignore future OUTCHANNEL enhancements
+
+2025-10-01
+- Fixed problems with grod.Keys by using Union and only sorting once.
+- Added grod.Items to get list of GrodItems by prefix.
+- Use grod.Keys as basis for grod.Count.
+- Save lists of verbs, nouns, and background scripts to avoid reloading them.
+- Speed is fixed!!! Much faster now. :)
