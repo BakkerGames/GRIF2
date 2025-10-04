@@ -450,17 +450,17 @@ public partial class Dags
         throw new SystemException("Expected a single text result.");
     }
 
-    private static int GetIntValue(string? value)
+    public static int GetIntValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
             return 0; // Default to 0 if not found
         }
-        if (!int.TryParse(value, out int value1))
+        if (!int.TryParse(value, out int intValue))
         {
             throw new SystemException($"Invalid integer: {value}");
         }
-        return value1;
+        return intValue;
     }
 
     private static List<DagsItem> GetUserDefinedFunctionValues(string token, List<DagsItem> p, Grod grod)

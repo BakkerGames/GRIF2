@@ -5,21 +5,32 @@ namespace Grif;
 
 public static partial class Grif
 {
+    private const string VERB_PREFIX = "verb.";
+    private const string NOUN_PREFIX = "noun.";
     private static List<GrodItem> _verbs = [];
     private static List<GrodItem> _nouns = [];
+    private static int _maxWordLen = 0;
 
     [SuppressMessage("Style", "IDE0305:Simplify collection initialization")]
     public static void ParseInit(Grod grod)
     {
-        _verbs = grod.Items("verb.", true, true)
-            .Select(x => new GrodItem(x.Key["verb.".Length..], x.Value))
+        _verbs = grod.Items(VERB_PREFIX, true, true)
+            .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
+            .Select(x => new GrodItem(x.Key[VERB_PREFIX.Length..], x.Value))
             .ToList();
-        _nouns = grod.Items("noun.", true, true)
-            .Select(x => new GrodItem(x.Key["noun.".Length..], x.Value))
+        _nouns = grod.Items(NOUN_PREFIX, true, true)
+            .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
+            .Select(x => new GrodItem(x.Key[NOUN_PREFIX.Length..], x.Value))
             .ToList();
+        _maxWordLen = Dags.GetIntValue(grod.Get(WORDSIZE, true));
+        if (_maxWordLen > 0)
+        {
+            TrimSynonyms(ref _verbs);
+            TrimSynonyms(ref _nouns);
+        }
     }
 
-    public static List<DagsItem> ParseInput(Grod grod, string input)
+    public static List<DagsItem>? ParseInput(Grod grod, string input)
     {
         var result = new List<DagsItem>();
         string? verb;
@@ -28,32 +39,26 @@ public static partial class Grif
         string? nounWord = null;
         if (string.IsNullOrWhiteSpace(input))
         {
-            return result;
+            return null;
         }
-        var words = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length == 0)
+        var words = input.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
+        if (words.Count == 0)
         {
-            return result;
+            return null;
         }
-        var mwl = grod.Get(WORDSIZE, true);
-        if (mwl == null || !int.TryParse(mwl, out int maxWordLen))
-        {
-            maxWordLen = 0;
-        }
-        verbWord = words[0];
-        verb = GetVerb(verbWord, maxWordLen);
+        (verb, verbWord) = GetVerb(ref words);
         if (verb == null)
         {
-            result.Add(new DagsItem(DagsType.Text, $"I don't know the verb \"{words[0]}\".\\n"));
+            result.Add(new DagsItem(DagsType.Text, $"I don't understand \"{input}\".\\n"));
             return result;
         }
-        if (words.Length > 1)
+        if (words.Count > 0)
         {
-            nounWord = words[1];
-            noun = GetNoun(nounWord, maxWordLen);
+            (noun, nounWord) = GetNoun(ref words);
             if (noun == null)
             {
-                result.Add(new DagsItem(DagsType.Text, $"I don't know the word \"{words[1]}\".\\n"));
+                result.Add(new DagsItem(DagsType.Text, $"I don't understand \"{input}\".\\n"));
                 return result;
             }
         }
@@ -86,57 +91,80 @@ public static partial class Grif
         return result;
     }
 
-    private static string? GetVerb(string verb, int maxWordLen)
+    private static void TrimSynonyms(ref List<GrodItem> items)
     {
-        if (maxWordLen > 0 && verb.Length > maxWordLen)
+        for (int i = 0; i < items.Count; i++)
         {
-            verb = verb[..maxWordLen];
-        }
-        foreach (var item in _verbs)
-        {
-            var verbWords = item.Value?.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var syn in verbWords ?? [])
+            var words = items[i].Value!.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            for (int j = 0; j < words.Length; j++)
             {
-                var synWord = syn;
-                if (maxWordLen > 0 && synWord.Length > maxWordLen)
+                if (_maxWordLen > 0 && words[j].Length > _maxWordLen)
                 {
-                    synWord = synWord[..maxWordLen];
-                }
-                if (verb.Equals(synWord, OIC))
-                {
-                    return item.Key.ToLower();
+                    words[j] = words[j][.._maxWordLen];
                 }
             }
+            items[i] = new GrodItem(items[i].Key, string.Join(',', words));
         }
-        return null;
     }
 
-    private static string? GetNoun(string noun, int maxWordLen)
+    private static (string?, string?) GetVerb(ref List<string> words)
     {
-        if (maxWordLen > 0 && noun.Length > maxWordLen)
+        for (int i = 0; i < words.Count; i++)
         {
-            noun = noun[..maxWordLen];
-        }
-        foreach (var item in _nouns)
-        {
-            var nounWords = item.Value?.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var syn in nounWords ?? [])
+            var word = words[i];
+            if (_maxWordLen > 0 && word.Length > _maxWordLen)
             {
-                var synWord = syn;
-                if (maxWordLen > 0 && synWord.Length > maxWordLen)
+                word = word[.._maxWordLen];
+            }
+            foreach (var item in _verbs)
+            {
+                var verbWords = item.Value!.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var syn in verbWords)
                 {
-                    synWord = synWord[..maxWordLen];
-                }
-                if (noun.Equals(synWord, OIC))
-                {
-                    return item.Key.ToLower();
+                    if (word.Equals(syn, OIC))
+                    {
+                        word = words[i]; // use original string
+                        words.RemoveAt(i);
+                        return (item.Key, word);
+                    }
                 }
             }
         }
-        if (int.TryParse(noun, out var _))
+        return (null, null);
+    }
+
+    private static (string?, string?) GetNoun(ref List<string> words)
+    {
+        for (int i = 0; i < words.Count; i++)
         {
-            return "#"; // check if handled as generic number
+            var word = words[i];
+            if (_maxWordLen > 0 && word.Length > _maxWordLen)
+            {
+                word = word[.._maxWordLen];
+            }
+            foreach (var item in _nouns)
+            {
+                var nounWords = item.Value!.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var syn in nounWords)
+                {
+                    if (word.Equals(syn, OIC))
+                    {
+                        word = words[i]; // use original string
+                        words.RemoveAt(i);
+                        return (item.Key, word);
+                    }
+                }
+            }
         }
-        return null;
+        for (int i = 0; i < words.Count; i++)
+        {
+            if (int.TryParse(words[i], out int number))
+            {
+                var word = words[i];
+                words.RemoveAt(i);
+                return ("#", word); // numeric noun
+            }
+        }
+        return (null, null);
     }
 }
