@@ -168,3 +168,7 @@
 - Use grod.Keys as basis for grod.Count.
 - Save lists of verbs, nouns, and background scripts to avoid reloading them.
 - Speed is fixed!!! Much faster now. :)
+
+2025-10-04
+- New parser that prefills verbs and nouns from grod.
+- Parser handles words out of order, mostly.
