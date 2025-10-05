@@ -172,3 +172,12 @@
 2025-10-04
 - New parser that prefills verbs and nouns from grod.
 - Parser handles words out of order, mostly.
+
+2025-10-05
+- Fixed parser to handle multiple nouns and prepositions.
+- Fixed parser to handle directions separately or with verbs.
+- Fixed parser to handle "look at box" and "look in box".
+- Fixed parser to handle "look north" and "go north".
+- Parser handles numeric nouns with "#", like "left #" or "go #".
+- Parser handles any noun with "*", such as "look at *", if specific noun not found.
+- Still to come: articles and adjectives.

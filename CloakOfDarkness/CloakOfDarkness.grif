@@ -583,11 +583,11 @@ value.scuffed
 	0
 value.scuffed.comment
 	how scuffed is the message?
-verb.down
+direction.down
 	down,d,descend
 verb.drop
 	drop,throw,remove
-verb.east
+direction.east
 	east,e
 verb.examine
 	x,examine
@@ -601,7 +601,7 @@ verb.inventory
 	i,inv,inventory
 verb.look
 	l,look
-verb.north
+direction.north
 	north,n
 verb.out
 	out
@@ -617,15 +617,15 @@ verb.save
 	save,suspend
 verb.score
 	score
-verb.south
+direction.south
 	south,s
 verb.take
 	take,t,get,wear
-verb.up
+direction.up
 	up,u,climb
 verb.use
 	use
 verb.version
 	ver,version
-verb.west
+direction.west
 	west,w

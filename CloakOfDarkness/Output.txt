@@ -69,11 +69,23 @@ This isn't the best place to leave a smart cloak lying around.
 
 You aren't carrying anything.
 
->hang cloak
+>hang cloak on hook
 
 The cloak is now hanging smartly on the hook.
 
 Your score has gone up by 1 point.
+
+>inv
+
+You aren't carrying anything.
+
+>examine hook
+
+It's just a small brass hook, with a cloak hanging on it.
+
+>hang cloak
+
+The cloak is already hanging on the hook.
 
 >inv
 

@@ -10,6 +10,9 @@ examine cloak
 examine hook
 drop cloak
 inv
+hang cloak on hook
+inv
+examine hook
 hang cloak
 inv
 look
