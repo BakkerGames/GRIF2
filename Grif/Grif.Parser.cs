@@ -22,12 +22,16 @@ public static partial class Grif
     private const string NOUN_PREFIX = "noun.";
     private const string DIRECTION_PREFIX = "direction.";
     private const string PREPOSITION_PREFIX = "preposition.";
+    private const string ADJECTIVE_PREFIX = "adjective.";
+    private const string ARTICLE_KEY = "articles";
     private const string COMMAND_PREFIX = "command.";
     private static string DONT_UNDERSTAND_TEXT = "";
     private static List<GrodItem> _verbs = [];
     private static List<GrodItem> _nouns = [];
     private static List<GrodItem> _directions = [];
     private static List<GrodItem> _prepositions = [];
+    private static List<GrodItem> _adjectives = [];
+    private static List<GrodItem> _articles = []; // "the,a,an,some,any,my,his,her,its,our,their"
 
     [SuppressMessage("Style", "IDE0305:Simplify collection initialization")]
     public static void ParseInit(Grod grod)
@@ -48,6 +52,11 @@ public static partial class Grif
             .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
             .Select(x => new GrodItem(x.Key[PREPOSITION_PREFIX.Length..], x.Value))
             .ToList();
+        _adjectives = grod.Items(ADJECTIVE_PREFIX, true, true)
+            .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
+            .Select(x => new GrodItem(x.Key[ADJECTIVE_PREFIX.Length..], x.Value))
+            .ToList();
+        _articles = grod.Items(ARTICLE_KEY, true, true);
         _maxWordLen = Dags.GetIntValue(grod.Get(WORDSIZE, true));
         if (_maxWordLen > 0)
         {
@@ -55,6 +64,8 @@ public static partial class Grif
             TrimSynonyms(ref _nouns);
             TrimSynonyms(ref _directions);
             TrimSynonyms(ref _prepositions);
+            TrimSynonyms(ref _adjectives);
+            TrimSynonyms(ref _articles);
         }
         DONT_UNDERSTAND_TEXT = grod.Get(DONT_UNDERSTAND, true) ??
             "I don't understand \"{0}\".\\n";
@@ -83,6 +94,7 @@ public static partial class Grif
         {
             return null;
         }
+        RemoveArticles(_articles, ref words);
         // handle "west", "go west", "west go"
         (verb, verbWord) = GetMatchingWord(_verbs, ref words);
         if (words.Count > 0)
@@ -254,5 +266,24 @@ public static partial class Grif
             }
         }
         return (null, null);
+    }
+
+    private static void RemoveArticles(List<GrodItem> articles, ref List<string> words)
+    {
+        for (int i = words.Count - 1; i >= 0; i--)
+        {
+            foreach (var item in articles)
+            {
+                var articleWords = item.Value!.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var syn in articleWords)
+                {
+                    if (words[i].Equals(syn, OIC))
+                    {
+                        words.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

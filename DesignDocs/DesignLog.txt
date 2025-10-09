@@ -181,3 +181,8 @@
 - Parser handles numeric nouns with "#", like "left #" or "go #".
 - Parser handles any noun with "*", such as "look at *", if specific noun not found.
 - Still to come: articles and adjectives.
+
+2025-10-08
+- Added articles and adjectives to parser.
+- Articles are ignored.
+- Adjectives are not implemented yet.
