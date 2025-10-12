@@ -67,9 +67,21 @@ public static partial class Grif
                         var pos = value.IndexOf(NL, OIC);
                         writer.WriteLine($"\t{value[..(pos + 2)]}");
                         value = value[(pos + 2)..]; // Skip the escape sequence
+                        if (value.StartsWith(' '))
+                        {
+                            value = SPACE + value[1..];
+                        }
                     }
                     if (value.Length > 0)
                     {
+                        if (value.StartsWith(' '))
+                        {
+                            value = SPACE + value[1..];
+                        }
+                        if (value.EndsWith(' '))
+                        {
+                            value = value[..^1] + SPACE;
+                        }
                         writer.WriteLine($"\t{value}");
                     }
                 }
@@ -164,6 +176,10 @@ public static partial class Grif
                         {
                             value += ' ';
                         }
+                    }
+                    if (trimmedLine.Contains(SPACE))
+                    {
+                        trimmedLine = trimmedLine.Replace(SPACE, " ");
                     }
                     value += trimmedLine;
                 }

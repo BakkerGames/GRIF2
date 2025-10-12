@@ -68,7 +68,7 @@ public static partial class Grif
             TrimSynonyms(ref _articles);
         }
         DONT_UNDERSTAND_TEXT = grod.Get(DONT_UNDERSTAND, true) ??
-            "I don't understand \"{0}\".\\n";
+            $"I don't understand \"{{0}}\".{NL}";
     }
 
     public static List<DagsItem>? ParseInput(Grod grod, string input)

@@ -4,7 +4,7 @@ namespace Grif;
 
 public partial class Grif
 {
-    private const string _version = "2.2025.1001";
+    private const string _version = "2.2025.1011";
     public static string Version => _version;
 
     private static StreamWriter? OutStream { get; set; }
@@ -85,13 +85,16 @@ public partial class Grif
                 AfterPrompt(grod);
                 // process input
                 var parsed = ParseInput(grod, input);
-                var output = Dags.ProcessItems(grod, parsed);
-                RenderOutput(grod, output);
+                if (parsed != null && parsed.Count > 0)
+                {
+                    var output = Dags.ProcessItems(grod, parsed);
+                    RenderOutput(grod, output);
+                }
             }
         }
         catch (Exception ex)
         {
-            WriteOutput($"\\nFatal error: {ex.Message}");
+            WriteOutput($"{NL}Fatal error: {ex.Message}");
         }
         OutStream?.Close();
     }
