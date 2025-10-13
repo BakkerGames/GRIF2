@@ -60,19 +60,11 @@ public static partial class Grif
                 }
                 else
                 {
-                    // Otherwise, write the value without quotes
-                    if (value == "") value = "\"\"";
-                    while (value.Length > 2 && value.Contains(NL, OIC))
+                    if (value == "")
                     {
-                        var pos = value.IndexOf(NL, OIC);
-                        writer.WriteLine($"\t{value[..(pos + 2)]}");
-                        value = value[(pos + 2)..]; // Skip the escape sequence
-                        if (value.StartsWith(' '))
-                        {
-                            value = SPACE + value[1..];
-                        }
+                        value = "\"\"";
                     }
-                    if (value.Length > 0)
+                    else
                     {
                         if (value.StartsWith(' '))
                         {
@@ -96,102 +88,44 @@ public static partial class Grif
 
     public static List<GrodItem> ReadGrif(string filePath)
     {
-        var lines = File.ReadAllLines(filePath);
-        string key = string.Empty;
-        string value = string.Empty;
         List<GrodItem> items = [];
-        var inCommentBlock = false;
         var jsonFormat = false;
-        foreach (var line in lines)
+        using var reader = new StreamReader(filePath);
+        var content = reader.ReadToEnd();
+        int index = 0;
+        string key;
+        string value;
+        SkipWhitespace(content, ref index);
+        if (index < content.Length && content[index] == '{')
         {
-            var trimmedLine = line.Trim();
-            if (trimmedLine.StartsWith("//"))
-            {
-                // Comment line, ignore
-                continue;
-            }
-            if (trimmedLine.StartsWith("/*"))
-            {
-                inCommentBlock = true;
-            }
-            if (inCommentBlock)
-            {
-                if (trimmedLine.EndsWith("*/"))
-                {
-                    inCommentBlock = false;
-                }
-                continue;
-            }
-            if (trimmedLine == "{" && items.Count == 0)
-            {
-                jsonFormat = true;
-                continue;
-            }
-            if (jsonFormat && trimmedLine == "}")
-            {
-                continue;
-            }
+            jsonFormat = true;
+            index++;
+        }
+        while (index < content.Length)
+        {
             if (jsonFormat)
             {
-                if (trimmedLine.EndsWith(','))
+                SkipWhitespace(content, ref index);
+                if (index < content.Length)
                 {
-                    trimmedLine = trimmedLine[..^1];
+                    if (content[index] == '}')
+                    {
+                        index++;
+                        break;
+                    }
+                    if (content[index] == ',')
+                    {
+                        index++;
+                        SkipWhitespace(content, ref index);
+                    }
                 }
-                var pos = trimmedLine.IndexOf("\": \"");
-                key = trimmedLine[..pos].Trim()[1..];
-                value = trimmedLine[(pos + 4)..].Trim()[..^1];
-                items.Add(new(key, value));
-                key = "";
-                value = "";
+                (key, value) = ParseJsonKeyValue(content, ref index);
             }
             else
             {
-                if (!line.StartsWith('\t') && !line.StartsWith(' '))
-                {
-                    if (!string.IsNullOrWhiteSpace(key))
-                    {
-                        if (value == NULL)
-                        {
-                            items.Add(new(key, null));
-                        }
-                        else
-                        {
-                            items.Add(new(key, value));
-                        }
-                    }
-                    // New key found, reset value
-                    key = trimmedLine;
-                    value = string.Empty;
-                }
-                else
-                {
-                    if (value.Length > 0)
-                    {
-                        if (!value.EndsWith(NL, OIC) &&
-                            !value.EndsWith(TAB, OIC) &&
-                            !value.EndsWith(SPACE, OIC) &&
-                            !trimmedLine.StartsWith(NL, OIC) &&
-                            !trimmedLine.StartsWith(TAB, OIC) &&
-                            !trimmedLine.StartsWith(SPACE, OIC))
-                        {
-                            value += ' ';
-                        }
-                    }
-                    if (trimmedLine.Contains(SPACE))
-                    {
-                        trimmedLine = trimmedLine.Replace(SPACE, " ");
-                    }
-                    value += trimmedLine;
-                }
+                (key, value) = ParseGrifKeyValue(content, ref index);
             }
-        }
-        if (!string.IsNullOrWhiteSpace(key))
-        {
-            if (value == NULL)
-            {
-                items.Add(new(key, null));
-            }
-            else
+            if (!string.IsNullOrWhiteSpace(key))
             {
                 items.Add(new(key, value));
             }
@@ -547,4 +481,200 @@ public static partial class Grif
         return result.ToString();
     }
 
+    #region ReadGrif Routines
+
+    private static (string key, string value) ParseJsonKeyValue(string content, ref int index)
+    {
+        SkipWhitespace(content, ref index);
+        string key = GetJsonString(content, ref index);
+        SkipWhitespace(content, ref index);
+        if (index >= content.Length || content[index] != ':')
+        {
+            throw new FormatException("Expected ':' after key in JSON object.");
+        }
+        index++; // Skip past ':'
+        SkipWhitespace(content, ref index);
+        string value = GetJsonString(content, ref index);
+        return (key, value);
+    }
+
+    private static string GetJsonString(string content, ref int index)
+    {
+        if (index >= content.Length || content[index] != '\"')
+        {
+            throw new FormatException("Expected '\"' at the start of JSON string.");
+        }
+        index++; // Skip past opening quote
+        StringBuilder result = new();
+        bool lastSlash = false;
+        while (index < content.Length)
+        {
+            char c = content[index++];
+            if (lastSlash)
+            {
+                switch (c)
+                {
+                    case 'n':
+                    case 'N':
+                        result.Append('\n');
+                        break;
+                    case 't':
+                    case 'T':
+                        result.Append('\t');
+                        break;
+                    case 'r':
+                    case 'R':
+                        result.Append('\r');
+                        break;
+                    case 'b':
+                    case 'B':
+                        result.Append('\b');
+                        break;
+                    case 'f':
+                    case 'F':
+                        result.Append('\f');
+                        break;
+                    case 'u':
+                    case 'U':
+                        // Expecting 4 hex digits
+                        if (index + 3 < content.Length &&
+                            Uri.IsHexDigit(content[index]) &&
+                            Uri.IsHexDigit(content[index + 1]) &&
+                            Uri.IsHexDigit(content[index + 2]) &&
+                            Uri.IsHexDigit(content[index + 3]))
+                        {
+                            var hex = content.Substring(index, 4);
+                            if (int.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out int codePoint))
+                            {
+                                result.Append((char)codePoint);
+                                index += 4;
+                            }
+                            else
+                            {
+                                throw new FormatException("Invalid unicode escape sequence in JSON string.");
+                            }
+                        }
+                        else
+                        {
+                            throw new FormatException("Invalid unicode escape sequence in JSON string.");
+                        }
+                        break;
+                    case '"':
+                        result.Append('\"');
+                        break;
+                    case '\\':
+                        result.Append('\\');
+                        break;
+                    default:
+                        result.Append('\\').Append(c);
+                        break;
+                }
+                lastSlash = false;
+            }
+            else if (c == '\\')
+            {
+                lastSlash = true;
+            }
+            else if (c == '\"')
+            {
+                // End of string
+                return result.ToString();
+            }
+            else
+            {
+                result.Append(c);
+            }
+        }
+        throw new FormatException("Unterminated string in JSON object.");
+    }
+
+    private static (string key, string value) ParseGrifKeyValue(string content, ref int index)
+    {
+        var needSpace = false;
+        StringBuilder key = new();
+        StringBuilder value = new();
+        while (index < content.Length)
+        {
+            if (content[index] == '\r' || content[index] == '\n')
+            {
+                break;
+            }
+            key.Append(content[index++]);
+        }
+        while (index < content.Length && (content[index] == '\r' || content[index] == '\n'))
+        {
+            index++;
+        }
+        while (index < content.Length && (content[index] == '\t' || content[index] == ' '))
+        {
+            while (index < content.Length && (content[index] == '\t' || content[index] == ' '))
+            {
+                index++;
+            }
+            if (needSpace)
+            {
+                value.Append(' ');
+            }
+            while (index < content.Length && content[index] != '\r' && content[index] != '\n')
+            {
+                value.Append(content[index++]);
+            }
+            while (index < content.Length && (content[index] == '\r' || content[index] == '\n'))
+            {
+                index++;
+            }
+            needSpace = true;
+        }
+        var valueTemp = value.ToString().Trim();
+        // change leading and trailing "\s" to spaces
+        if (valueTemp.StartsWith("\\s"))
+        {
+            valueTemp = ' ' + valueTemp[2..];
+        }
+        if (valueTemp.EndsWith("\\s"))
+        {
+            valueTemp = valueTemp[..^2] + ' ';
+        }
+        return (key.ToString(), valueTemp);
+    }
+
+    private static void SkipWhitespace(string content, ref int index)
+    {
+        bool found;
+        do
+        {
+            found = false;
+            while (index < content.Length && char.IsWhiteSpace(content[index]))
+            {
+                index++;
+                found = true;
+            }
+            if (index + 1 < content.Length && content[index] == '/' && content[index + 1] == '/')
+            {
+                // Single line comment
+                index += 2;
+                while (index < content.Length && content[index] != '\n')
+                {
+                    index++;
+                }
+                found = true;
+            }
+            if (index + 1 < content.Length && content[index] == '/' && content[index + 1] == '*')
+            {
+                // Multi-line comment
+                index += 2;
+                while (index + 1 < content.Length && !(content[index] == '*' && content[index + 1] == '/'))
+                {
+                    index++;
+                }
+                if (index + 1 < content.Length)
+                {
+                    index += 2; // Skip past the closing */
+                }
+                found = true;
+            }
+        } while (found);
+    }
+
+    #endregion
 }
