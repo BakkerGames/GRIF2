@@ -186,3 +186,13 @@
 - Added articles and adjectives to parser.
 - Articles are ignored.
 - Adjectives are not implemented yet.
+- Probably will need to read verb anywhere, then noun/preposition/noun in order.
+- Make sure to handle verb/preposition/noun format, "look in box".
+
+2025-10-11
+- Strings start/end spaces as "//s".
+
+2025-10-12
+- WriteGrif no splitting on "//n".
+- ReadGrif fixes for JSON internal quotes.
+- ReadGrif now uses full JSON logic, not simple logic.
