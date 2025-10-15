@@ -196,3 +196,6 @@
 - WriteGrif no splitting on "//n".
 - ReadGrif fixes for JSON internal quotes.
 - ReadGrif now uses full JSON logic, not simple logic.
+
+2025-10-13
+- ValidateScript
