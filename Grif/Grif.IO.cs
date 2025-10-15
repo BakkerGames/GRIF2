@@ -427,6 +427,8 @@ public static partial class Grif
         return result;
     }
 
+    #region Private routines
+
     private static string EncodeString(string value)
     {
         StringBuilder result = new();
@@ -480,8 +482,6 @@ public static partial class Grif
         result.AppendLine();
         return result.ToString();
     }
-
-    #region ReadGrif Routines
 
     private static (string key, string value) ParseJsonKeyValue(string content, ref int index)
     {

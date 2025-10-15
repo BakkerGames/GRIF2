@@ -363,6 +363,106 @@ public partial class Dags
         return result.ToString();
     }
 
+    public static bool ValidateScript(string script)
+    {
+        if (!script.TrimStart().StartsWith('@'))
+        {
+            return true;
+        }
+        var tokens = SplitTokens(script);
+        int parens = 0;
+        int ifCount = 0;
+        int forCount = 0;
+        int forEachKeyCount = 0;
+        int forEachListCount = 0;
+        foreach (string s in tokens)
+        {
+            if (s.StartsWith('@') && s.EndsWith('('))
+            {
+                parens++;
+            }
+            else if (s == ")")
+            {
+                parens--;
+                if (parens < 0)
+                {
+                    return false; // More closing parens than opening
+                }
+            }
+            switch (s.ToLower())
+            {
+                case "@if(":
+                    ifCount++;
+                    break;
+                case "@for(":
+                    forCount++;
+                    break;
+                case "@foreachkey(":
+                    forEachKeyCount++;
+                    break;
+                case "@foreachlist(":
+                    forEachListCount++;
+                    break;
+                case "@then":
+                case "@else":
+                case "@elseif":
+                    if (ifCount == 0)
+                    {
+                        return false; // @then, @else, or @elseif without matching @if
+                    }
+                    break;
+                case "@endif":
+                    ifCount--;
+                    if (ifCount < 0)
+                    {
+                        return false; // More @endif than @if
+                    }
+                    break;
+                case "@endfor":
+                    forCount--;
+                    if (forCount < 0)
+                    {
+                        return false; // More @endfor than @for
+                    }
+                    break;
+                case "@endforeachkey":
+                    forEachKeyCount--;
+                    if (forEachKeyCount < 0)
+                    {
+                        return false; // More @endforeachkey than @foreachkey
+                    }
+                    break;
+                case "@endforeachlist":
+                    forEachListCount--;
+                    if (forEachListCount < 0)
+                    {
+                        return false; // More @endforeachlist than @foreachlist
+                    }
+                    break;
+            }
+        }
+        if (parens != 0) return false; // parens not balanced
+        if (forCount != 0) return false; // for loops not balanced
+        if (forEachKeyCount != 0) return false; // foreachkey loops not balanced
+        if (forEachListCount != 0) return false; // foreachlist loops not balanced
+        return true;
+    }
+
+    public static int GetIntValue(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return 0; // Default to 0 if not found
+        }
+        if (!int.TryParse(value, out int intValue))
+        {
+            throw new SystemException($"Invalid integer: {value}");
+        }
+        return intValue;
+    }
+
+    #region Private routines
+
     private static List<DagsItem> GetParameters(string[] tokens, ref int index, Grod grod)
     {
         List<DagsItem> parameters = [];
@@ -410,11 +510,6 @@ public partial class Dags
         return value;
     }
 
-    private static string AddQuotes(string value)
-    {
-        return "\"" + value.Replace("\"", "\\\"") + "\"";
-    }
-
     private static void CheckParameterCount(List<DagsItem> p, int count)
     {
         if (p.Count != count)
@@ -448,19 +543,6 @@ public partial class Dags
             return GetValue(grod, resultItems[0].Value);
         }
         throw new SystemException("Expected a single text result.");
-    }
-
-    public static int GetIntValue(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return 0; // Default to 0 if not found
-        }
-        if (!int.TryParse(value, out int intValue))
-        {
-            throw new SystemException($"Invalid integer: {value}");
-        }
-        return intValue;
     }
 
     private static List<DagsItem> GetUserDefinedFunctionValues(string token, List<DagsItem> p, Grod grod)
@@ -695,4 +777,6 @@ public partial class Dags
         items.RemoveAt(x);
         grod.Set(key, string.Join(',', items));
     }
+
+    #endregion
 }
