@@ -391,7 +391,7 @@ public partial class Dags
             }
             switch (s.ToLower())
             {
-                case "@if(":
+                case "@if":
                     ifCount++;
                     break;
                 case "@for(":
@@ -441,10 +441,26 @@ public partial class Dags
                     break;
             }
         }
-        if (parens != 0) return false; // parens not balanced
-        if (forCount != 0) return false; // for loops not balanced
-        if (forEachKeyCount != 0) return false; // foreachkey loops not balanced
-        if (forEachListCount != 0) return false; // foreachlist loops not balanced
+        if (parens != 0)
+        {
+            return false; // parens not balanced
+        }
+        if (ifCount != 0)
+        {
+            return false; // if not balanced
+        }
+        if (forCount != 0)
+        {
+            return false; // for loops not balanced
+        }
+        if (forEachKeyCount != 0)
+        {
+            return false; // foreachkey loops not balanced
+        }
+        if (forEachListCount != 0)
+        {
+            return false; // foreachlist loops not balanced
+        }
         return true;
     }
 
