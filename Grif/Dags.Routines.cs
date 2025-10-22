@@ -5,6 +5,9 @@ namespace Grif;
 
 public partial class Dags
 {
+    /// <summary>
+    /// Split the script into tokens for processing.
+    /// </summary>
     public static string[] SplitTokens(string script)
     {
         List<string> result = [];
@@ -363,6 +366,9 @@ public partial class Dags
         return result.ToString();
     }
 
+    /// <summary>
+    /// Validate the script for correct syntax.
+    /// </summary>
     public static bool ValidateScript(string script)
     {
         if (!script.TrimStart().StartsWith('@'))
@@ -372,6 +378,7 @@ public partial class Dags
         var tokens = SplitTokens(script);
         int parens = 0;
         int ifCount = 0;
+        bool inIf = false;
         int forCount = 0;
         int forEachKeyCount = 0;
         int forEachListCount = 0;
@@ -393,6 +400,38 @@ public partial class Dags
             {
                 case "@if":
                     ifCount++;
+                    inIf = true;
+                    break;
+                case "@and":
+                case "@or":
+                case "@not":
+                    if (!inIf)
+                    {
+                        return false; // Logical operator outside of @if
+                    }
+                    break;
+                case "@then":
+                case "@else":
+                    inIf = false;
+                    if (ifCount == 0)
+                    {
+                        return false; // @then, @else without matching @if
+                    }
+                    break;
+                case "@elseif":
+                    inIf = true;
+                    if (ifCount == 0)
+                    {
+                        return false; // @elseif without matching @if
+                    }
+                    break;
+                case "@endif":
+                    ifCount--;
+                    inIf = false;
+                    if (ifCount < 0)
+                    {
+                        return false; // More @endif than @if
+                    }
                     break;
                 case "@for(":
                     forCount++;
@@ -402,21 +441,6 @@ public partial class Dags
                     break;
                 case "@foreachlist(":
                     forEachListCount++;
-                    break;
-                case "@then":
-                case "@else":
-                case "@elseif":
-                    if (ifCount == 0)
-                    {
-                        return false; // @then, @else, or @elseif without matching @if
-                    }
-                    break;
-                case "@endif":
-                    ifCount--;
-                    if (ifCount < 0)
-                    {
-                        return false; // More @endif than @if
-                    }
                     break;
                 case "@endfor":
                     forCount--;
@@ -445,7 +469,7 @@ public partial class Dags
         {
             return false; // parens not balanced
         }
-        if (ifCount != 0)
+        if (ifCount != 0 || inIf)
         {
             return false; // if not balanced
         }
@@ -464,6 +488,9 @@ public partial class Dags
         return true;
     }
 
+    /// <summary>
+    /// Get integer value from string, with error handling.
+    /// </summary>
     public static int GetIntValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))

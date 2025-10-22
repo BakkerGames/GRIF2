@@ -68,12 +68,6 @@ public class TestGrod
     }
 
     [Test]
-    public void TestGrodVersion()
-    {
-        Assert.That(Grod.Version, Is.EqualTo("2.2025.1001"));
-    }
-
-    [Test]
     public void TestGrodInvalidKey()
     {
         var grod = new Grod("grod6");

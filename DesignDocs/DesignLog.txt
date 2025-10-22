@@ -199,3 +199,9 @@
 
 2025-10-13
 - ValidateScript
+
+2025-10-21
+- Finished ValidateScript with all unit tests passing.
+- Validate @and, @or, @not as only being used inside @if.
+- @flipbit, @fromhex, @len, @tohex
+- Added CompareKeys for sorting. Sorts numeric parts numerically.

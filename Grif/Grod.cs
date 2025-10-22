@@ -4,7 +4,7 @@ public record GrodItem(string Key, string? Value);
 
 public class Grod
 {
-    private const string _version = "2.2025.1001";
+    private const string _version = "2.2025.1021";
 
     private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
 
@@ -103,7 +103,7 @@ public class Grod
         }
         if (sorted)
         {
-            keys.Sort(StringComparer.OrdinalIgnoreCase);
+            keys.Sort(CompareKeys);
         }
         return keys;
     }
@@ -122,7 +122,7 @@ public class Grod
         }
         if (sorted)
         {
-            keys.Sort(StringComparer.OrdinalIgnoreCase);
+            keys.Sort(CompareKeys);
         }
         return keys;
     }
@@ -160,6 +160,46 @@ public class Grod
                 Set(item);
             }
         }
+    }
+
+    /// <summary>
+    /// Key comparison function, returns -1/0/1. Used in keys.Sort(CompareKeys);
+    /// Designed for hierarchical keys separated by '.'.
+    /// Handles numeric key sections in numeric order, not alphabetic order.
+    /// </summary>
+    public static int CompareKeys(string x, string y)
+    {
+        if (x == null)
+        {
+            if (y == null) return 0;
+            return -1;
+        }
+        if (y == null)
+        {
+            return 1;
+        }
+        if (x.Equals(y, StringComparison.OrdinalIgnoreCase)) return 0;
+        var xTokens = x.Split('.');
+        var yTokens = y.Split('.');
+        for (int i = 0; i < Math.Max(xTokens.Length, yTokens.Length); i++)
+        {
+            if (i >= xTokens.Length) return -1; // x is shorter and earlier
+            if (i >= yTokens.Length) return 1; // y is shorter and earlier
+            if (xTokens[i].Equals(yTokens[i], StringComparison.OrdinalIgnoreCase)) continue;
+            if (xTokens[i] == "*") return -1; // "*" comes first so x is earlier
+            if (yTokens[i] == "*") return 1; // "*" comes first so y is earlier
+            if (xTokens[i] == "?") return -1; // "?" comes next so x is earlier
+            if (yTokens[i] == "?") return 1; // "?" comes next so y is earlier
+            if (xTokens[i] == "#") return -1; // "#" comes next so x is earlier
+            if (yTokens[i] == "#") return 1; // "#" comes next so y is earlier
+            if (int.TryParse(xTokens[i], out int xVal) && int.TryParse(yTokens[i], out int yVal))
+            {
+                if (xVal == yVal) continue;
+                return xVal < yVal ? -1 : 1;
+            }
+            return string.Compare(xTokens[i], yTokens[i], StringComparison.OrdinalIgnoreCase);
+        }
+        return 0;
     }
 
     #region private methods

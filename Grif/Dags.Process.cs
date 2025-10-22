@@ -236,6 +236,17 @@ public partial class Dags
                         result.Add(new DagsItem(DagsType.Internal, TrueFalse(false)));
                     }
                     break;
+                case "@flipbit(":
+                    CheckParameterCount(p, 2);
+                    int1 = GetIntValue(p[0].Value);
+                    int2 = GetIntValue(p[1].Value);
+                    if (int1 < 0 || int2 < 0 || int2 > 30)
+                    {
+                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                    }
+                    intAnswer = int1 ^ (int)Math.Pow(2, int2);
+                    result.Add(new DagsItem(DagsType.Internal, intAnswer.ToString()));
+                    break;
                 case "@for(":
                     CheckParameterCount(p, 3);
                     HandleFor(p, tokens, ref index, grod, result);
@@ -259,6 +270,19 @@ public partial class Dags
                         value = value.Replace($"{{{i - 1}}}", p[i].Value); // {0} = p[1]
                     }
                     result.Add(new DagsItem(DagsType.Internal, value));
+                    break;
+                case "@fromhex(":
+                    CheckParameterCount(p, 1);
+                    try
+                    {
+                        int1 = Convert.ToInt32(p[0].Value, 16);
+                        value = int1.ToString();
+                        result.Add(new DagsItem(DagsType.Internal, value));
+                    }
+                    catch (Exception)
+                    {
+                        throw new SystemException($"{token}{p[0].Value}): Invalid hex string");
+                    }
                     break;
                 case "@ge(":
                     CheckParameterCount(p, 2);
@@ -424,6 +448,10 @@ public partial class Dags
                         result.Add(new DagsItem(DagsType.Internal,
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) <= 0)));
                     }
+                    break;
+                case "@len(":
+                    CheckParameterCount(p, 1);
+                    result.Add(new DagsItem(DagsType.Internal, p[0].Value.Length.ToString()));
                     break;
                 case "@listlength(":
                     CheckParameterCount(p, 1);
@@ -651,6 +679,11 @@ public partial class Dags
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     result.Add(new DagsItem(DagsType.Internal, Convert.ToString(int1, 2)));
+                    break;
+                case "@tohex(":
+                    CheckParameterCount(p, 1);
+                    int1 = GetIntValue(p[0].Value);
+                    result.Add(new DagsItem(DagsType.Internal, int1.ToString("X")));
                     break;
                 case "@tointeger(":
                     CheckParameterCount(p, 1);

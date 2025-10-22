@@ -1,6 +1,7 @@
 using Grif;
 using System.Text;
 using static Grif.Common;
+using static Grif.Dags;
 
 namespace Tests;
 
@@ -834,5 +835,50 @@ public class UnitTestDags
     {
         result = Dags.Process(grod, $"@tointeger(111)");
         Assert.That(Squash(result), Is.EqualTo("7"));
+    }
+
+    [Test]
+    public void Test_ToHex()
+    {
+        result = Dags.Process(grod, "@tohex(255)");
+        Assert.That(Squash(result), Is.EqualTo("FF"));
+    }
+
+    [Test]
+    public void Test_FromHex()
+    {
+        result = Dags.Process(grod, "@fromhex(FF)");
+        Assert.That(Squash(result), Is.EqualTo("255"));
+    }
+
+    [Test]
+    public void Test_FlipBit()
+    {
+        result = Dags.Process(grod, $"@flipbit(7,2)");
+        Assert.That(Squash(result), Is.EqualTo("3"));
+        result = Dags.Process(grod, $"@flipbit(8,2)");
+        Assert.That(Squash(result), Is.EqualTo("12"));
+    }
+
+    [Test]
+    public void Test_Len()
+    {
+        result = Dags.Process(grod, $"@len(abcabc)");
+        Assert.That(Squash(result), Is.EqualTo("6"));
+        result = Dags.Process(grod, $"@len(\"\")");
+        Assert.That(Squash(result), Is.EqualTo("0"));
+        result = Dags.Process(grod, $"@len(null)");
+        Assert.That(Squash(result), Is.EqualTo("4"));
+    }
+
+    [Test]
+    public void Test_ValidateScript()
+    {
+        var script1 = "@set(value,123) @write(@get(value))";
+        bool isValid = ValidateScript(script1);
+        Assert.That(isValid, Is.True);
+        var script2 = "@set(value,123 @write(@get(value))";
+        isValid = ValidateScript(script2);
+        Assert.That(isValid, Is.False);
     }
 }

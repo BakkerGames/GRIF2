@@ -315,6 +315,18 @@ command.version
 	@writeline(@__version)
 command.west
 	@godir(west)
+direction.down
+	down,d,descend
+direction.east
+	east,e
+direction.north
+	north,n
+direction.south
+	south,s
+direction.up
+	up,u,climb
+direction.west
+	west,w
 item.cloak.afterdrop
 	@nl
 	@msg(message.dropcloak)
@@ -375,23 +387,7 @@ message.examine_what
 message.hang_what
 	Hang what?
 message.help
-	There are just three rooms and three objects.\n
-	\n
-	The Foyer of the Opera House is where the game begins. This empty room has doors to the south and west, also an unusable exit to the north. There is nobody else around.\n
-	\n
-	The Bar lies south of the Foyer, and is initially unlit. Trying to do anything other than return northwards results in a warning message about disturbing things in the dark.\n
-	\n
-	On the wall of the Cloakroom, to the west of the Foyer, is fixed a small brass hook.\n
-	\n
-	Taking an inventory of possessions reveals that the player is wearing a black velvet cloak which, upon examination, is found to be light-absorbent. The player can drop the cloak on the floor of the Cloakroom or, better, put it on the hook.\n
-	\n
-	Returning to the Bar without the cloak reveals that the room is now lit. A message is scratched in the sawdust on the floor.\n
-	\n
-	The message reads either "You have won" or "You have lost", depending on how much it was disturbed by the player while the room was dark.\n
-	\n
-	The act of reading the message ends the game.\n
-	\n
-	And that's all there is to it...
+	There are just three rooms and three objects.\n\nThe Foyer of the Opera House is where the game begins. This empty room has doors to the south and west, also an unusable exit to the north. There is nobody else around.\n\nThe Bar lies south of the Foyer, and is initially unlit. Trying to do anything other than return northwards results in a warning message about disturbing things in the dark.\n\nOn the wall of the Cloakroom, to the west of the Foyer, is fixed a small brass hook.\n\nTaking an inventory of possessions reveals that the player is wearing a black velvet cloak which, upon examination, is found to be light-absorbent. The player can drop the cloak on the floor of the Cloakroom or, better, put it on the hook.\n\nReturning to the Bar without the cloak reveals that the room is now lit. A message is scratched in the sawdust on the floor.\n\nThe message reads either "You have won" or "You have lost", depending on how much it was disturbed by the player while the room was dark.\n\nThe act of reading the message ends the game.\n\nAnd that's all there is to it...
 message.hook_desc_cloak
 	with a cloak hanging on it.
 message.hook_desc_empty
@@ -401,11 +397,7 @@ message.hook_desc_start
 message.hook_with_cloak
 	There is a handsome cloak hanging on the hook.
 message.intro
-	Cloak of Darkness\n
-	\n
-	A basic IF demonstration.\n
-	\n
-	Hurrying through the rainswept November night, you're glad to see the bright lights of the Opera House. It's surprising that there aren't more people about but, hey, what do you expect in a cheap demo game...?
+	Cloak of Darkness\n\nA basic IF demonstration.\n\nHurrying through the rainswept November night, you're glad to see the bright lights of the Opera House. It's surprising that there aren't more people about but, hey, what do you expect in a cheap demo game...?
 message.inv_empty
 	You aren't carrying anything.
 message.leave_operahouse
@@ -565,8 +557,7 @@ system.gametitle
 system.output_width
 	80
 system.prompt
-	\n
-	>
+	\n >
 value.cloakscore
 	1
 value.maxscore
@@ -583,12 +574,8 @@ value.scuffed
 	0
 value.scuffed.comment
 	how scuffed is the message?
-direction.down
-	down,d,descend
 verb.drop
 	drop,throw,remove
-direction.east
-	east,e
 verb.examine
 	x,examine
 verb.go
@@ -601,8 +588,6 @@ verb.inventory
 	i,inv,inventory
 verb.look
 	l,look
-direction.north
-	north,n
 verb.out
 	out
 verb.quit
@@ -617,15 +602,9 @@ verb.save
 	save,suspend
 verb.score
 	score
-direction.south
-	south,s
 verb.take
 	take,t,get,wear
-direction.up
-	up,u,climb
 verb.use
 	use
 verb.version
 	ver,version
-direction.west
-	west,w

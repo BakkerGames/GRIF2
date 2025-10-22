@@ -654,4 +654,54 @@ public class TestDags
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "value1") }));
     }
+
+    [Test]
+    public void TestGetValueNonExistentKey()
+    {
+        Grod grod = new("testGrod");
+        string script = "@getvalue(nonexistent)";
+        var result = Dags.Process(grod, script);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "") }));
+    }
+
+    [Test]
+    public void TestGetValueWithNestedFunction()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("key1", "value1");
+        grod.Set("key2", "@get(key1)");
+        grod.Set("key3", "@get(key2)");
+        string script = "@getvalue(key3)";
+        var result = Dags.Process(grod, script);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Internal, "value1") }));
+    }
+
+    [Test]
+    public void TestComplexScript()
+    {
+        Grod grod = new("testGrod");
+        grod.Set("a", "10");
+        grod.Set("b", "20");
+        string script = "@if @gt(@get(a),5) @and @lt(@get(b),30) @then @write(@add(@get(a),@get(b))) @else @write(Out of range) @endif";
+        var result = Dags.Process(grod, script);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "30") }));
+    }
+
+    [Test]
+    public void TestCommentCommand()
+    {
+        Grod grod = new("testGrod");
+        string script = "@comment(\"This is a comment\")@write(Hello)";
+        var result = Dags.Process(grod, script);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "Hello") }));
+    }
+
+    [Test]
+    public void TestCommentCommandWithNewline()
+    {
+        Grod grod = new("testGrod");
+        string script = "@comment(\"This is a comment\nwith a newline\")@write(Hello)";
+        var result = Dags.Process(grod, script);
+        Assert.That(result, Is.EqualTo(new List<DagsItem> { new(DagsType.Text, "Hello") }));
+    }
 }
