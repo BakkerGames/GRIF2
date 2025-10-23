@@ -171,7 +171,7 @@ public static partial class Grif
     {
         if (OutputWidth <= 0)
         {
-            Console.Write(value);
+            StandardOutput(value);
             OutStream?.Write(value.Replace("\n", Environment.NewLine));
             return;
         }
@@ -245,7 +245,7 @@ public static partial class Grif
                 CurrOutputPos += tempOutput.Length;
             }
         }
-        Console.Write(output.ToString());
+        StandardOutput(output.ToString());
         OutStream?.Write(output.ToString().Replace("\n", Environment.NewLine));
     }
 
@@ -389,7 +389,7 @@ public static partial class Grif
             resultRaw = InputLines[InputIndex++].Trim();
             if (resultRaw.StartsWith("//"))
             {
-                Console.Write(resultRaw + Environment.NewLine);
+                StandardOutput(resultRaw + Environment.NewLine);
                 OutStream?.Write(resultRaw.Replace("\n", Environment.NewLine) + Environment.NewLine);
             }
             result = resultRaw.Trim();
@@ -400,7 +400,7 @@ public static partial class Grif
         }
         if (!string.IsNullOrWhiteSpace(result))
         {
-            Console.Write(resultRaw + Environment.NewLine);
+            StandardOutput(resultRaw + Environment.NewLine);
         }
         while (string.IsNullOrWhiteSpace(result))
         {
