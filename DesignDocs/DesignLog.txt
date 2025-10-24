@@ -205,3 +205,8 @@
 - Validate @and, @or, @not as only being used inside @if.
 - @flipbit, @fromhex, @len, @tohex
 - Added CompareKeys for sorting. Sorts numeric parts numerically.
+
+2025-10-22
+- Trying StandardOutput for output instead of Console.WriteLine.
+
+2025-10-23

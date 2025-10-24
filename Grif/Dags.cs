@@ -2,24 +2,13 @@
 
 namespace Grif;
 
-public enum DagsType
-{
-    Error = -1,
-    Text = 0,
-    Internal = 1,
-    OutChannel = 2,
-    InChannel = 3,
-}
-
-public record DagsItem(DagsType Type, string Value);
-
 public partial class Dags
 {
-    private const string _version = "2.2025.1021";
-
-    public static string Version => _version;
+    private const string _version = "2.2025.1023";
 
     private static readonly Random _random = new();
+
+    public static string Version => _version;
 
     public static List<DagsItem> Process(Grod grod, string? script)
     {

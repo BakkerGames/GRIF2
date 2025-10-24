@@ -4,7 +4,8 @@ namespace Grif;
 
 public partial class Grif
 {
-    private const string _version = "2.2025.1025";
+    private const string _version = "2.2025.1023";
+
     public static string Version => _version;
 
     public static Action<string> StandardOutput = text => Console.Write(text);

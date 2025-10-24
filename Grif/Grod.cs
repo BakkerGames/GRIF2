@@ -1,10 +1,12 @@
 ﻿namespace Grif;
 
-public record GrodItem(string Key, string? Value);
-
 public class Grod
 {
-    private const string _version = "2.2025.1021";
+    private const string _version = "2.2025.1023";
+
+    private const string NULL = "null";
+    private const string TRUE = "true";
+    private const string FALSE = "false";
 
     private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
 
@@ -45,13 +47,55 @@ public class Grod
         return null;
     }
 
+    public int? GetInt(string key, bool recursive)
+    {
+        var value = Get(key, recursive);
+        if (value == null)
+        {
+            return null;
+        }
+        if (int.TryParse(value, out int intValue))
+        {
+            return intValue;
+        }
+        throw new FormatException($"Value for key '{key}' is not a valid integer.");
+    }
+
+    public bool? GetBool(string key, bool recursive)
+    {
+        var value = Get(key, recursive);
+        if (value == null)
+        {
+            return null;
+        }
+        if (bool.TryParse(value, out bool boolValue))
+        {
+            return boolValue;
+        }
+        throw new FormatException($"Value for key '{key}' is not a valid boolean.");
+    }
+
     public void Set(string key, string? value)
     {
         ValidateKey(ref key);
+        if (value != null && value.Equals(NULL, StringComparison.OrdinalIgnoreCase))
+        {
+            value = null;
+        }
         if (!_data.TryAdd(key, value))
         {
             _data[key] = value;
         }
+    }
+
+    public void Set(string key, int value)
+    {
+        Set(key, value.ToString());
+    }
+
+    public void Set(string key, bool value)
+    {
+        Set(key, value ? TRUE : FALSE);
     }
 
     public void Set(GrodItem item)
@@ -162,12 +206,9 @@ public class Grod
         }
     }
 
-    /// <summary>
-    /// Key comparison function, returns -1/0/1. Used in keys.Sort(CompareKeys);
-    /// Designed for hierarchical keys separated by '.'.
-    /// Handles numeric key sections in numeric order, not alphabetic order.
-    /// </summary>
-    public static int CompareKeys(string x, string y)
+    #region private methods
+
+    private static int CompareKeys(string x, string y)
     {
         if (x == null)
         {
@@ -201,8 +242,6 @@ public class Grod
         }
         return 0;
     }
-
-    #region private methods
 
     private static void ValidateKey(ref string key)
     {
