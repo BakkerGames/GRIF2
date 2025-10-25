@@ -120,27 +120,13 @@ internal class Program
             return;
         }
         // load data
-        Grod? parentGrod = null;
-        Grod? currentGrod = null;
-        foreach (var file in fileList)
+        var game = new Game();
+        game.Initialize(fileList[0]);
+        for (int i = 1; i < fileList.Count; i++)
         {
-            // stack up all the files in the order specified
-            currentGrod = new Grod(file, parentGrod);
-            List<GrodItem> items = Grif.ReadGrif(file);
-            currentGrod.AddItems(items);
-            parentGrod = currentGrod;
+            game.AddModule(fileList[i]);
         }
-        var grod = new Grod("userdata", currentGrod);
-        try
-        {
-            Grif.VerifyGame(grod);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return;
-        }
-        Grif.RunGame(grod, inputFilename, outputFilename);
+        game.RunGame(inputFilename, outputFilename);
     }
 
     public static string Syntax()

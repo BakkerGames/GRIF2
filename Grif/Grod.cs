@@ -2,13 +2,17 @@
 
 public class Grod
 {
-    private const string _version = "2.2025.1023";
+    public const string Version = "2.2025.1024";
 
     private const string NULL = "null";
     private const string TRUE = "true";
     private const string FALSE = "false";
 
     private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
+
+    public Grod()
+    {
+    }
 
     public Grod(string name)
     {
@@ -21,9 +25,7 @@ public class Grod
         Parent = parent;
     }
 
-    public static string Version => _version;
-
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public Grod? Parent { get; set; }
 

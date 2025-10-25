@@ -18,7 +18,7 @@ public static class Common
     public const string APP_NAME = "GRIF";
     public const string DATA_EXTENSION = ".grif";
     public const string SAVE_FILENAME = "save";
-    public const string SAVE_EXTENSION = ".dat";
+    public const string SAVE_EXTENSION = ".grifsave";
 
     public const string AFTER_PROMPT = "system.after_prompt";
     public const string DONT_UNDERSTAND = "system.dont_understand";
