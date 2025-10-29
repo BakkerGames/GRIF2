@@ -1,4 +1,5 @@
 ﻿using static Grif.Common;
+using static Grif.IO;
 
 namespace Grif;
 
@@ -6,6 +7,7 @@ public static partial class Grif
 {
     public static void HandleOutChannel(Grod grod, List<DagsItem> items, ref int index)
     {
+/*
         var item = items[index];
         bool exists;
         if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
@@ -163,5 +165,6 @@ public static partial class Grif
             return;
         }
         throw new Exception($"Unknown OutChannel command {item.Value}");
+*/
     }
 }

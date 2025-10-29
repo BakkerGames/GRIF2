@@ -12,9 +12,10 @@ internal class Program
         string filename;
         string? inputFilename = null;
         string? outputFilename = null;
+        var game = new Game();
         if (args.Length == 0)
         {
-            Syntax();
+            game.Output(Syntax());
             return;
         }
         int index = 0;
@@ -120,13 +121,12 @@ internal class Program
             return;
         }
         // load data
-        var game = new Game();
         game.Initialize(fileList[0]);
         for (int i = 1; i < fileList.Count; i++)
         {
             game.AddModule(fileList[i]);
         }
-        game.RunGame(inputFilename, outputFilename);
+        game.RunGame(inputFilename ?? "inputFilename", outputFilename ?? "outputFilename");
     }
 
     public static string Syntax()

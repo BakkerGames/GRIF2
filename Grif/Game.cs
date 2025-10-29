@@ -1,4 +1,5 @@
 ﻿using static Grif.Common;
+using static Grif.IO;
 
 namespace Grif;
 
@@ -14,7 +15,7 @@ public class Game
         _baseGrod.Name = baseFilename;
         _baseGrod.Clear(false);
         _baseGrod.AddItems(loadedItems);
-        var savePath = IO.GetSavePath(Path.GetFileNameWithoutExtension(baseFilename));
+        var savePath = GetSavePath(Path.GetFileNameWithoutExtension(baseFilename));
         _overlayGrod.Name = Path.Combine(savePath, SAVE_FILENAME + SAVE_EXTENSION);
         _overlayGrod.Clear(false);
         _overlayGrod.Parent = _baseGrod;
@@ -38,7 +39,7 @@ public class Game
         _baseGrod = grodBase;
         _overlayGrod.Clear(false);
         _overlayGrod.Parent = _baseGrod;
-        var savePath = IO.GetSavePath(Path.GetFileNameWithoutExtension(_baseGrod.Name));
+        var savePath = GetSavePath(Path.GetFileNameWithoutExtension(_baseGrod.Name));
         _overlayGrod.Name = Path.Combine(savePath, SAVE_FILENAME + SAVE_EXTENSION);
     }
 
@@ -51,7 +52,7 @@ public class Game
 
     public void AddModule(string modFilename)
     {
-        var loadedItems = IO.ReadGrif(modFilename);
+        var loadedItems = ReadGrif(modFilename);
         Grod grodMod = new(modFilename);
         grodMod.AddItems(loadedItems);
         AddModule(grodMod);
@@ -64,15 +65,29 @@ public class Game
         _overlayGrod.Parent = grodMod;
     }
 
-    public void Input(string input)
+    public void RunGame(string inputFilename, string outputFilename)
     {
+        Output("Game started.");
+        Output(inputFilename);
+        Output(outputFilename);
+        Input(Console.ReadLine() ?? "");
     }
 
-    // Declare the delegate (if using non-generic pattern).
-    public delegate void OutputEventHandler(object sender, OutputEventArgs e);
+    public void Input(string input)
+    {
+        Console.WriteLine($"Input received: {input}");
+    }
 
-    // Declare the event.
-    public event OutputEventHandler? OutputEvent;
+    public void Output(string output)
+    {
+        Console.WriteLine($"Output: {output}");
+    }
+
+    //// Declare the delegate (if using non-generic pattern).
+    //public delegate void OutputEventHandler(object sender, OutputEventArgs e);
+
+    //// Declare the event.
+    //public event OutputEventHandler? OutputEvent;
 
     //public static void RunGame(string? inFile, string? outFile)
     //{
@@ -147,7 +162,7 @@ public class Game
     */
 }
 
-public class OutputEventArgs(string text)
-{
-    public string Text { get; } = text;
-}
+//public class OutputEventArgs(string text)
+//{
+//    public string Text { get; } = text;
+//}
