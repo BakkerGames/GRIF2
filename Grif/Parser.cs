@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using static Grif.Common;
+﻿using static Grif.Common;
 
 namespace Grif;
 
@@ -15,7 +14,7 @@ The order of the words does not matter, so "go west" and "west go" are equivalen
 Noun must come before indirect noun if both are present.
 */
 
-public static partial class Grif
+public static class Parser
 {
     private static int _maxWordLen = 0;
     private const string VERB_PREFIX = "verb.";
@@ -33,29 +32,23 @@ public static partial class Grif
     private static List<GrodItem> _adjectives = [];
     private static List<GrodItem> _articles = []; // "the,a,an,some,any,my,his,her,its,our,their"
 
-    [SuppressMessage("Style", "IDE0305:Simplify collection initialization")]
     public static void ParseInit(Grod grod)
     {
-        _verbs = grod.Items(VERB_PREFIX, true, true)
+        _verbs = [.. grod.Items(VERB_PREFIX, true, true)
             .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
-            .Select(x => new GrodItem(x.Key[VERB_PREFIX.Length..], x.Value))
-            .ToList();
-        _nouns = grod.Items(NOUN_PREFIX, true, true)
+            .Select(x => new GrodItem(x.Key[VERB_PREFIX.Length..], x.Value))];
+        _nouns = [.. grod.Items(NOUN_PREFIX, true, true)
             .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
-            .Select(x => new GrodItem(x.Key[NOUN_PREFIX.Length..], x.Value))
-            .ToList();
-        _directions = grod.Items(DIRECTION_PREFIX, true, true)
+            .Select(x => new GrodItem(x.Key[NOUN_PREFIX.Length..], x.Value))];
+        _directions = [.. grod.Items(DIRECTION_PREFIX, true, true)
             .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
-            .Select(x => new GrodItem(x.Key[DIRECTION_PREFIX.Length..], x.Value))
-            .ToList();
-        _prepositions = grod.Items(PREPOSITION_PREFIX, true, true)
+            .Select(x => new GrodItem(x.Key[DIRECTION_PREFIX.Length..], x.Value))];
+        _prepositions = [.. grod.Items(PREPOSITION_PREFIX, true, true)
             .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
-            .Select(x => new GrodItem(x.Key[PREPOSITION_PREFIX.Length..], x.Value))
-            .ToList();
-        _adjectives = grod.Items(ADJECTIVE_PREFIX, true, true)
+            .Select(x => new GrodItem(x.Key[PREPOSITION_PREFIX.Length..], x.Value))];
+        _adjectives = [.. grod.Items(ADJECTIVE_PREFIX, true, true)
             .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
-            .Select(x => new GrodItem(x.Key[ADJECTIVE_PREFIX.Length..], x.Value))
-            .ToList();
+            .Select(x => new GrodItem(x.Key[ADJECTIVE_PREFIX.Length..], x.Value))];
         _articles = grod.Items(ARTICLE_KEY, true, true);
         _maxWordLen = Dags.GetIntValue(grod.Get(WORDSIZE, true));
         if (_maxWordLen > 0)
@@ -208,6 +201,8 @@ public static partial class Grif
         return result;
     }
 
+    #region Private methods
+
     private static void TrimSynonyms(ref List<GrodItem> items)
     {
         for (int i = 0; i < items.Count; i++)
@@ -286,4 +281,6 @@ public static partial class Grif
             }
         }
     }
+
+    #endregion
 }

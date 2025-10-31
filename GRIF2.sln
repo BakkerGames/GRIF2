@@ -22,6 +22,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DesignDocs", "DesignDocs", "{33C059D6-BBE3-492A-9228-DB14EC641B5C}"
 	ProjectSection(SolutionItems) = preProject
 		DesignDocs\DesignLog.txt = DesignDocs\DesignLog.txt
+		GameFlow.txt = GameFlow.txt
 		DesignDocs\Grod.md = DesignDocs\Grod.md
 	EndProjectSection
 EndProject

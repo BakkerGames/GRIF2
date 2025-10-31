@@ -6,16 +6,16 @@ namespace Grif;
 
 internal class Program
 {
+    private static string? outputFilename = null;
+
     static void Main(string[] args)
     {
         List<string> fileList = [];
         string filename;
         string? inputFilename = null;
-        string? outputFilename = null;
-        var game = new Game();
         if (args.Length == 0)
         {
-            game.Output(Syntax());
+            OutputText(Syntax());
             return;
         }
         int index = 0;
@@ -25,8 +25,8 @@ internal class Program
             {
                 if (index + 1 >= args.Length)
                 {
-                    Console.WriteLine($"Argument must have a value: {args[index]}");
-                    Syntax();
+                    OutputText($"Argument must have a value: {args[index]}");
+                    OutputText(Syntax());
                     return;
                 }
                 if (args[index].Equals("-i", OIC) ||
@@ -36,8 +36,8 @@ internal class Program
                     inputFilename = args[index++];
                     if (!File.Exists(inputFilename))
                     {
-                        Console.WriteLine($"Input file not found: {inputFilename}");
-                        Syntax();
+                        OutputText($"Input file not found: {inputFilename}");
+                        OutputText(Syntax());
                         return;
                     }
                 }
@@ -45,17 +45,18 @@ internal class Program
                     args[index].Equals("--output", OIC))
                 {
                     index++;
-                    outputFilename = args[index++];
+                    var tempFilename = args[index++];
                     try
                     {
                         // check if file can be created
-                        var outStream = File.CreateText(outputFilename);
+                        var outStream = File.CreateText(tempFilename);
                         outStream.Close();
+                        outputFilename = tempFilename;
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine($"Error creating output file: {outputFilename}");
-                        Syntax();
+                        OutputText($"Error creating output file: {tempFilename}");
+                        OutputText(Syntax());
                         return;
                     }
                 }
@@ -81,13 +82,13 @@ internal class Program
                     }
                     else
                     {
-                        Console.WriteLine($"File/directory not found: {modFilename}");
+                        OutputText($"File/directory not found: {modFilename}");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Unknown argument: {args[index++]}");
-                    Syntax();
+                    OutputText($"Unknown argument: {args[index++]}");
+                    OutputText(Syntax());
                     return;
                 }
             }
@@ -111,22 +112,55 @@ internal class Program
                 }
                 else
                 {
-                    Console.WriteLine($"File/directory not found: {filename}");
+                    OutputText($"File/directory not found: {filename}");
                 }
             }
         }
         if (fileList.Count == 0)
         {
-            Syntax();
+            OutputText(Syntax());
             return;
         }
         // load data
-        game.Initialize(fileList[0]);
+        var game = new Game();
+        game.OutputEvent += Output;
+        Grod baseGrod = new(fileList[0]);
+        baseGrod.AddItems(IO.ReadGrif(fileList[0]));
         for (int i = 1; i < fileList.Count; i++)
         {
-            game.AddModule(fileList[i]);
+            baseGrod.AddItems(IO.ReadGrif(fileList[i]));
         }
-        game.RunGame(inputFilename ?? "inputFilename", outputFilename ?? "outputFilename");
+        var gameName = baseGrod.Get(GAMENAME, true);
+        if (string.IsNullOrWhiteSpace(gameName))
+        {
+            gameName = "Unnamed Game";
+        }
+        game.Initialize(baseGrod, gameName, null);
+        if (inputFilename != null)
+        {
+            try
+            {
+                var inStream = File.ReadAllLines(inputFilename);
+                foreach (var line in inStream)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        var message = new InputMessage
+                        {
+                            MessageType = InputMessageType.Text,
+                            Content = line
+                        };
+                        game.InputMessages.Enqueue(message);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                OutputText($"Error opening input file: {inputFilename}");
+                return;
+            }
+        }
+        game.RunGame();
     }
 
     public static string Syntax()
@@ -144,5 +178,28 @@ internal class Program
         result.AppendLine();
         result.AppendLine("There may be multiple -m/--mod parameters.");
         return result.ToString();
+    }
+
+    private static void Output(object sender, OutputMessage e)
+    {
+        OutputText(e.Content);
+    }
+
+    private static void OutputText(string text)
+    {
+        Console.Write(text);
+        if (outputFilename != null)
+        {
+            try
+            {
+                using var outStream = File.AppendText(outputFilename);
+                outStream.Write(text);
+                outStream.Flush();
+            }
+            catch (Exception)
+            {
+                // ignore file write errors
+            }
+        }
     }
 }

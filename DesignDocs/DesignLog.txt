@@ -210,3 +210,14 @@
 - Trying StandardOutput for output instead of Console.WriteLine.
 
 2025-10-23
+- Starting split out into Game and IO classes.
+- Everything a mess until finished!
+
+2025-10-31
+- Finished splitting into Game and IO classes.
+- RunGame() loop in Game class.
+- Events for output handling by calling program.
+- Queues to hold input and output lines.
+- AdvanceGameState() to process background scripts.
+- Changed Program to use new Game and IO classes and handle output.
+- WIP - not tested yet.

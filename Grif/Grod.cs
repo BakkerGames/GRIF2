@@ -74,6 +74,23 @@ public class Grod
         {
             return boolValue;
         }
+        switch (value.ToLowerInvariant())
+        {
+            case "y":
+            case "yes":
+            case "t":
+            case "1":
+            case "-1":
+                return true;
+            case "n":
+            case "no":
+            case "f":
+            case "0":
+            case "":
+                return false;
+            default:
+                break;
+        }
         throw new FormatException($"Value for key '{key}' is not a valid boolean.");
     }
 
