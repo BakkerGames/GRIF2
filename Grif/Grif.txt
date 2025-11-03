@@ -8,14 +8,7 @@ public partial class Grif
 
     public static string Version => _version;
 
-    public static Action<string> StandardOutput = text => Console.Write(text);
-
     private static StreamWriter? OutStream { get; set; }
-
-    /// <summary>
-    /// Indicates if the game has ended.
-    /// </summary>
-    private static bool GameOver { get; set; } = false;
 
     /// <summary>
     /// Text to be used as input until exhausted.

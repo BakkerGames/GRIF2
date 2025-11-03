@@ -3,6 +3,7 @@ using static Grif.Parser;
 
 namespace Grif;
 
+public delegate void InputEventHandler(object sender);
 public delegate void OutputEventHandler(object sender, OutputMessage e);
 
 public class Game
@@ -15,6 +16,7 @@ public class Game
     private const string SCRIPT = "@script(";
     private const string BACKGROUND_PREFIX = "background.";
 
+    public event InputEventHandler? InputEvent;
     public event OutputEventHandler? OutputEvent;
 
     public Queue<InputMessage> InputMessages { get; } = new();
@@ -76,7 +78,7 @@ public class Game
         }
     }
 
-    public async void RunGame()
+    public async Task GameLoop()
     {
         while (true)
         {
@@ -88,7 +90,15 @@ public class Game
             if (OutputMessages.Count > 0)
             {
                 var outputMessage = OutputMessages.Dequeue();
-                OutputEvent?.Invoke(this, outputMessage);
+                ProcessOutputMessage(outputMessage);
+            }
+            if (GameOver())
+            {
+                break;
+            }
+            if (InputEvent != null && InputMessages.Count == 0)
+            {
+                InputEvent?.Invoke(this);
             }
             while (InputMessages.Count == 0)
             {
@@ -102,11 +112,32 @@ public class Game
             if (OutputMessages.Count > 0)
             {
                 var outputMessage = OutputMessages.Dequeue();
-                OutputEvent?.Invoke(this, outputMessage);
+                ProcessOutputMessage(outputMessage);
             }
         }
     }
 
+    private void ProcessOutputMessage(OutputMessage outputMessage)
+    {
+        switch (outputMessage.MessageType)
+        {
+            case OutputMessageType.Text:
+                OutputEvent?.Invoke(this, outputMessage);
+                break;
+            default:
+                OutputEvent?.Invoke(this, new OutputMessage
+                {
+                    MessageType = OutputMessageType.Text,
+                    Content = $"Unknown Output Message Type: {outputMessage.MessageType}",
+                    ExtraData = (outputMessage.Content + " " + outputMessage.ExtraData).Trim()
+                });
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Indicates if the game has ended.
+    /// </summary>
     public bool GameOver()
     {
         if (_overlayGrod.GetBool(GAMEOVER, true) ?? false)

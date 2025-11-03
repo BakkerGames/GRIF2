@@ -8,7 +8,7 @@ internal class Program
 {
     private static string? outputFilename = null;
 
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         List<string> fileList = [];
         string filename;
@@ -123,7 +123,6 @@ internal class Program
         }
         // load data
         var game = new Game();
-        game.OutputEvent += Output;
         Grod baseGrod = new(fileList[0]);
         baseGrod.AddItems(IO.ReadGrif(fileList[0]));
         for (int i = 1; i < fileList.Count; i++)
@@ -160,7 +159,9 @@ internal class Program
                 return;
             }
         }
-        game.RunGame();
+        game.InputEvent += Input;
+        game.OutputEvent += Output;
+        await game.GameLoop();
     }
 
     public static string Syntax()
@@ -180,6 +181,21 @@ internal class Program
         return result.ToString();
     }
 
+    private static void Input(object sender)
+    {
+        var input = Console.ReadLine();
+        if (input != null)
+        {
+            OutputTextLog(input + Environment.NewLine);
+            var message = new InputMessage
+            {
+                MessageType = InputMessageType.Text,
+                Content = input
+            };
+            ((Game)sender).InputMessages.Enqueue(message);
+        }
+    }
+
     private static void Output(object sender, OutputMessage e)
     {
         OutputText(e.Content);
@@ -188,18 +204,24 @@ internal class Program
     private static void OutputText(string text)
     {
         Console.Write(text);
-        if (outputFilename != null)
+        OutputTextLog(text);
+    }
+
+    private static void OutputTextLog(string text)
+    {
+        if (outputFilename == null)
         {
-            try
-            {
-                using var outStream = File.AppendText(outputFilename);
-                outStream.Write(text);
-                outStream.Flush();
-            }
-            catch (Exception)
-            {
-                // ignore file write errors
-            }
+            return;
+        }
+        try
+        {
+            using var outStream = File.AppendText(outputFilename);
+            outStream.Write(text);
+            outStream.Flush();
+        }
+        catch (Exception)
+        {
+            // ignore file write errors
         }
     }
 }

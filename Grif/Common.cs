@@ -23,6 +23,7 @@ public static class Common
     public const string AFTER_PROMPT = "system.after_prompt";
     public const string DONT_UNDERSTAND = "system.dont_understand";
     public const string GAMENAME = "system.gamename";
+    public const string GAMETITLE = "system.gametitle";
     public const string GAMEOVER = "system.gameover";
     public const string INTRO = "system.intro";
     public const string OUTPUT_WIDTH = "system.output_width";
