@@ -221,3 +221,10 @@
 - AdvanceGameState() to process background scripts.
 - Changed Program to use new Game and IO classes and handle output.
 - WIP - not tested yet.
+
+2025-11-03
+- Adding input/output handling to Program.
+- Cloak of Darkness works with new structure.
+- Added event handlers for output lines and prompts.
+- Added input queue to handle automated input for testing.
+- Sleep not working yet.

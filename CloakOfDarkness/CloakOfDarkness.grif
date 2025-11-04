@@ -1,4 +1,6 @@
 // CloakOfDarkness.grif - GRIF format
+@!version
+	2025.11.03
 @addscore(x)
 	@if @ne($x,0) @then
 		@addto(value.score,$x)
@@ -93,8 +95,6 @@
 	@setoutchannel("#GAMEOVER;")
 @room
 	@get(value.room)
-@__version
-	Version 2025.07.31
 adjective.cloak
 	velvet,handsome,black,dark,satin
 adjective.hook
@@ -207,14 +207,11 @@ command.read.message
 			@if @lt(@get(value.scuffed),2) @then
 				@write(@get(message.readable))
 				@write(".")
-				@setoutchannel("#SLEEP;")
-				@setoutchannel(1000)
+				@setoutchannel("#SLEEP;",1000)
 				@write(".")
-				@setoutchannel("#SLEEP;")
-				@setoutchannel(1000)
+				@setoutchannel("#SLEEP;",1000)
 				@write(".")
-				@setoutchannel("#SLEEP;")
-				@setoutchannel(1000)
+				@setoutchannel("#SLEEP;",1000)
 				@nl
 				@nl
 				@msg(message.you_won)
@@ -224,14 +221,11 @@ command.read.message
 			@else
 				@write(@get(message.unreadable))
 				@write(".")
-				@setoutchannel("#SLEEP;")
-				@setoutchannel(1000)
+				@setoutchannel("#SLEEP;",1000)
 				@write(".")
-				@setoutchannel("#SLEEP;")
-				@setoutchannel(1000)
+				@setoutchannel("#SLEEP;",1000)
 				@write(".")
-				@setoutchannel("#SLEEP;")
-				@setoutchannel(1000)
+				@setoutchannel("#SLEEP;",1000)
 				@nl
 				@nl
 				@msg(message.you_lost)
@@ -254,8 +248,7 @@ command.restore
 command.restore.#
 	@set(temp.slot,@get(input.nounword))
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#RESTORENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#RESTORENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.restore_complete) @nl")
 		@setoutchannel("@lookfull")
 	@else
@@ -270,8 +263,7 @@ command.save
 command.save.#
 	@set(temp.slot,@get(input.nounword))
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#SAVENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#SAVENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.save_complete)")
 	@else
 		@msg(message.save_slot_number)
@@ -522,8 +514,7 @@ script.restart
 script.restore_slot
 	@set(temp.slot,@getinchannel)
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#RESTORENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#RESTORENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.restore_complete) @nl")
 		@setoutchannel("@lookfull")
 	@else
@@ -534,8 +525,7 @@ script.restore_slot
 script.save_slot
 	@set(temp.slot,@getinchannel)
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#SAVENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#SAVENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.save_complete)")
 	@else
 		@msg(message.save_slot_number)
@@ -557,7 +547,7 @@ system.gametitle
 system.output_width
 	80
 system.prompt
-	\n >
+	\n>\s
 value.cloakscore
 	1
 value.maxscore

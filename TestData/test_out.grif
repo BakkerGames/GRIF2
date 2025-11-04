@@ -233,8 +233,7 @@ command.restore
 command.restore.#
 	@set(temp.slot,@get(input.nounword))
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#RESTORENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#RESTORENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.restore_complete) @nl")
 		@setoutchannel("@lookfull")
 	@else
@@ -249,8 +248,7 @@ command.save
 command.save.#
 	@set(temp.slot,@get(input.nounword))
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#SAVENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#SAVENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.save_complete)")
 	@else
 		@msg(message.save_slot_number)
@@ -509,8 +507,7 @@ script.restart
 script.restore_slot
 	@set(temp.slot,@getinchannel)
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#RESTORENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#RESTORENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.restore_complete) @nl")
 		@setoutchannel("@lookfull")
 	@else
@@ -521,8 +518,7 @@ script.restore_slot
 script.save_slot
 	@set(temp.slot,@getinchannel)
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
-		@setoutchannel("#SAVENAME;")
-		@setoutchannel(@get(temp.slot))
+		@setoutchannel("#SAVENAME;",@get(temp.slot))
 		@setoutchannel("@msg(message.save_complete)")
 	@else
 		@msg(message.save_slot_number)

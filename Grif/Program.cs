@@ -8,6 +8,8 @@ internal class Program
 {
     private static string? outputFilename = null;
 
+    private static readonly Queue<string> _inputQueue = new();
+
     static async Task Main(string[] args)
     {
         List<string> fileList = [];
@@ -144,12 +146,7 @@ internal class Program
                 {
                     if (!string.IsNullOrWhiteSpace(line))
                     {
-                        var message = new InputMessage
-                        {
-                            MessageType = InputMessageType.Text,
-                            Content = line
-                        };
-                        game.InputMessages.Enqueue(message);
+                        _inputQueue.Enqueue(line);
                     }
                 }
             }
@@ -164,7 +161,9 @@ internal class Program
         await game.GameLoop();
     }
 
-    public static string Syntax()
+    #region Private Methods
+
+    private static string Syntax()
     {
         Version version = Assembly.GetEntryAssembly()?.GetName().Version ?? Version.Parse("1.0.0.0");
         StringBuilder result = new();
@@ -183,7 +182,16 @@ internal class Program
 
     private static void Input(object sender)
     {
-        var input = Console.ReadLine();
+        OutputText(((Game)sender).Prompt() ?? "");
+        string? input;
+        if (_inputQueue.Count > 0)
+        {
+            input = _inputQueue.Dequeue();
+        }
+        else
+        {
+            input = Console.ReadLine();
+        }
         if (input != null)
         {
             OutputTextLog(input + Environment.NewLine);
@@ -193,6 +201,7 @@ internal class Program
                 Content = input
             };
             ((Game)sender).InputMessages.Enqueue(message);
+            OutputText(((Game)sender).AfterPrompt() ?? "");
         }
     }
 
@@ -203,8 +212,23 @@ internal class Program
 
     private static void OutputText(string text)
     {
-        Console.Write(text);
-        OutputTextLog(text);
+        if (text.Contains("\\s"))
+        {
+            text = text.Replace("\\s", " ");
+        }
+        while (text.Contains("\\n"))
+        {
+            var index = text.IndexOf("\\n");
+            var before = text[..index];
+            text = text[(index + 2)..];
+            Console.WriteLine(before);
+            OutputTextLog(before + Environment.NewLine);
+        }
+        if (!string.IsNullOrEmpty(text))
+        {
+            Console.Write(text);
+            OutputTextLog(text);
+        }
     }
 
     private static void OutputTextLog(string text)
@@ -224,4 +248,6 @@ internal class Program
             // ignore file write errors
         }
     }
+
+    #endregion
 }

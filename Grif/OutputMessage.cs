@@ -4,7 +4,8 @@ public enum OutputMessageType
 {
     Unknown = 0,
     Text = 1,
-    Command = 2,
+    Script = 2,
+    OutChannel = 3,
 }
 
 public class OutputMessage

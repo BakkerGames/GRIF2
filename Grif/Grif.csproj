@@ -5,13 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>2.2025.1023</Version>
+    <Version>2.2025.1103</Version>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="Grif.IO.txt" />
-    <Compile Include="Grif.OutChannel.txt" />
-    <Compile Include="Grif.txt" />
-  </ItemGroup>
 
 </Project>

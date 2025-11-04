@@ -4,11 +4,9 @@ namespace Grif;
 
 public partial class Dags
 {
-    private const string _version = "2.2025.1023";
+    public static string Version { get { return "2.2025.1103"; } }
 
     private static readonly Random _random = new();
-
-    public static string Version => _version;
 
     public static List<DagsItem> Process(Grod grod, string? script)
     {

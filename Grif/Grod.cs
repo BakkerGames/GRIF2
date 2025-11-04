@@ -2,7 +2,7 @@
 
 public class Grod
 {
-    public const string Version = "2.2025.1024";
+    public static string Version { get { return "2.2025.1103"; } }
 
     private const string NULL = "null";
     private const string TRUE = "true";
@@ -25,7 +25,7 @@ public class Grod
         Parent = parent;
     }
 
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; }
 
     public Grod? Parent { get; set; }
 

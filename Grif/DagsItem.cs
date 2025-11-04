@@ -9,4 +9,4 @@ public enum DagsType
     InChannel = 3,
 }
 
-public record DagsItem(DagsType Type, string Value);
+public record DagsItem(DagsType Type, string Value, string? ExtraValue = null);

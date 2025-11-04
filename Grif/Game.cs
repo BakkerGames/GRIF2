@@ -1,4 +1,6 @@
-﻿using static Grif.Common;
+﻿using System.ComponentModel;
+using static Grif.Common;
+using static Grif.IO;
 using static Grif.Parser;
 
 namespace Grif;
@@ -8,10 +10,12 @@ public delegate void OutputEventHandler(object sender, OutputMessage e);
 
 public class Game
 {
+    public static string Version { get { return "2.2025.1103"; } }
+
     private Grod _baseGrod = new("");
     private Grod _overlayGrod = new("");
-    private string? _saveBasePath = "";
-    private string? _referenceBasePath = "";
+    private string _saveBasePath = "";
+    private string? _referenceBasePath;
 
     private const string SCRIPT = "@script(";
     private const string BACKGROUND_PREFIX = "background.";
@@ -25,6 +29,7 @@ public class Game
 
     public void Initialize(Grod grod, string saveBasePath, string? referenceBasePath = null)
     {
+        GameOver = false;
         _saveBasePath = saveBasePath;
         _referenceBasePath = referenceBasePath;
         try
@@ -76,23 +81,31 @@ public class Game
         {
             throw new IOException("Failed to initialize game data.");
         }
+        try
+        {
+            ParseInit(_overlayGrod);
+        }
+        catch (Exception)
+        {
+            throw new SystemException("Failed to initialize parser.");
+        }
     }
 
     public async Task GameLoop()
     {
         while (true)
         {
-            if (GameOver())
+            if (GameOver)
             {
                 break;
             }
             await AdvanceGameState();
-            if (OutputMessages.Count > 0)
+            while (OutputMessages.Count > 0)
             {
                 var outputMessage = OutputMessages.Dequeue();
                 ProcessOutputMessage(outputMessage);
             }
-            if (GameOver())
+            if (GameOver)
             {
                 break;
             }
@@ -109,10 +122,70 @@ public class Game
                 var inputMessage = InputMessages.Dequeue();
                 await ProcessInputMessage(inputMessage);
             }
-            if (OutputMessages.Count > 0)
+            while (OutputMessages.Count > 0)
             {
                 var outputMessage = OutputMessages.Dequeue();
                 ProcessOutputMessage(outputMessage);
+            }
+        }
+    }
+
+    public bool GameOver { get; set; } = false;
+
+    public string? Prompt()
+    {
+        var prompt = _overlayGrod.Get(PROMPT, true);
+        if (prompt != null && prompt.StartsWith('@'))
+        {
+            prompt = Dags.Process(_overlayGrod, prompt).FirstOrDefault()?.Value;
+        }
+        return prompt;
+    }
+
+    public string? AfterPrompt()
+    {
+        var afterPrompt = _overlayGrod.Get(AFTER_PROMPT, true);
+        if (afterPrompt != null && afterPrompt.StartsWith('@'))
+        {
+            afterPrompt = Dags.Process(_overlayGrod, afterPrompt).FirstOrDefault()?.Value;
+        }
+        return afterPrompt;
+    }
+
+    private async Task ProcessInputMessage(InputMessage inputMessage)
+    {
+        var inputItems = await Task.FromResult(ParseInput(_overlayGrod, inputMessage.Content));
+        if (inputItems != null)
+        {
+            var outputItems = Dags.ProcessItems(_overlayGrod, inputItems);
+            await HandleOutputItems(outputItems);
+        }
+    }
+
+    private async Task HandleOutputItems(List<DagsItem> outputItems)
+    {
+        foreach (var item in outputItems)
+        {
+            switch (item.Type)
+            {
+                case DagsType.Text:
+                    OutputMessages.Enqueue(new OutputMessage
+                    {
+                        MessageType = OutputMessageType.Text,
+                        Content = item.Value
+                    });
+                    break;
+                case DagsType.OutChannel:
+                    await HandleOutChannel(item);
+                    break;
+                default:
+                    OutputMessages.Enqueue(new OutputMessage
+                    {
+                        // TODO other types
+                        MessageType = OutputMessageType.Text,
+                        Content = item.Value
+                    });
+                    break;
             }
         }
     }
@@ -124,6 +197,7 @@ public class Game
             case OutputMessageType.Text:
                 OutputEvent?.Invoke(this, outputMessage);
                 break;
+
             default:
                 OutputEvent?.Invoke(this, new OutputMessage
                 {
@@ -132,36 +206,6 @@ public class Game
                     ExtraData = (outputMessage.Content + " " + outputMessage.ExtraData).Trim()
                 });
                 break;
-        }
-    }
-
-    /// <summary>
-    /// Indicates if the game has ended.
-    /// </summary>
-    public bool GameOver()
-    {
-        if (_overlayGrod.GetBool(GAMEOVER, true) ?? false)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private async Task ProcessInputMessage(InputMessage inputMessage)
-    {
-        var inputItems = await Task.FromResult(ParseInput(_overlayGrod, inputMessage.Content));
-        if (inputItems != null)
-        {
-            var outputItems = Dags.ProcessItems(_overlayGrod, inputItems);
-            foreach (var item in outputItems)
-            {
-                OutputMessages.Enqueue(new OutputMessage
-                {
-                    // TODO other types
-                    MessageType = OutputMessageType.Text,
-                    Content = item.Value
-                });
-            }
         }
     }
 
@@ -181,5 +225,132 @@ public class Game
                 });
             }
         }
+    }
+
+    public async Task HandleOutChannel(DagsItem item)
+    {
+        bool exists;
+        if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
+        {
+            GameOver = true;
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_EXISTS_SAVE, OIC))
+        {
+            var savefile = Path.Combine(_saveBasePath, SAVE_FILENAME + SAVE_EXTENSION);
+            exists = File.Exists(savefile);
+            _overlayGrod.Set(INCHANNEL, exists ? "true" : "false");
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_EXISTS_SAVE_NAME, OIC))
+        {
+            if (item.ExtraValue == null)
+            {
+                throw new Exception("Save filename not specified.");
+            }
+            var savefile = Path.Combine(_saveBasePath, item.ExtraValue + SAVE_EXTENSION);
+            exists = File.Exists(savefile);
+            _overlayGrod.Set(INCHANNEL, exists ? "true" : "false");
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_SAVE, OIC))
+        {
+            var savefile = Path.Combine(_saveBasePath, SAVE_FILENAME + SAVE_EXTENSION);
+            var itemList = _overlayGrod.Items(false, true);
+            WriteGrif(savefile, itemList, true);
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_SAVE_NAME, OIC))
+        {
+            if (item.ExtraValue == null)
+            {
+                throw new Exception("Save filename not specified.");
+            }
+            var savefile = Path.Combine(_saveBasePath, item.ExtraValue + SAVE_EXTENSION);
+            var itemList = _overlayGrod.Items(false, true);
+            WriteGrif(savefile, itemList, false);
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_RESTORE, OIC))
+        {
+            var savefile = Path.Combine(_saveBasePath, SAVE_FILENAME + SAVE_EXTENSION);
+            if (!File.Exists(savefile))
+            {
+                throw new FileNotFoundException(savefile);
+            }
+            var itemList = ReadGrif(savefile);
+            _overlayGrod.Clear(false); // clear only the user data
+            _overlayGrod.AddItems(itemList);
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_RESTORE_NAME, OIC))
+        {
+            if (item.ExtraValue == null)
+            {
+                throw new Exception("Save filename not specified.");
+            }
+            var savefile = Path.Combine(_saveBasePath, item.ExtraValue + SAVE_EXTENSION);
+            if (!File.Exists(savefile))
+            {
+                throw new FileNotFoundException(savefile);
+            }
+            var itemList = ReadGrif(savefile);
+            _overlayGrod.Clear(false); // clear only the user data
+            _overlayGrod.AddItems(itemList);
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_RESTART, OIC))
+        {
+            _overlayGrod.Clear(false); // clear only the user data
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_ASK, OIC))
+        {
+            if (InputEvent != null && InputMessages.Count == 0)
+            {
+                InputEvent?.Invoke(this);
+            }
+            while (InputMessages.Count == 0)
+            {
+                await Task.Delay(100); // TODO adjust delay as needed
+            }
+            var inputMessage = InputMessages.Dequeue();
+            _overlayGrod.Set(INCHANNEL, inputMessage.Content);
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_ENTER, OIC))
+        {
+            if (InputEvent != null && InputMessages.Count == 0)
+            {
+                InputEvent?.Invoke(this);
+            }
+            while (InputMessages.Count == 0)
+            {
+                await Task.Delay(100); // TODO adjust delay as needed
+            }
+            _ = InputMessages.Dequeue();
+            return;
+        }
+        if (item.Value.Equals(OUTCHANNEL_SLEEP, OIC))
+        {
+            if (!int.TryParse(item.ExtraValue, out int value))
+            {
+                throw new Exception($"Invalid sleep duration: {item.ExtraValue}");
+            }
+            Thread.Sleep(value);
+            return;
+        }
+        if (item.Value.StartsWith('@'))
+        {
+            var outputItems = Dags.ProcessItems(_overlayGrod, [new DagsItem(DagsType.Internal, item.Value)]);
+            await HandleOutputItems(outputItems);
+            return;
+        }
+        if (item.Value.StartsWith('#') && item.Value.EndsWith(';'))
+        {
+            // future enhancements go here, just quietly ignore for now
+            return;
+        }
+        throw new Exception($"Unknown OutChannel command {item.Value}");
     }
 }

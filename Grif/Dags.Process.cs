@@ -642,8 +642,14 @@ public partial class Dags
                     SetListItem(grod, p[0].Value, int1, p[2].Value);
                     break;
                 case "@setoutchannel(":
-                    CheckParameterCount(p, 1);
-                    result.Add(new DagsItem(DagsType.OutChannel, p[0].Value));
+                    if (p.Count == 1)
+                    {
+                        result.Add(new DagsItem(DagsType.OutChannel, p[0].Value));
+                    }
+                    else if (p.Count == 2)
+                    {
+                        result.Add(new DagsItem(DagsType.OutChannel, p[0].Value, p[1].Value));
+                    }
                     break;
                 case "@sub(":
                     CheckParameterCount(p, 2);
