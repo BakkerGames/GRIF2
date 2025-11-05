@@ -144,9 +144,14 @@ internal class Program
                 var inStream = File.ReadAllLines(inputFilename);
                 foreach (var line in inStream)
                 {
-                    if (!string.IsNullOrWhiteSpace(line))
+                    var tempLine = line;
+                    if (tempLine.Contains("//"))
                     {
-                        _inputQueue.Enqueue(line);
+                        tempLine = tempLine[..tempLine.IndexOf("//")].Trim();
+                    }
+                    if (!string.IsNullOrWhiteSpace(tempLine))
+                    {
+                        _inputQueue.Enqueue(tempLine);
                     }
                 }
             }
