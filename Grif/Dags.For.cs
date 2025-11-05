@@ -5,7 +5,7 @@ namespace Grif;
 
 public partial class Dags
 {
-    private static void HandleFor(List<DagsItem> p, string[] tokens, ref int index, Grod grod, List<DagsItem> result)
+    private static void HandleFor(List<Message> p, string[] tokens, ref int index, Grod grod, List<Message> result)
     {
         // @for(i,<start>,<end inclusive>)=...$i...@endfor
         var iterator = "$" + p[0].Value;
@@ -55,7 +55,7 @@ public partial class Dags
         }
     }
 
-    private static void HandleForEachKey(List<DagsItem> p, string[] tokens, ref int index, Grod grod, List<DagsItem> result)
+    private static void HandleForEachKey(List<Message> p, string[] tokens, ref int index, Grod grod, List<Message> result)
     {
         // @foreachkey(i,prefix,[suffix])=...$i...@endforeachkey
         var newTokens = new StringBuilder();
@@ -96,7 +96,7 @@ public partial class Dags
         }
     }
 
-    private static void HandleForEachList(List<DagsItem> p, string[] tokens, ref int index, Grod grod, List<DagsItem> result)
+    private static void HandleForEachList(List<Message> p, string[] tokens, ref int index, Grod grod, List<Message> result)
     {
         // @foreachlist(x,listname)=...$x...@endforeachlist
         var newTokens = new StringBuilder();

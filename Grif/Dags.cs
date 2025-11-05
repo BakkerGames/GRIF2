@@ -4,27 +4,29 @@ namespace Grif;
 
 public partial class Dags
 {
-    public static string Version { get { return "2.2025.1103"; } }
+    public static string Version { get { return "2.2025.1104"; } }
 
     private static readonly Random _random = new();
 
-    public static List<DagsItem> Process(Grod grod, string? script)
+    public static List<Message> Process(Grod grod, string? script)
     {
-        List<DagsItem> items = [new DagsItem(DagsType.Text, script ?? "")];
+        List<Message> items = [new Message(MessageType.Text, script ?? "")];
         return ProcessItems(grod, items);
     }
 
-    public static List<DagsItem> ProcessItems(Grod grod, List<DagsItem> items)
+    public static List<Message> ProcessItems(Grod grod, List<Message> items)
     {
-        List<DagsItem> result = [];
+        List<Message> result = [];
         foreach (var item in items)
         {
-            if (item.Type == DagsType.Error)
+            if (item.Type == MessageType.Error)
             {
                 result.Add(item);
                 continue;
             }
-            if (item.Type == DagsType.Text || item.Type == DagsType.Internal)
+            if (item.Type == MessageType.Text ||
+                item.Type == MessageType.Internal ||
+                item.Type == MessageType.Script)
             {
                 if (string.IsNullOrEmpty(item.Value))
                 {
@@ -48,7 +50,7 @@ public partial class Dags
                 result.Add(item);
                 continue;
             }
-            if (item.Type == DagsType.InChannel)
+            if (item.Type == MessageType.InChannel)
             {
                 if (!IsNull(grod.Get(INCHANNEL, true)))
                 {

@@ -64,9 +64,9 @@ public static class Parser
             $"I don't understand \"{{0}}\".{NL}";
     }
 
-    public static List<DagsItem>? ParseInput(Grod grod, string input)
+    public static List<Message>? ParseInput(Grod grod, string input)
     {
-        var result = new List<DagsItem>();
+        var result = new List<Message>();
         string? verb;
         string? verbWord;
         string? direction = null;
@@ -107,18 +107,18 @@ public static class Parser
             }
             else
             {
-                result.Add(new DagsItem(DagsType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+                result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
                 return result;
             }
         }
         if (verb == null && direction == null)
         {
-            result.Add(new DagsItem(DagsType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+            result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
             return result;
         }
         if (words.Count > 0)
         {
-            result.Add(new DagsItem(DagsType.Text, string.Format(DONT_UNDERSTAND_TEXT, string.Join(", ", words))));
+            result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, string.Join(", ", words))));
             return result;
         }
         string command;
@@ -183,21 +183,21 @@ public static class Parser
         }
         if (grod.Get(command, true) == null)
         {
-            result.Add(new DagsItem(DagsType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+            result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
             return result;
         }
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.full,\"{input}\")"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.verb,{verb ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.verbword,{verbWord ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.direction,{direction ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.directionword,{directionWord ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.noun,{noun ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.nounword,{nounWord ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.preposition,{preposition ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.prepositionword,{prepositionWord ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.indirectnoun,{indirectNoun ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@set(input.indirectnounword,{indirectNounWord ?? NULL})"));
-        result.Add(new DagsItem(DagsType.Internal, $"@script({command})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.full,\"{input}\")"));
+        result.Add(new Message(MessageType.Script, $"@set(input.verb,{verb ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.verbword,{verbWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.direction,{direction ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.directionword,{directionWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.noun,{noun ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.nounword,{nounWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.preposition,{preposition ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.prepositionword,{prepositionWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.indirectnoun,{indirectNoun ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@set(input.indirectnounword,{indirectNounWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"@script({command})"));
         return result;
     }
 

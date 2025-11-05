@@ -6,7 +6,7 @@ public partial class Dags
 {
     private const string _invalidIfSyntax = "Invalid @if syntax";
 
-    private static List<DagsItem> ProcessIf(string[] tokens, ref int index, Grod grod)
+    private static List<Message> ProcessIf(string[] tokens, ref int index, Grod grod)
     {
         // conditions
         bool notFlag;
@@ -85,7 +85,7 @@ public partial class Dags
             }
         }
         // process all commands in this section
-        List<DagsItem> result = [];
+        List<Message> result = [];
         while (index < tokens.Length)
         {
             token = tokens[index].ToLower();
@@ -151,7 +151,7 @@ public partial class Dags
     {
         var answer = ProcessOneCommand(tokens, ref index, grod);
         if (answer.Count != 1
-            || (answer[0].Type != DagsType.Text && answer[0].Type != DagsType.Internal))
+            || (answer[0].Type != MessageType.Text && answer[0].Type != MessageType.Internal))
         {
             throw new SystemException("Invalid condition in @if");
         }

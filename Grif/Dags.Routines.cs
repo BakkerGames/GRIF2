@@ -506,9 +506,9 @@ public partial class Dags
 
     #region Private routines
 
-    private static List<DagsItem> GetParameters(string[] tokens, ref int index, Grod grod)
+    private static List<Message> GetParameters(string[] tokens, ref int index, Grod grod)
     {
-        List<DagsItem> parameters = [];
+        List<Message> parameters = [];
         while (index < tokens.Length && tokens[index] != ")")
         {
             var token = tokens[index];
@@ -519,7 +519,7 @@ public partial class Dags
             }
             else
             {
-                parameters.Add(new DagsItem(DagsType.Internal, TrimQuotes(token)));
+                parameters.Add(new Message(MessageType.Internal, TrimQuotes(token)));
                 index++;
             }
             if (index < tokens.Length)
@@ -553,7 +553,7 @@ public partial class Dags
         return value;
     }
 
-    private static void CheckParameterCount(List<DagsItem> p, int count)
+    private static void CheckParameterCount(List<Message> p, int count)
     {
         if (p.Count != count)
         {
@@ -561,7 +561,7 @@ public partial class Dags
         }
     }
 
-    private static void CheckParameterAtLeastOne(List<DagsItem> p)
+    private static void CheckParameterAtLeastOne(List<Message> p)
     {
         if (p.Count == 0)
         {
@@ -581,14 +581,14 @@ public partial class Dags
         }
         var resultItems = Process(grod, value);
         if (resultItems.Count == 1 &&
-            (resultItems[0].Type == DagsType.Text || resultItems[0].Type == DagsType.Internal))
+            (resultItems[0].Type == MessageType.Text || resultItems[0].Type == MessageType.Internal))
         {
             return GetValue(grod, resultItems[0].Value);
         }
         throw new SystemException("Expected a single text result.");
     }
 
-    private static List<DagsItem> GetUserDefinedFunctionValues(string token, List<DagsItem> p, Grod grod)
+    private static List<Message> GetUserDefinedFunctionValues(string token, List<Message> p, Grod grod)
     {
         var keys = grod.Keys(token, true, true);
         if (keys.Count == 0)

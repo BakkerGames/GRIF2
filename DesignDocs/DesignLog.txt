@@ -228,3 +228,8 @@
 - Added event handlers for output lines and prompts.
 - Added input queue to handle automated input for testing.
 - Sleep not working yet.
+
+2025-11-04
+- Fixed sleep.
+- Everything works.
+- Cloak of Darkness works perfectly with new structure.

@@ -8,14 +8,14 @@ namespace Tests;
 public class UnitTestDags
 {
     private readonly Grod grod = new("base");
-    private List<DagsItem> result = [];
+    private List<Message> result = [];
 
-    private static string Squash(List<DagsItem> result)
+    private static string Squash(List<Message> result)
     {
         var sb = new StringBuilder();
         foreach (var item in result)
         {
-            if (item.Type == DagsType.Text || item.Type == DagsType.Internal)
+            if (item.Type == MessageType.Text || item.Type == MessageType.Internal)
             {
                 sb.Append(item.Value);
             }
@@ -560,7 +560,7 @@ public class UnitTestDags
         result = Dags.Process(grod, "@setoutchannel(abc)");
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(result[0].Type, Is.EqualTo(DagsType.OutChannel));
+            Assert.That(result[0].Type, Is.EqualTo(MessageType.OutChannel));
             Assert.That(result[0].Value, Is.EqualTo("abc"));
         }
     }
@@ -731,7 +731,7 @@ public class UnitTestDags
         result = Dags.Process(grod, $"@isnumber({value2})");
         Assert.That(Squash(result), Is.EqualTo("false"));
         result = Dags.Process(grod, $"@isnumber({value3})");
-        Assert.That(result[0].Type, Is.EqualTo(DagsType.Error));
+        Assert.That(result[0].Type, Is.EqualTo(MessageType.Error));
     }
 
     [Test]

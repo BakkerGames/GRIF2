@@ -1,16 +1,15 @@
-﻿using System.ComponentModel;
-using static Grif.Common;
+﻿using static Grif.Common;
 using static Grif.IO;
 using static Grif.Parser;
 
 namespace Grif;
 
 public delegate void InputEventHandler(object sender);
-public delegate void OutputEventHandler(object sender, OutputMessage e);
+public delegate void OutputEventHandler(object sender, Message e);
 
 public class Game
 {
-    public static string Version { get { return "2.2025.1103"; } }
+    public static string Version { get { return "2.2025.1104"; } }
 
     private Grod _baseGrod = new("");
     private Grod _overlayGrod = new("");
@@ -23,9 +22,9 @@ public class Game
     public event InputEventHandler? InputEvent;
     public event OutputEventHandler? OutputEvent;
 
-    public Queue<InputMessage> InputMessages { get; } = new();
+    public Queue<Message> InputMessages { get; } = new();
 
-    public Queue<OutputMessage> OutputMessages { get; } = new();
+    public Queue<Message> OutputMessages { get; } = new();
 
     public void Initialize(Grod grod, string saveBasePath, string? referenceBasePath = null)
     {
@@ -99,7 +98,7 @@ public class Game
             {
                 break;
             }
-            await AdvanceGameState();
+            AdvanceGameState();
             while (OutputMessages.Count > 0)
             {
                 var outputMessage = OutputMessages.Dequeue();
@@ -120,7 +119,7 @@ public class Game
             if (InputMessages.Count > 0)
             {
                 var inputMessage = InputMessages.Dequeue();
-                await ProcessInputMessage(inputMessage);
+                ProcessInputMessage(inputMessage);
             }
             while (OutputMessages.Count > 0)
             {
@@ -152,82 +151,52 @@ public class Game
         return afterPrompt;
     }
 
-    private async Task ProcessInputMessage(InputMessage inputMessage)
+    private void ProcessInputMessage(Message inputMessage)
     {
-        var inputItems = await Task.FromResult(ParseInput(_overlayGrod, inputMessage.Content));
-        if (inputItems != null)
+        var inputItems = ParseInput(_overlayGrod, inputMessage.Value);
+        foreach (var item in inputItems ?? [])
         {
-            var outputItems = Dags.ProcessItems(_overlayGrod, inputItems);
-            await HandleOutputItems(outputItems);
+            OutputMessages.Enqueue(new Message(item.Type, item.Value, item.ExtraValue));
         }
     }
 
-    private async Task HandleOutputItems(List<DagsItem> outputItems)
+    private void ProcessOutputMessage(Message message)
     {
-        foreach (var item in outputItems)
+        switch (message.Type)
         {
-            switch (item.Type)
-            {
-                case DagsType.Text:
-                    OutputMessages.Enqueue(new OutputMessage
-                    {
-                        MessageType = OutputMessageType.Text,
-                        Content = item.Value
-                    });
-                    break;
-                case DagsType.OutChannel:
-                    await HandleOutChannel(item);
-                    break;
-                default:
-                    OutputMessages.Enqueue(new OutputMessage
-                    {
-                        // TODO other types
-                        MessageType = OutputMessageType.Text,
-                        Content = item.Value
-                    });
-                    break;
-            }
-        }
-    }
-
-    private void ProcessOutputMessage(OutputMessage outputMessage)
-    {
-        switch (outputMessage.MessageType)
-        {
-            case OutputMessageType.Text:
-                OutputEvent?.Invoke(this, outputMessage);
+            case MessageType.Text:
+                OutputEvent?.Invoke(this, message);
                 break;
-
-            default:
-                OutputEvent?.Invoke(this, new OutputMessage
+            case MessageType.OutChannel:
+                HandleOutChannel(message);
+                break;
+            case MessageType.Script:
+                var outputItems = Dags.ProcessItems(_overlayGrod, [message]);
+                foreach (var item in outputItems)
                 {
-                    MessageType = OutputMessageType.Text,
-                    Content = $"Unknown Output Message Type: {outputMessage.MessageType}",
-                    ExtraData = (outputMessage.Content + " " + outputMessage.ExtraData).Trim()
-                });
+                    OutputMessages.Enqueue(item);
+                }
                 break;
+            default:
+                throw new Exception($"Unsupported output message type: {message.Type}");
         }
     }
 
-    private async Task AdvanceGameState()
+    private void AdvanceGameState()
     {
-        var keys = await Task.FromResult(_overlayGrod.Keys(BACKGROUND_PREFIX, true, false));
+        var keys = _overlayGrod.Keys(BACKGROUND_PREFIX, true, false);
         foreach (var key in keys)
         {
             var script = $"{SCRIPT}{key})";
-            var items = await Task.FromResult(Dags.Process(_overlayGrod, script));
+            var items = Dags.Process(_overlayGrod, script);
             foreach (var item in items)
             {
-                OutputMessages.Enqueue(new OutputMessage
-                {
-                    MessageType = OutputMessageType.Text,
-                    Content = item.Value
-                });
+                OutputMessages.Enqueue(item);
             }
         }
     }
 
-    public async Task HandleOutChannel(DagsItem item)
+    public void HandleOutChannel(Message item)
     {
         bool exists;
         if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
@@ -312,10 +281,10 @@ public class Game
             }
             while (InputMessages.Count == 0)
             {
-                await Task.Delay(100); // TODO adjust delay as needed
+                Thread.Sleep(100); // TODO adjust delay as needed
             }
             var inputMessage = InputMessages.Dequeue();
-            _overlayGrod.Set(INCHANNEL, inputMessage.Content);
+            _overlayGrod.Set(INCHANNEL, inputMessage.Value);
             return;
         }
         if (item.Value.Equals(OUTCHANNEL_ENTER, OIC))
@@ -326,7 +295,7 @@ public class Game
             }
             while (InputMessages.Count == 0)
             {
-                await Task.Delay(100); // TODO adjust delay as needed
+                Thread.Sleep(100); // TODO adjust delay as needed
             }
             _ = InputMessages.Dequeue();
             return;
@@ -342,8 +311,11 @@ public class Game
         }
         if (item.Value.StartsWith('@'))
         {
-            var outputItems = Dags.ProcessItems(_overlayGrod, [new DagsItem(DagsType.Internal, item.Value)]);
-            await HandleOutputItems(outputItems);
+            var outputItems = Dags.ProcessItems(_overlayGrod, [new Message(MessageType.Script, item.Value)]);
+            foreach (var outputItem in outputItems)
+            {
+                OutputMessages.Enqueue(outputItem);
+            }
             return;
         }
         if (item.Value.StartsWith('#') && item.Value.EndsWith(';'))

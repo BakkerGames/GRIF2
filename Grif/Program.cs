@@ -187,6 +187,7 @@ internal class Program
         if (_inputQueue.Count > 0)
         {
             input = _inputQueue.Dequeue();
+            Console.WriteLine(input);
         }
         else
         {
@@ -195,19 +196,15 @@ internal class Program
         if (input != null)
         {
             OutputTextLog(input + Environment.NewLine);
-            var message = new InputMessage
-            {
-                MessageType = InputMessageType.Text,
-                Content = input
-            };
+            var message = new Message(MessageType.Text, input);
             ((Game)sender).InputMessages.Enqueue(message);
             OutputText(((Game)sender).AfterPrompt() ?? "");
         }
     }
 
-    private static void Output(object sender, OutputMessage e)
+    private static void Output(object sender, Message e)
     {
-        OutputText(e.Content);
+        OutputText(e.Value);
     }
 
     private static void OutputText(string text)
