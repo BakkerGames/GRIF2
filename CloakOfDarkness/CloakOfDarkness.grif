@@ -547,7 +547,7 @@ system.gametitle
 system.output_width
 	80
 system.prompt
-	\n>\s
+	\n>
 value.cloakscore
 	1
 value.maxscore
