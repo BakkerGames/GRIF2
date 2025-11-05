@@ -136,7 +136,12 @@ public class Game
         var prompt = _overlayGrod.Get(PROMPT, true);
         if (prompt != null && prompt.StartsWith('@'))
         {
-            prompt = Dags.Process(_overlayGrod, prompt).FirstOrDefault()?.Value;
+            var promptData = Dags.Process(_overlayGrod, prompt);
+            prompt = "";
+            foreach (var item in promptData)
+            {
+                prompt += item.Value;
+            }
         }
         return prompt;
     }

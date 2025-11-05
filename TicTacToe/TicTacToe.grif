@@ -80,6 +80,11 @@
 	@write(" ",@value(7)," | ",@value(8)," | ",@value(9)," \n")
 @value(x)
 	@write(@piece(@getlist(ttt,$x)))
+background.0
+	@if @false(@get(value.intro)) @then
+		@script(system.intro)
+		@set(value.intro,true)
+	@endif
 command.1
 	@move(1)
 command.2
@@ -184,6 +189,8 @@ system.prompt
 	@else
 		@write("\n>")
 	@endif
+value.intro
+	false
 value.moves
 	0
 value.player

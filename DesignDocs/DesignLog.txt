@@ -233,3 +233,5 @@
 - Fixed sleep.
 - Everything works.
 - Cloak of Darkness works perfectly with new structure.
+- Castlequest works perfectly with new structure.
+- Fixed prompt for TicTacToe, works perfectly now.

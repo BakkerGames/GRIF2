@@ -60,8 +60,8 @@ public static class Parser
             TrimSynonyms(ref _adjectives);
             TrimSynonyms(ref _articles);
         }
-        DONT_UNDERSTAND_TEXT = grod.Get(DONT_UNDERSTAND, true) ??
-            $"I don't understand \"{{0}}\".{NL}";
+        DONT_UNDERSTAND_TEXT = (grod.Get(DONT_UNDERSTAND, true) ??
+            $"I don't understand \"{{0}}\".") + NL;
     }
 
     public static List<Message>? ParseInput(Grod grod, string input)
