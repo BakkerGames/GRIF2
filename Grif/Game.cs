@@ -9,7 +9,7 @@ public delegate void OutputEventHandler(object sender, Message e);
 
 public class Game
 {
-    public static string Version { get { return "2.2025.1104"; } }
+    public static string Version { get { return "2.2025.1109"; } }
 
     private Grod _baseGrod = new("");
     private Grod _overlayGrod = new("");

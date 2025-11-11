@@ -6,11 +6,13 @@ Grod stands for Game Resource Overlay Database, and it is intended to be used in
 
 Grod uses a parent-child relationships to hold data. Each key in a parent level can be overridden by a child level. The purpose is to track all changes made to the data, allowing for easy saving and loading of game states. Reading data can be done either on the current level or by searching through all levels until a match is found.
 
-Keys are not case-sensitive. They cannot be null or empty or only whitespace. They also cannot start or end with whitespace. Values cannot be null but can be empty or only whitespace. If a null value is provided, the item will be removed from the database.
+Keys are not case-sensitive. They cannot be null or empty or only whitespace. They also cannot start or end with whitespace. Values can be null.
 
 ## Get
 
 The `Get` operation retrieves the value associated with a given key. The `recursive` parameter indicates if parent levels are searched whenever the child level does not contain a key. If the key is not found in any level, null is returned.
+
+There are two variations of the `Get` operation: `GetInt` and `GetBool`. `GetInt` retrieves the value as an integer, returning 0 if the key is not found or if the value cannot be converted to an integer. `GetBool` retrieves the value as a boolean, returning false if the key is not found or if the value cannot be converted to a boolean. Other true/false values are recognized. Both return null if the key does not exist.
 
 ## Set
 

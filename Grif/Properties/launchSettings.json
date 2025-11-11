@@ -2,32 +2,32 @@
   "profiles": {
     "Grif": {
       "commandName": "Project",
-      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+      "workingDirectory": ".."
     },
     "TicTacToe": {
       "commandName": "Project",
       "commandLineArgs": "\"TicTacToe\\TicTacToe.grif\"",
-      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+      "workingDirectory": ".."
     },
     "Cloak of Darkness Input": {
       "commandName": "Project",
       "commandLineArgs": "\"CloakOfDarkness\\CloakOfDarkness.grif\" -i \"CloakOfDarkness\\Input.txt\" -o \"CloakOfDarkness\\Output.txt\"",
-      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+      "workingDirectory": ".."
     },
     "Cloak of Darkness": {
       "commandName": "Project",
       "commandLineArgs": "\"CloakOfDarkness\\CloakOfDarkness.grif\"",
-      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+      "workingDirectory": ".."
     },
     "Castlequest Input": {
       "commandName": "Project",
       "commandLineArgs": "\"..\\Castlequest_GRIF\\Castlequest.grif\" -i \"..\\Castlequest_GRIF\\Walkthrough\\happypath.txt\" -m \"..\\Castlequest_GRIF\\Mods\\norandom.grif\" -m \"..\\Castlequest_GRIF\\Mods\\corrections.grif\"",
-      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+      "workingDirectory": ".."
     },
     "Castlequest": {
       "commandName": "Project",
       "commandLineArgs": "\"..\\Castlequest_GRIF\\Castlequest.grif\" -m \"..\\Castlequest_GRIF\\Mods\\corrections.grif\"",
-      "workingDirectory": "C:\\Users\\Scott\\source\\repos\\GRIF2"
+      "workingDirectory": ".."
     }
   }
 }

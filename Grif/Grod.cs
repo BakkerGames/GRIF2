@@ -2,11 +2,13 @@
 
 public class Grod
 {
-    public static string Version { get { return "2.2025.1103"; } }
+    public static string Version { get { return "2.2025.1109"; } }
 
     private const string NULL = "null";
     private const string TRUE = "true";
     private const string FALSE = "false";
+    private readonly string[] _true = ["y", "yes", "t", "1", "-1", TRUE];
+    private readonly string[] _false = ["n", "no", "f", "0", "", FALSE];
 
     private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
 
@@ -40,6 +42,10 @@ public class Grod
         ValidateKey(ref key);
         if (_data.TryGetValue(key, out var value))
         {
+            if (value == null || value.Equals(NULL, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
             return value;
         }
         if (recursive && Parent != null)
@@ -70,26 +76,17 @@ public class Grod
         {
             return null;
         }
+        if (_true.Contains(value, StringComparer.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        if (_false.Contains(value, StringComparer.OrdinalIgnoreCase))
+        {
+            return false;
+        }
         if (bool.TryParse(value, out bool boolValue))
         {
             return boolValue;
-        }
-        switch (value.ToLowerInvariant())
-        {
-            case "y":
-            case "yes":
-            case "t":
-            case "1":
-            case "-1":
-                return true;
-            case "n":
-            case "no":
-            case "f":
-            case "0":
-            case "":
-                return false;
-            default:
-                break;
         }
         throw new FormatException($"Value for key '{key}' is not a valid boolean.");
     }
