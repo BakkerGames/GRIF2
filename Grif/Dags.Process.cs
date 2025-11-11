@@ -32,20 +32,17 @@ public partial class Dags
             {
                 switch (token.ToLower())
                 {
-                    case "@if":
+                    case IF_TOKEN:
                         result.AddRange(ProcessIf(tokens, ref index, grod));
                         break;
-                    case "@help":
-                        // TODO: Implement help command
-                        break;
-                    case "@getinchannel":
+                    case GETINCHANNEL_TOKEN:
                         result.Add(new Message(MessageType.Internal, grod.Get(INCHANNEL, true) ?? ""));
                         grod.Remove(INCHANNEL, false); // Clear after reading
                         break;
-                    case "@nl":
-                        result.Add(new Message(MessageType.Text, NL));
+                    case NL_TOKEN:
+                        result.Add(new Message(MessageType.Text, NL_CHAR));
                         break;
-                    case "@return":
+                    case RETURN_TOKEN:
                         index = tokens.Length; // End processing
                         return result;
                     default:
@@ -63,7 +60,7 @@ public partial class Dags
             var p = GetParameters(tokens, ref index, grod);
             switch (token.ToLower())
             {
-                case "@abs(":
+                case ABS_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     if (int1 < 0)
@@ -72,25 +69,25 @@ public partial class Dags
                     }
                     result.Add(new Message(MessageType.Internal, int1.ToString()));
                     break;
-                case "@add(":
+                case ADD_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     intAnswer = int1 + int2;
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@addlist(":
+                case ADDLIST_TOKEN:
                     CheckParameterCount(p, 2);
                     AddListItem(grod, p[0].Value, p[1].Value);
                     break;
-                case "@addto(":
+                case ADDTO_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(grod.Get(p[0].Value, true));
                     int2 = GetIntValue(p[1].Value);
                     intAnswer = int1 + int2;
                     grod.Set(p[0].Value, intAnswer.ToString());
                     break;
-                case "@bitwiseand(":
+                case BITWISEAND_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -101,7 +98,7 @@ public partial class Dags
                     intAnswer = int1 & int2;
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@bitwiseor(":
+                case BITWISEOR_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -112,7 +109,7 @@ public partial class Dags
                     intAnswer = int1 | int2;
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@bitwisexor(":
+                case BITWISEXOR_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -123,11 +120,11 @@ public partial class Dags
                     intAnswer = int1 ^ int2;
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@cleararray(":
+                case CLEARARRAY_TOKEN:
                     CheckParameterCount(p, 1);
                     ClearArray(grod, p[0].Value);
                     break;
-                case "@clearbit(":
+                case CLEARBIT_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -138,7 +135,7 @@ public partial class Dags
                     intAnswer = int1 ^ (int)Math.Pow(2, int2);
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@clearlist(":
+                case CLEARLIST_TOKEN:
                     CheckParameterCount(p, 1);
                     if (string.IsNullOrWhiteSpace(p[0].Value))
                     {
@@ -146,10 +143,10 @@ public partial class Dags
                     }
                     grod.Set(p[0].Value, null);
                     break;
-                case "@comment(":
+                case COMMENT_TOKEN:
                     // Ignore comments
                     break;
-                case "@concat(":
+                case CONCAT_TOKEN:
                     CheckParameterAtLeastOne(p);
                     StringBuilder sb = new();
                     foreach (var item in p)
@@ -158,16 +155,16 @@ public partial class Dags
                     }
                     result.Add(new Message(MessageType.Internal, sb.ToString()));
                     break;
-                case "@debug(":
+                case DEBUG_TOKEN:
                     CheckParameterCount(p, 1);
-                    if (IsTrue(grod.Get(DEBUG, true)))
+                    if (IsTrue(grod.Get(DEBUG_FLAG, true)))
                     {
                         result.Add(new Message(MessageType.Text, "### "));
                         result.Add(new Message(MessageType.Text, p[0].Value));
-                        result.Add(new Message(MessageType.Text, NL));
+                        result.Add(new Message(MessageType.Text, NL_CHAR));
                     }
                     break;
-                case "@div(":
+                case DIV_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -178,7 +175,7 @@ public partial class Dags
                     int1 /= int2;
                     result.Add(new Message(MessageType.Internal, int1.ToString()));
                     break;
-                case "@divto(":
+                case DIVTO_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(grod.Get(p[0].Value, true));
                     int2 = GetIntValue(p[1].Value);
@@ -189,7 +186,7 @@ public partial class Dags
                     int1 /= int2;
                     grod.Set(p[0].Value, int1.ToString());
                     break;
-                case "@eq(":
+                case EQ_TOKEN:
                     CheckParameterCount(p, 2);
                     isNull0 = IsNull(p[0].Value);
                     isNull1 = IsNull(p[1].Value);
@@ -214,17 +211,17 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, FALSE));
                     }
                     break;
-                case "@exec(":
+                case EXEC_TOKEN:
                     CheckParameterCount(p, 1);
                     value = p[0].Value;
                     result.AddRange(Process(grod, value));
                     break;
-                case "@exists(":
+                case EXISTS_TOKEN:
                     CheckParameterCount(p, 1);
                     value = grod.Get(p[0].Value, true);
                     result.Add(new Message(MessageType.Internal, TrueFalse(!IsNullOrEmpty(value))));
                     break;
-                case "@false(":
+                case ISFALSE_TOKEN:
                     CheckParameterCount(p, 1);
                     try
                     {
@@ -236,7 +233,7 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, TrueFalse(false)));
                     }
                     break;
-                case "@flipbit(":
+                case FLIPBIT_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -247,22 +244,22 @@ public partial class Dags
                     intAnswer = int1 ^ (int)Math.Pow(2, int2);
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@for(":
+                case FOR_TOKEN:
                     CheckParameterCount(p, 3);
                     HandleFor(p, tokens, ref index, grod, result);
                     break;
-                case "@foreachkey(":
+                case FOREACHKEY_TOKEN:
                     if (p.Count != 2 && p.Count != 3)
                     {
                         CheckParameterCount(p, 3);
                     }
                     HandleForEachKey(p, tokens, ref index, grod, result);
                     break;
-                case "@foreachlist(":
+                case FOREACHLIST_TOKEN:
                     CheckParameterCount(p, 2);
                     HandleForEachList(p, tokens, ref index, grod, result);
                     break;
-                case "@format(":
+                case FORMAT_TOKEN:
                     CheckParameterAtLeastOne(p);
                     value = p[0].Value;
                     for (int i = 1; i < p.Count; i++)
@@ -271,7 +268,7 @@ public partial class Dags
                     }
                     result.Add(new Message(MessageType.Internal, value));
                     break;
-                case "@fromhex(":
+                case FROMHEX_TOKEN:
                     CheckParameterCount(p, 1);
                     try
                     {
@@ -284,7 +281,7 @@ public partial class Dags
                         throw new SystemException($"{token}{p[0].Value}): Invalid hex string");
                     }
                     break;
-                case "@ge(":
+                case GE_TOKEN:
                     CheckParameterCount(p, 2);
                     isNull0 = IsNull(p[0].Value);
                     isNull1 = IsNull(p[1].Value);
@@ -306,12 +303,12 @@ public partial class Dags
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) >= 0)));
                     }
                     break;
-                case "@get(":
+                case GET_TOKEN:
                     CheckParameterCount(p, 1);
                     value = grod.Get(p[0].Value, true) ?? "";
                     result.Add(new Message(MessageType.Internal, value));
                     break;
-                case "@getarray(":
+                case GETARRAY_TOKEN:
                     CheckParameterCount(p, 3);
                     if (string.IsNullOrWhiteSpace(p[0].Value))
                     {
@@ -322,7 +319,7 @@ public partial class Dags
                     value = GetArrayItem(grod, p[0].Value, int1, int2);
                     result.Add(new Message(MessageType.Internal, value ?? ""));
                     break;
-                case "@getbit(":
+                case GETBIT_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -337,7 +334,7 @@ public partial class Dags
                     }
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@getlist(":
+                case GETLIST_TOKEN:
                     CheckParameterCount(p, 2);
                     if (string.IsNullOrWhiteSpace(p[0].Value))
                     {
@@ -347,22 +344,22 @@ public partial class Dags
                     value = GetListItem(grod, p[0].Value, int1);
                     result.Add(new Message(MessageType.Internal, value ?? ""));
                     break;
-                case "@getvalue(":
+                case GETVALUE_TOKEN:
                     CheckParameterCount(p, 1);
                     value = GetValue(grod, grod.Get(p[0].Value, true));
                     result.Add(new Message(MessageType.Internal, value));
                     break;
-                case "@golabel(":
+                case GOLABEL_TOKEN:
                     CheckParameterCount(p, 1);
                     for (int i = 0; i < tokens.Length - 1; i++)
                     {
-                        if (tokens[i] == "@label(" && tokens[i + 1] == p[0].Value && tokens[i + 2] == ")")
+                        if (tokens[i] == LABEL_TOKEN && tokens[i + 1] == p[0].Value && tokens[i + 2] == ")")
                         {
                             index = i + 3;
                         }
                     }
                     break;
-                case "@gt(":
+                case GT_TOKEN:
                     CheckParameterCount(p, 2);
                     isNull0 = IsNull(p[0].Value);
                     isNull1 = IsNull(p[1].Value);
@@ -384,12 +381,12 @@ public partial class Dags
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) > 0)));
                     }
                     break;
-                case "@insertatlist(":
+                case INSERTATLIST_TOKEN:
                     CheckParameterCount(p, 3);
                     int1 = GetIntValue(p[1].Value);
                     InsertAtListItem(grod, p[0].Value, int1, p[2].Value);
                     break;
-                case "@isbool(":
+                case ISBOOL_TOKEN:
                     CheckParameterCount(p, 1);
                     try
                     {
@@ -401,7 +398,7 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, FALSE));
                     }
                     break;
-                case "@isnumber(":
+                case ISNUMBER_TOKEN:
                     CheckParameterCount(p, 1);
                     if (int.TryParse(p[0].Value, out _))
                     {
@@ -412,7 +409,7 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, FALSE));
                     }
                     break;
-                case "@isscript(":
+                case ISSCRIPT_TOKEN:
                     CheckParameterCount(p, 1);
                     value = grod.Get(p[0].Value, true);
                     if (IsNull(value))
@@ -424,10 +421,10 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, TrueFalse(value!.StartsWith('@'))));
                     }
                     break;
-                case "@label(":
+                case LABEL_TOKEN:
                     CheckParameterCount(p, 1);
                     break;
-                case "@le(":
+                case LE_TOKEN:
                     CheckParameterCount(p, 2);
                     isNull0 = IsNull(p[0].Value);
                     isNull1 = IsNull(p[1].Value);
@@ -449,11 +446,11 @@ public partial class Dags
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) <= 0)));
                     }
                     break;
-                case "@len(":
+                case LEN_TOKEN:
                     CheckParameterCount(p, 1);
                     result.Add(new Message(MessageType.Internal, p[0].Value.Length.ToString()));
                     break;
-                case "@listlength(":
+                case LISTLENGTH_TOKEN:
                     CheckParameterCount(p, 1);
                     if (string.IsNullOrWhiteSpace(p[0].Value))
                     {
@@ -470,11 +467,11 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, listItems.Length.ToString()));
                     }
                     break;
-                case "@lower(":
+                case LOWER_TOKEN:
                     CheckParameterCount(p, 1);
                     result.Add(new Message(MessageType.Internal, p[0].Value.ToLower()));
                     break;
-                case "@lt(":
+                case LT_TOKEN:
                     CheckParameterCount(p, 2);
                     isNull0 = IsNull(p[0].Value);
                     isNull1 = IsNull(p[1].Value);
@@ -496,21 +493,21 @@ public partial class Dags
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) < 0)));
                     }
                     break;
-                case "@mod(":
+                case MOD_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     int1 %= int2;
                     result.Add(new Message(MessageType.Internal, int1.ToString()));
                     break;
-                case "@modto(":
+                case MODTO_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(grod.Get(p[0].Value, true));
                     int2 = GetIntValue(p[1].Value);
                     int1 %= int2;
                     grod.Set(p[0].Value, int1.ToString());
                     break;
-                case "@msg(":
+                case MSG_TOKEN:
                     CheckParameterCount(p, 1);
                     var tempResult = Dags.Process(grod, grod.Get(p[0].Value, true));
                     foreach (var msgItem in tempResult)
@@ -524,23 +521,23 @@ public partial class Dags
                             }
                         }
                     }
-                    result.Add(new Message(MessageType.Text, NL));
+                    result.Add(new Message(MessageType.Text, NL_CHAR));
                     break;
-                case "@mul(":
+                case MUL_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     int1 *= int2;
                     result.Add(new Message(MessageType.Internal, int1.ToString()));
                     break;
-                case "@multo(":
+                case MULTO_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(grod.Get(p[0].Value, true));
                     int2 = GetIntValue(p[1].Value);
                     int1 *= int2;
                     grod.Set(p[0].Value, int1.ToString());
                     break;
-                case "@ne(":
+                case NE_TOKEN:
                     CheckParameterCount(p, 2);
                     isNull0 = IsNull(p[0].Value);
                     isNull1 = IsNull(p[1].Value);
@@ -565,44 +562,44 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, TRUE));
                     }
                     break;
-                case "@neg(":
+                case NEG_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     int1 = -int1;
                     result.Add(new Message(MessageType.Internal, int1.ToString()));
                     break;
-                case "@negto(":
+                case NEGTO_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(grod.Get(p[0].Value, true));
                     int1 = -int1;
                     grod.Set(p[0].Value, int1.ToString());
                     break;
-                case "@null(":
+                case ISNULL_TOKEN:
                     CheckParameterCount(p, 1);
                     result.Add(new Message(MessageType.Internal, TrueFalse(IsNullOrEmpty(p[0].Value))));
                     break;
-                case "@rand(":
+                case RAND_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     int2 = _random.Next(100);
                     boolAnswer = int2 < int1;
                     result.Add(new Message(MessageType.Internal, TrueFalse(boolAnswer)));
                     break;
-                case "@removeatlist(":
+                case REMOVEATLIST_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[1].Value);
                     RemoveAtListItem(grod, p[0].Value, int1);
                     break;
-                case "@replace(":
+                case REPLACE_TOKEN:
                     CheckParameterCount(p, 3);
                     result.Add(new Message(MessageType.Internal, p[0].Value.Replace(p[1].Value, p[2].Value, OIC)));
                     break;
-                case "@rnd(":
+                case RND_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     result.Add(new Message(MessageType.Internal, _random.Next(int1).ToString()));
                     break;
-                case "@script(":
+                case SCRIPT_TOKEN:
                     CheckParameterCount(p, 1);
                     value = grod.Get(p[0].Value, true);
                     if (!string.IsNullOrWhiteSpace(value))
@@ -611,11 +608,11 @@ public partial class Dags
                         result.AddRange(scriptResult);
                     }
                     break;
-                case "@set(":
+                case SET_TOKEN:
                     CheckParameterCount(p, 2);
                     grod.Set(p[0].Value, p[1].Value);
                     break;
-                case "@setarray(":
+                case SETARRAY_TOKEN:
                     CheckParameterCount(p, 4);
                     if (string.IsNullOrWhiteSpace(p[0].Value))
                     {
@@ -625,7 +622,7 @@ public partial class Dags
                     int2 = GetIntValue(p[2].Value); // x
                     SetArrayItem(grod, p[0].Value, int1, int2, p[3].Value);
                     break;
-                case "@setbit(":
+                case SETBIT_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
@@ -636,12 +633,12 @@ public partial class Dags
                     intAnswer = int1 | (int)Math.Pow(2, int2);
                     result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
                     break;
-                case "@setlist(":
+                case SETLIST_TOKEN:
                     CheckParameterCount(p, 3);
                     int1 = GetIntValue(p[1].Value);
                     SetListItem(grod, p[0].Value, int1, p[2].Value);
                     break;
-                case "@setoutchannel(":
+                case SETOUTCHANNEL_TOKEN:
                     if (p.Count == 1)
                     {
                         result.Add(new Message(MessageType.OutChannel, p[0].Value));
@@ -651,14 +648,14 @@ public partial class Dags
                         result.Add(new Message(MessageType.OutChannel, p[0].Value, p[1].Value));
                     }
                     break;
-                case "@sub(":
+                case SUB_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     int1 -= int2;
                     result.Add(new Message(MessageType.Internal, int1.ToString()));
                     break;
-                case "@substring(":
+                case SUBSTRING_TOKEN:
                     CheckParameterCount(p, 3);
                     int1 = GetIntValue(p[1].Value);
                     int2 = GetIntValue(p[2].Value);
@@ -668,39 +665,39 @@ public partial class Dags
                     }
                     result.Add(new Message(MessageType.Internal, p[0].Value.Substring(int1, int2)));
                     break;
-                case "@subto(":
+                case SUBTO_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(grod.Get(p[0].Value, true));
                     int2 = GetIntValue(p[1].Value);
                     int1 -= int2;
                     grod.Set(p[0].Value, int1.ToString());
                     break;
-                case "@swap(":
+                case SWAP_TOKEN:
                     CheckParameterCount(p, 2);
                     value = grod.Get(p[0].Value, true);
                     grod.Set(p[0].Value, grod.Get(p[1].Value, true));
                     grod.Set(p[1].Value, value);
                     break;
-                case "@tobinary(":
+                case TOBINARY_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     result.Add(new Message(MessageType.Internal, Convert.ToString(int1, 2)));
                     break;
-                case "@tohex(":
+                case TOHEX_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     result.Add(new Message(MessageType.Internal, int1.ToString("X")));
                     break;
-                case "@tointeger(":
+                case TOINTEGER_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = Convert.ToInt32(p[0].Value, 2);
                     result.Add(new Message(MessageType.Internal, int1.ToString()));
                     break;
-                case "@trim(":
+                case TRIM_TOKEN:
                     CheckParameterCount(p, 1);
                     result.Add(new Message(MessageType.Internal, p[0].Value.Trim()));
                     break;
-                case "@true(":
+                case ISTRUE_TOKEN:
                     CheckParameterCount(p, 1);
                     try
                     {
@@ -712,11 +709,11 @@ public partial class Dags
                         result.Add(new Message(MessageType.Internal, TrueFalse(false)));
                     }
                     break;
-                case "@upper(":
+                case UPPER_TOKEN:
                     CheckParameterCount(p, 1);
                     result.Add(new Message(MessageType.Internal, p[0].Value.ToUpper()));
                     break;
-                case "@write(":
+                case WRITE_TOKEN:
                     CheckParameterAtLeastOne(p);
                     foreach (var item in p) // concatenate all parameters
                     {
@@ -724,14 +721,14 @@ public partial class Dags
                         result.Add(new Message(MessageType.Text, value));
                     }
                     break;
-                case "@writeline(":
+                case WRITELINE_TOKEN:
                     CheckParameterAtLeastOne(p);
                     foreach (var item in p) // concatenate all parameters
                     {
                         value = GetValue(grod, item.Value);
                         result.Add(new Message(MessageType.Text, value));
                     }
-                    result.Add(new Message(MessageType.Text, NL));
+                    result.Add(new Message(MessageType.Text, NL_CHAR));
                     break;
                 default:
                     var userResult = GetUserDefinedFunctionValues(token, p, grod);

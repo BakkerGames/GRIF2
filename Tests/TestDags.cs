@@ -1,4 +1,6 @@
 ﻿using Grif;
+using static Grif.Dags;
+using static Grif.Common;
 
 namespace Tests;
 
@@ -15,7 +17,7 @@ public class TestDags
     public void TestProcess()
     {
         Grod grod = new("testGrod");
-        string script = "@write(abc)";
+        string script = $"{WRITE_TOKEN}abc)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "abc") }));
     }
@@ -24,7 +26,7 @@ public class TestDags
     public void TestTwoCommands()
     {
         Grod grod = new("testGrod");
-        string script = "@write(abc)@write(def)";
+        string script = $"{WRITE_TOKEN}abc){WRITE_TOKEN}def)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "abc"), new(MessageType.Text, "def") }));
     }
@@ -33,7 +35,7 @@ public class TestDags
     public void TestConcatenate()
     {
         Grod grod = new("testGrod");
-        string script = "@write(abc,def)";
+        string script = $"{WRITE_TOKEN}abc,def)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "abc"), new(MessageType.Text, "def") }));
     }
@@ -42,9 +44,9 @@ public class TestDags
     public void TestWriteError()
     {
         Grod grod = new("testGrod");
-        string script = "@write(abc";
+        string script = $"{WRITE_TOKEN}abc";
         var result = Dags.Process(grod, script);
-        var expected = new List<Message> { new(MessageType.Error, "Error processing command at index 2:\r\nMissing closing parenthesis\r\n0: @write(\r\n1: abc\r\n") };
+        var expected = new List<Message> { new(MessageType.Error, $"Error processing command at index 2:\r\nMissing closing parenthesis\r\n0: {WRITE_TOKEN}\r\n1: abc\r\n") };
         Assert.That(result, Is.EqualTo(expected));
     }
 
@@ -52,9 +54,9 @@ public class TestDags
     public void TestNoParams()
     {
         Grod grod = new("testGrod");
-        string script = "@write()";
+        string script = $"{WRITE_TOKEN})";
         var result = Dags.Process(grod, script);
-        var expected = new List<Message> { new(MessageType.Error, "Error processing command at index 2:\r\nExpected at least one parameter, but got 0\r\n0: @write(\r\n1: )\r\n") };
+        var expected = new List<Message> { new(MessageType.Error, $"Error processing command at index 2:\r\nExpected at least one parameter, but got 0\r\n0: {WRITE_TOKEN}\r\n1: )\r\n") };
         Assert.That(result, Is.EqualTo(expected));
     }
 
@@ -63,7 +65,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("key1", "value1");
-        string script = "@get(key1)";
+        string script = $"{GET_TOKEN}key1)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "value1") }));
     }
@@ -72,7 +74,7 @@ public class TestDags
     public void TestIfCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if true @then @write(\"Condition met\") @endif";
+        string script = $"{IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition met") }));
@@ -82,7 +84,7 @@ public class TestDags
     public void TestIfNotCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if @not false @then @write(\"Condition met\") @endif";
+        string script = $"{IF_TOKEN} {NOT_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition met") }));
@@ -92,7 +94,7 @@ public class TestDags
     public void TestIfWithAndCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if true @and true @then @write(\"Condition met\") @endif";
+        string script = $"{IF_TOKEN} {TRUE} {AND_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition met") }));
@@ -102,7 +104,7 @@ public class TestDags
     public void TestIfWithOrCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if false @or true @then @write(\"Condition met\") @endif";
+        string script = $"{IF_TOKEN} {FALSE} {OR_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition met") }));
@@ -112,7 +114,7 @@ public class TestDags
     public void TestIfWithOrShortCircuitCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if true @or false @then @write(\"Condition met\") @endif";
+        string script = $"{IF_TOKEN} {TRUE} {OR_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition met") }));
@@ -122,7 +124,7 @@ public class TestDags
     public void TestIfWithElseCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        string script = $"{IF_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ELSE_TOKEN} {WRITE_TOKEN}\"Condition not met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition not met") }));
@@ -132,7 +134,7 @@ public class TestDags
     public void TestIfWithAndFailsToElseCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if true @and false @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        string script = $"{IF_TOKEN} {TRUE} {AND_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ELSE_TOKEN} {WRITE_TOKEN}\"Condition not met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition not met") }));
@@ -142,7 +144,7 @@ public class TestDags
     public void TestIfWithAndShortCircuitToElseCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if false @and true @then @write(\"Condition met\") @else @write(\"Condition not met\") @endif";
+        string script = $"{IF_TOKEN} {FALSE} {AND_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ELSE_TOKEN} {WRITE_TOKEN}\"Condition not met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Condition not met") }));
@@ -152,7 +154,7 @@ public class TestDags
     public void TestIfWithElseIfCondition()
     {
         Grod grod = new("testGrod");
-        string script = "@if false @then @write(\"Condition met\") @elseif true @then @write(\"Second condition met\") @endif";
+        string script = $"{IF_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}\"Condition met\") {ELSEIF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}\"Second condition met\") {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Second condition met") }));
@@ -162,7 +164,7 @@ public class TestDags
     public void TestIfNestedAnswer1()
     {
         Grod grod = new("testGrod");
-        string script = "@if true @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif false @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        string script = $"{IF_TOKEN} {TRUE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer1) {ELSE_TOKEN} {WRITE_TOKEN}Answer2) {ENDIF_TOKEN} {ELSEIF_TOKEN} {FALSE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer3) {ELSE_TOKEN} {WRITE_TOKEN}Answer4) {ENDIF_TOKEN} {ELSE_TOKEN} {WRITE_TOKEN}Answer5) {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Answer1") }));
@@ -172,7 +174,7 @@ public class TestDags
     public void TestIfNestedAnswer2()
     {
         Grod grod = new("testGrod");
-        string script = "@if true @then @if false @then @write(Answer1) @else @write(Answer2) @endif @elseif false @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        string script = $"{IF_TOKEN} {TRUE} {THEN_TOKEN} {IF_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}Answer1) {ELSE_TOKEN} {WRITE_TOKEN}Answer2) {ENDIF_TOKEN} {ELSEIF_TOKEN} {FALSE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer3) {ELSE_TOKEN} {WRITE_TOKEN}Answer4) {ENDIF_TOKEN} {ELSE_TOKEN} {WRITE_TOKEN}Answer5) {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Answer2") }));
@@ -182,7 +184,7 @@ public class TestDags
     public void TestIfNestedAnswer3()
     {
         Grod grod = new("testGrod");
-        string script = "@if false @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif true @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        string script = $"{IF_TOKEN} {FALSE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer1) {ELSE_TOKEN} {WRITE_TOKEN}Answer2) {ENDIF_TOKEN} {ELSEIF_TOKEN} {TRUE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer3) {ELSE_TOKEN} {WRITE_TOKEN}Answer4) {ENDIF_TOKEN} {ELSE_TOKEN} {WRITE_TOKEN}Answer5) {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Answer3") }));
@@ -192,7 +194,7 @@ public class TestDags
     public void TestIfNestedAnswer4()
     {
         Grod grod = new("testGrod");
-        string script = "@if false @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif true @then @if false @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        string script = $"{IF_TOKEN} {FALSE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer1) {ELSE_TOKEN} {WRITE_TOKEN}Answer2) {ENDIF_TOKEN} {ELSEIF_TOKEN} {TRUE} {THEN_TOKEN} {IF_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}Answer3) {ELSE_TOKEN} {WRITE_TOKEN}Answer4) {ENDIF_TOKEN} {ELSE_TOKEN} {WRITE_TOKEN}Answer5) {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Answer4") }));
@@ -202,7 +204,7 @@ public class TestDags
     public void TestIfNestedAnswer5()
     {
         Grod grod = new("testGrod");
-        string script = "@if false @then @if true @then @write(Answer1) @else @write(Answer2) @endif @elseif false @then @if true @then @write(Answer3) @else @write(Answer4) @endif @else @write(Answer5) @endif";
+        string script = $"{IF_TOKEN} {FALSE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer1) {ELSE_TOKEN} {WRITE_TOKEN}Answer2) {ENDIF_TOKEN} {ELSEIF_TOKEN} {FALSE} {THEN_TOKEN} {IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}Answer3) {ELSE_TOKEN} {WRITE_TOKEN}Answer4) {ENDIF_TOKEN} {ELSE_TOKEN} {WRITE_TOKEN}Answer5) {ENDIF_TOKEN}";
         grod.Set("key1", "value1");
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Answer5") }));
@@ -212,7 +214,7 @@ public class TestDags
     public void TestIfEQ()
     {
         Grod grod = new("testGrod");
-        string script = "@if @eq(1,1) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {EQ_TOKEN}1,1) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -221,7 +223,7 @@ public class TestDags
     public void TestIfEQNull()
     {
         Grod grod = new("testGrod");
-        string script = "@if @eq(null,null) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {EQ_TOKEN}null,null) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -230,7 +232,7 @@ public class TestDags
     public void TestIfEQString()
     {
         Grod grod = new("testGrod");
-        string script = "@if @eq(abc,abc) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {EQ_TOKEN}abc,abc) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -239,7 +241,7 @@ public class TestDags
     public void TestIfNE()
     {
         Grod grod = new("testGrod");
-        string script = "@if @ne(1,2) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {NE_TOKEN}1,2) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -248,7 +250,7 @@ public class TestDags
     public void TestIfNENull()
     {
         Grod grod = new("testGrod");
-        string script = "@if @ne(null,2) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {NE_TOKEN}null,2) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -257,7 +259,7 @@ public class TestDags
     public void TestIfNEString()
     {
         Grod grod = new("testGrod");
-        string script = "@if @ne(abc,xyz) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {NE_TOKEN}abc,xyz) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -266,7 +268,7 @@ public class TestDags
     public void TestIfGT()
     {
         Grod grod = new("testGrod");
-        string script = "@if @gt(2,1) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {GT_TOKEN}2,1) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -275,7 +277,7 @@ public class TestDags
     public void TestIfGTNull()
     {
         Grod grod = new("testGrod");
-        string script = "@if @gt(2,null) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {GT_TOKEN}2,null) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -284,7 +286,7 @@ public class TestDags
     public void TestIfGTString()
     {
         Grod grod = new("testGrod");
-        string script = "@if @gt(xyz,abc) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {GT_TOKEN}xyz,abc) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -293,7 +295,7 @@ public class TestDags
     public void TestIfGE()
     {
         Grod grod = new("testGrod");
-        string script = "@if @ge(1,1) @and @ge(2,1) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {GE_TOKEN}1,1) {AND_TOKEN} {GE_TOKEN}2,1) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -302,7 +304,7 @@ public class TestDags
     public void TestIfGENull()
     {
         Grod grod = new("testGrod");
-        string script = "@if @ge(null,null) @and @ge(2,null) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {GE_TOKEN}null,null) {AND_TOKEN} {GE_TOKEN}2,null) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -311,7 +313,7 @@ public class TestDags
     public void TestIfGEString()
     {
         Grod grod = new("testGrod");
-        string script = "@if @ge(abc,abc) @and @ge(xyz,abc) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {GE_TOKEN}abc,abc) {AND_TOKEN} {GE_TOKEN}xyz,abc) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -320,7 +322,7 @@ public class TestDags
     public void TestIfLT()
     {
         Grod grod = new("testGrod");
-        string script = "@if @lt(1,2) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {LT_TOKEN}1,2) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -329,7 +331,7 @@ public class TestDags
     public void TestIfLTNull()
     {
         Grod grod = new("testGrod");
-        string script = "@if @lt(null,2) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {LT_TOKEN}null,2) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -338,7 +340,7 @@ public class TestDags
     public void TestIfLTString()
     {
         Grod grod = new("testGrod");
-        string script = "@if @lt(abc,xyz) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {LT_TOKEN}abc,xyz) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -347,7 +349,7 @@ public class TestDags
     public void TestIfLE()
     {
         Grod grod = new("testGrod");
-        string script = "@if @le(1,1) @and @le(1,2) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {LE_TOKEN}1,1) {AND_TOKEN} {LE_TOKEN}1,2) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -356,7 +358,7 @@ public class TestDags
     public void TestIfLENull()
     {
         Grod grod = new("testGrod");
-        string script = "@if @le(null,null) @and @le(null,2) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {LE_TOKEN}null,null) {AND_TOKEN} {LE_TOKEN}null,2) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -365,7 +367,7 @@ public class TestDags
     public void TestIfLEString()
     {
         Grod grod = new("testGrod");
-        string script = "@if @le(abc,abc) @and @le(abc,xyz) @then @write(answer) @endif";
+        string script = $"{IF_TOKEN} {LE_TOKEN}abc,abc) {AND_TOKEN} {LE_TOKEN}abc,xyz) {THEN_TOKEN} {WRITE_TOKEN}answer) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "answer") }));
     }
@@ -375,7 +377,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("Hello", "Hello, World!");
-        string script = "@msg(Hello)";
+        string script = $"{MSG_TOKEN}Hello)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Hello, World!"), new(MessageType.Text, "\\n") }));
     }
@@ -385,7 +387,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("key1", "value1");
-        string script = "@write(@get(key1))";
+        string script = $"{WRITE_TOKEN}{GET_TOKEN}key1))";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "value1") }));
     }
@@ -396,7 +398,7 @@ public class TestDags
         Grod grod = new("testGrod");
         grod.Set("key1", "value1");
         grod.Set("key2", "key1");
-        string script = "@write(@get(@get(key2)))";
+        string script = $"{WRITE_TOKEN}{GET_TOKEN}{GET_TOKEN}key2)))";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "value1") }));
     }
@@ -415,7 +417,7 @@ public class TestDags
     public void TestUserDefinedScript()
     {
         Grod grod = new("testGrod");
-        grod.Set("@myScript", "@write(\"Hello from user-defined script!\")");
+        grod.Set("@myScript", $"{WRITE_TOKEN}\"Hello from user-defined script!\")");
         string script = "@myScript";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Hello from user-defined script!") }));
@@ -426,7 +428,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("counter", "5");
-        string script = "@addto(counter,3)@get(counter)";
+        string script = $"{ADDTO_TOKEN}counter,3){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "8") }));
     }
@@ -436,7 +438,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("counter", "5");
-        string script = "@subto(counter,2)@get(counter)";
+        string script = $"{SUBTO_TOKEN}counter,2){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "3") }));
     }
@@ -446,7 +448,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("counter", "5");
-        string script = "@multo(counter,4)@get(counter)";
+        string script = $"{MULTO_TOKEN}counter,4){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "20") }));
     }
@@ -456,7 +458,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("counter", "20");
-        string script = "@divto(counter,4)@get(counter)";
+        string script = $"{DIVTO_TOKEN}counter,4){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "5") }));
     }
@@ -467,10 +469,10 @@ public class TestDags
         var counterValue = "20";
         Grod grod = new("testGrod");
         grod.Set("counter", counterValue);
-        string script = "@divto(counter,0)@get(counter)";
+        string script = $"{DIVTO_TOKEN}counter,0){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         var expected = new List<Message> {
-            new(MessageType.Error, "Error processing command at index 5:\r\nDivision by zero is not allowed.\r\n0: @divto(\r\n1: counter\r\n2: ,\r\n3: 0\r\n4: )\r\n5: @get(\r\n6: counter\r\n7: )\r\n"),
+            new(MessageType.Error, $"Error processing command at index 5:\r\nDivision by zero is not allowed.\r\n0: {DIVTO_TOKEN}\r\n1: counter\r\n2: ,\r\n3: 0\r\n4: )\r\n5: {GET_TOKEN}\r\n6: counter\r\n7: )\r\n"),
             new(MessageType.Internal, counterValue)
         };
         Assert.That(result, Is.Not.Null);
@@ -484,10 +486,10 @@ public class TestDags
         var counterValue = "five";
         Grod grod = new("testGrod");
         grod.Set("counter", counterValue);
-        string script = "@addto(counter,3)@get(counter)";
+        string script = $"{ADDTO_TOKEN}counter,3){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         var expected = new List<Message> {
-            new(MessageType.Error, "Error processing command at index 5:\r\nInvalid integer: five\r\n0: @addto(\r\n1: counter\r\n2: ,\r\n3: 3\r\n4: )\r\n5: @get(\r\n6: counter\r\n7: )\r\n"),
+            new(MessageType.Error, $"Error processing command at index 5:\r\nInvalid integer: five\r\n0: {ADDTO_TOKEN}\r\n1: counter\r\n2: ,\r\n3: 3\r\n4: )\r\n5: {GET_TOKEN}\r\n6: counter\r\n7: )\r\n"),
             new(MessageType.Internal, counterValue)
         };
         Assert.That(result, Is.Not.Null);
@@ -500,7 +502,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("counter", "20");
-        string script = "@modto(counter,6)@get(counter)";
+        string script = $"{MODTO_TOKEN}counter,6){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "2") }));
     }
@@ -509,7 +511,7 @@ public class TestDags
     public void TestAdd()
     {
         Grod grod = new("testGrod");
-        string script = "@add(5,3)";
+        string script = $"{ADD_TOKEN}5,3)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "8") }));
     }
@@ -518,7 +520,7 @@ public class TestDags
     public void TestSub()
     {
         Grod grod = new("testGrod");
-        string script = "@sub(5,3)";
+        string script = $"{SUB_TOKEN}5,3)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "2") }));
     }
@@ -527,7 +529,7 @@ public class TestDags
     public void TestMul()
     {
         Grod grod = new("testGrod");
-        string script = "@mul(5,3)";
+        string script = $"{MUL_TOKEN}5,3)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "15") }));
     }
@@ -536,7 +538,7 @@ public class TestDags
     public void TestDiv()
     {
         Grod grod = new("testGrod");
-        string script = "@div(6,3)";
+        string script = $"{DIV_TOKEN}6,3)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "2") }));
     }
@@ -545,7 +547,7 @@ public class TestDags
     public void TestMod()
     {
         Grod grod = new("testGrod");
-        string script = "@mod(20,6)";
+        string script = $"{MOD_TOKEN}20,6)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "2") }));
     }
@@ -554,9 +556,9 @@ public class TestDags
     public void TestDivByZero()
     {
         Grod grod = new("testGrod");
-        string script = "@div(6,0)";
+        string script = $"{DIV_TOKEN}6,0)";
         var result = Dags.Process(grod, script);
-        var expected = new List<Message> { new(MessageType.Error, "Error processing command at index 5:\r\nDivision by zero is not allowed.\r\n0: @div(\r\n1: 6\r\n2: ,\r\n3: 0\r\n4: )\r\n") };
+        var expected = new List<Message> { new(MessageType.Error, $"Error processing command at index 5:\r\nDivision by zero is not allowed.\r\n0: {DIV_TOKEN}\r\n1: 6\r\n2: ,\r\n3: 0\r\n4: )\r\n") };
         Assert.That(result, Is.EqualTo(expected));
     }
 
@@ -564,9 +566,9 @@ public class TestDags
     public void TestModByZero()
     {
         Grod grod = new("testGrod");
-        string script = "@mod(20,0)";
+        string script = $"{MOD_TOKEN}20,0)";
         var result = Dags.Process(grod, script);
-        var expected = new List<Message> { new(MessageType.Error, "Error processing command at index 5:\r\nAttempted to divide by zero.\r\n0: @mod(\r\n1: 20\r\n2: ,\r\n3: 0\r\n4: )\r\n") };
+        var expected = new List<Message> { new(MessageType.Error, $"Error processing command at index 5:\r\nAttempted to divide by zero.\r\n0: {MOD_TOKEN}\r\n1: 20\r\n2: ,\r\n3: 0\r\n4: )\r\n") };
         Assert.That(result, Is.EqualTo(expected));
     }
 
@@ -602,7 +604,7 @@ public class TestDags
     public void TestScriptWithOnlyComments()
     {
         Grod grod = new("testGrod");
-        string script = "@comment(\"This is a comment\n\") @comment(\"Another comment\")";
+        string script = $"{COMMENT_TOKEN}\"This is a comment\n\") {COMMENT_TOKEN}\"Another comment\")";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message>()));
     }
@@ -611,7 +613,7 @@ public class TestDags
     public void TestScriptWithMixedContent()
     {
         Grod grod = new("testGrod");
-        string script = "@comment(\"This is a comment\n\") @write(Hello) @comment(\"Another comment\") @write(World)";
+        string script = $"{COMMENT_TOKEN}\"This is a comment\n\") {WRITE_TOKEN}Hello) {COMMENT_TOKEN}\"Another comment\") {WRITE_TOKEN}World)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Hello"), new(MessageType.Text, "World") }));
     }
@@ -620,7 +622,7 @@ public class TestDags
     public void TestNeg()
     {
         Grod grod = new("testGrod");
-        string script = "@neg(5)";
+        string script = $"{NEG_TOKEN}5)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "-5") }));
     }
@@ -629,7 +631,7 @@ public class TestDags
     public void TestNegZero()
     {
         Grod grod = new("testGrod");
-        string script = "@neg(0)";
+        string script = $"{NEG_TOKEN}0)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "0") }));
     }
@@ -639,7 +641,7 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("counter", "5");
-        string script = "@negto(counter)@get(counter)";
+        string script = $"{NEGTO_TOKEN}counter){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "-5") }));
     }
@@ -649,8 +651,8 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("key1", "value1");
-        grod.Set("key2", "@get(key1)");
-        string script = "@getvalue(key2)";
+        grod.Set("key2", $"{GET_TOKEN}key1)");
+        string script = $"{GETVALUE_TOKEN}key2)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "value1") }));
     }
@@ -659,7 +661,7 @@ public class TestDags
     public void TestGetValueNonExistentKey()
     {
         Grod grod = new("testGrod");
-        string script = "@getvalue(nonexistent)";
+        string script = $"{GETVALUE_TOKEN}nonexistent)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "") }));
     }
@@ -669,9 +671,9 @@ public class TestDags
     {
         Grod grod = new("testGrod");
         grod.Set("key1", "value1");
-        grod.Set("key2", "@get(key1)");
-        grod.Set("key3", "@get(key2)");
-        string script = "@getvalue(key3)";
+        grod.Set("key2", $"{GET_TOKEN}key1)");
+        grod.Set("key3", $"{GET_TOKEN}key2)");
+        string script = $"{GETVALUE_TOKEN}key3)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Internal, "value1") }));
     }
@@ -682,7 +684,7 @@ public class TestDags
         Grod grod = new("testGrod");
         grod.Set("a", "10");
         grod.Set("b", "20");
-        string script = "@if @gt(@get(a),5) @and @lt(@get(b),30) @then @write(@add(@get(a),@get(b))) @else @write(Out of range) @endif";
+        string script = $"{IF_TOKEN} {GT_TOKEN}{GET_TOKEN}a),5) {AND_TOKEN} {LT_TOKEN}{GET_TOKEN}b),30) {THEN_TOKEN} {WRITE_TOKEN}{ADD_TOKEN}{GET_TOKEN}a),{GET_TOKEN}b))) {ELSE_TOKEN} {WRITE_TOKEN}Out of range) {ENDIF_TOKEN}";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "30") }));
     }
@@ -691,7 +693,7 @@ public class TestDags
     public void TestCommentCommand()
     {
         Grod grod = new("testGrod");
-        string script = "@comment(\"This is a comment\")@write(Hello)";
+        string script = $"{COMMENT_TOKEN}\"This is a comment\"){WRITE_TOKEN}Hello)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Hello") }));
     }
@@ -700,7 +702,7 @@ public class TestDags
     public void TestCommentCommandWithNewline()
     {
         Grod grod = new("testGrod");
-        string script = "@comment(\"This is a comment\nwith a newline\")@write(Hello)";
+        string script = $"{COMMENT_TOKEN}\"This is a comment\nwith a newline\"){WRITE_TOKEN}Hello)";
         var result = Dags.Process(grod, script);
         Assert.That(result, Is.EqualTo(new List<Message> { new(MessageType.Text, "Hello") }));
     }

@@ -8,10 +8,10 @@ public static class Common
     public const string TRUE = "true";
     public const string FALSE = "false";
 
-    public const string NL = "\\n";
-    public const string TAB = "\\t";
-    public const string SPACE = "\\s";
-    public const string COMMA_UTF = "\\u002c";
+    public const string NL_CHAR = "\\n";
+    public const string TAB_CHAR = "\\t";
+    public const string SPACE_CHAR = "\\s";
+    public const string COMMA_CHAR = "\\u002c";
 
     public const string INCHANNEL = "#INCHANNEL;";
 
@@ -29,7 +29,7 @@ public static class Common
     public const string OUTPUT_WIDTH = "system.output_width";
     public const string PROMPT = "system.prompt";
     public const string UPPERCASE = "system.uppercase";
-    public const string DEBUG = "system.debug";
+    public const string DEBUG_FLAG = "system.debug";
     public const string WORDSIZE = "system.wordsize";
 
     // OutChannel constants used by GRIF

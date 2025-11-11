@@ -1,4 +1,5 @@
 ﻿using static Grif.Common;
+using static Grif.Dags;
 
 namespace Grif;
 
@@ -61,7 +62,7 @@ public static class Parser
             TrimSynonyms(ref _articles);
         }
         DONT_UNDERSTAND_TEXT = (grod.Get(DONT_UNDERSTAND, true) ??
-            $"I don't understand \"{{0}}\".") + NL;
+            $"I don't understand \"{{0}}\".") + NL_CHAR;
     }
 
     public static List<Message>? ParseInput(Grod grod, string input)
@@ -186,18 +187,18 @@ public static class Parser
             result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
             return result;
         }
-        result.Add(new Message(MessageType.Script, $"@set(input.full,\"{input}\")"));
-        result.Add(new Message(MessageType.Script, $"@set(input.verb,{verb ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.verbword,{verbWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.direction,{direction ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.directionword,{directionWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.noun,{noun ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.nounword,{nounWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.preposition,{preposition ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.prepositionword,{prepositionWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.indirectnoun,{indirectNoun ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@set(input.indirectnounword,{indirectNounWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"@script({command})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.full,\"{input}\")"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.verb,{verb ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.verbword,{verbWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.direction,{direction ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.directionword,{directionWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.noun,{noun ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.nounword,{nounWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.preposition,{preposition ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.prepositionword,{prepositionWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.indirectnoun,{indirectNoun ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.indirectnounword,{indirectNounWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SCRIPT_TOKEN}{command})"));
         return result;
     }
 

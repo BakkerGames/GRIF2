@@ -243,22 +243,22 @@ public partial class Dags
             // handle everything else
             switch (s.ToLower())
             {
-                case "@elseif":
+                case ELSEIF_TOKEN:
                     if (indentLevel > startIndent) indentLevel--;
                     break;
-                case "@else":
+                case ELSE_TOKEN:
                     if (indentLevel > startIndent) indentLevel--;
                     break;
-                case "@endif":
+                case ENDIF_TOKEN:
                     if (indentLevel > startIndent) indentLevel--;
                     break;
-                case "@endfor":
+                case ENDFOR_TOKEN:
                     if (indentLevel > startIndent) indentLevel--;
                     break;
-                case "@endforeachkey":
+                case ENDFOREACHKEY_TOKEN:
                     if (indentLevel > startIndent) indentLevel--;
                     break;
-                case "@endforeachlist":
+                case ENDFOREACHLIST_TOKEN:
                     if (indentLevel > startIndent) indentLevel--;
                     break;
             }
@@ -283,26 +283,26 @@ public partial class Dags
             result.Append(s);
             switch (s.ToLower())
             {
-                case "@if":
+                case IF_TOKEN:
                     ifLine = true;
                     break;
-                case "@elseif":
+                case ELSEIF_TOKEN:
                     ifLine = true;
                     break;
-                case "@else":
+                case ELSE_TOKEN:
                     indentLevel++;
                     break;
-                case "@then":
+                case THEN_TOKEN:
                     indentLevel++;
                     ifLine = false;
                     break;
-                case "@for(":
+                case FOR_TOKEN:
                     forLine = true;
                     break;
-                case "@foreachkey(":
+                case FOREACHKEY_TOKEN:
                     forEachKeyLine = true;
                     break;
-                case "@foreachlist(":
+                case FOREACHLIST_TOKEN:
                     forEachListLine = true;
                     break;
             }
@@ -398,34 +398,34 @@ public partial class Dags
             }
             switch (s.ToLower())
             {
-                case "@if":
+                case IF_TOKEN:
                     ifCount++;
                     inIf = true;
                     break;
-                case "@and":
-                case "@or":
-                case "@not":
+                case AND_TOKEN:
+                case OR_TOKEN:
+                case NOT_TOKEN:
                     if (!inIf)
                     {
                         return false; // Logical operator outside of @if
                     }
                     break;
-                case "@then":
-                case "@else":
+                case THEN_TOKEN:
+                case ELSE_TOKEN:
                     inIf = false;
                     if (ifCount == 0)
                     {
                         return false; // @then, @else without matching @if
                     }
                     break;
-                case "@elseif":
+                case ELSEIF_TOKEN:
                     inIf = true;
                     if (ifCount == 0)
                     {
                         return false; // @elseif without matching @if
                     }
                     break;
-                case "@endif":
+                case ENDIF_TOKEN:
                     ifCount--;
                     inIf = false;
                     if (ifCount < 0)
@@ -433,30 +433,30 @@ public partial class Dags
                         return false; // More @endif than @if
                     }
                     break;
-                case "@for(":
+                case FOR_TOKEN:
                     forCount++;
                     break;
-                case "@foreachkey(":
+                case FOREACHKEY_TOKEN:
                     forEachKeyCount++;
                     break;
-                case "@foreachlist(":
+                case FOREACHLIST_TOKEN:
                     forEachListCount++;
                     break;
-                case "@endfor":
+                case ENDFOR_TOKEN:
                     forCount--;
                     if (forCount < 0)
                     {
                         return false; // More @endfor than @for
                     }
                     break;
-                case "@endforeachkey":
+                case ENDFOREACHKEY_TOKEN:
                     forEachKeyCount--;
                     if (forEachKeyCount < 0)
                     {
                         return false; // More @endforeachkey than @foreachkey
                     }
                     break;
-                case "@endforeachlist":
+                case ENDFOREACHLIST_TOKEN:
                     forEachListCount--;
                     if (forEachListCount < 0)
                     {
@@ -685,7 +685,7 @@ public partial class Dags
         if (string.IsNullOrEmpty(value))
             return NULL;
         if (value.Contains(','))
-            value = value.Replace(",", COMMA_UTF);
+            value = value.Replace(",", COMMA_CHAR);
         return value;
     }
 
@@ -693,8 +693,8 @@ public partial class Dags
     {
         if (value == NULL)
             return null;
-        if (value.Contains(COMMA_UTF))
-            value = value.Replace(COMMA_UTF, ",");
+        if (value.Contains(COMMA_CHAR))
+            value = value.Replace(COMMA_CHAR, ",");
         return value;
     }
 

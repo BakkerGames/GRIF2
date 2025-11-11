@@ -14,11 +14,11 @@ public partial class Dags
         do
         {
             var token = tokens[index++];
-            if (token.Equals("@for(", OIC))
+            if (token.Equals(FOR_TOKEN, OIC))
             {
                 level++;
             }
-            else if (token.Equals("@endfor", OIC))
+            else if (token.Equals(ENDFOR_TOKEN, OIC))
             {
                 if (level <= 0)
                 {
@@ -63,11 +63,11 @@ public partial class Dags
         do
         {
             var token = tokens[index++];
-            if (token.Equals("@foreachkey(", OIC))
+            if (token.Equals(FOREACHKEY_TOKEN, OIC))
             {
                 level++;
             }
-            else if (token.Equals("@endforeachkey", OIC))
+            else if (token.Equals(ENDFOREACHKEY_TOKEN, OIC))
             {
                 if (level <= 0)
                 {
@@ -104,11 +104,11 @@ public partial class Dags
         do
         {
             var token = tokens[index++];
-            if (token.Equals("@foreachlist(", OIC))
+            if (token.Equals(FOREACHLIST_TOKEN, OIC))
             {
                 level++;
             }
-            else if (token.Equals("@endforeachlist", OIC))
+            else if (token.Equals(ENDFOREACHLIST_TOKEN, OIC))
             {
                 if (level <= 0)
                 {

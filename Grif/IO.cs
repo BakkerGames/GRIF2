@@ -127,11 +127,11 @@ public static class IO
                     {
                         if (value.StartsWith(' '))
                         {
-                            value = SPACE + value[1..];
+                            value = SPACE_CHAR + value[1..];
                         }
                         if (value.EndsWith(' '))
                         {
-                            value = value[..^1] + SPACE;
+                            value = value[..^1] + SPACE_CHAR;
                         }
                         writer.WriteLine($"\t{value}");
                     }

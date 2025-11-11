@@ -42,7 +42,7 @@ public class UnitTestDags
         var key = "abc";
         var value = "123";
         grod.Set(key, value);
-        result = Dags.Process(grod, $"@get({key})");
+        result = Dags.Process(grod, $"{GET_TOKEN}{key})");
         Assert.That(result, Has.Count.EqualTo(1));
         Assert.That(result[0].Value, Is.EqualTo(value));
     }
@@ -52,8 +52,8 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "123";
-        Dags.Process(grod, $"@set({key},{value})");
-        result = Dags.Process(grod, $"@get({key})");
+        Dags.Process(grod, $"{SET_TOKEN}{key},{value})");
+        result = Dags.Process(grod, $"{GET_TOKEN}{key})");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
@@ -61,10 +61,10 @@ public class UnitTestDags
     public void Test_Set_Script()
     {
         var key = "abc";
-        var answer = "@comment(\"this is a comment\")";
+        var answer = $"{COMMENT_TOKEN}\"this is a comment\")";
         var value = "\"" + answer.Replace("\"", "\\\"") + "\"";
-        Dags.Process(grod, $"@set({key},{value})");
-        result = Dags.Process(grod, $"@get({key})");
+        Dags.Process(grod, $"{SET_TOKEN}{key},{value})");
+        result = Dags.Process(grod, $"{GET_TOKEN}{key})");
         Assert.That(Squash(result), Is.EqualTo(answer));
     }
 
@@ -73,8 +73,8 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "123";
-        Dags.Process(grod, $"@setarray({key},2,3,{value})");
-        result = Dags.Process(grod, $"@getarray({key},2,3)");
+        Dags.Process(grod, $"{SETARRAY_TOKEN}{key},2,3,{value})");
+        result = Dags.Process(grod, $"{GETARRAY_TOKEN}{key},2,3)");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
@@ -83,8 +83,8 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "";
-        Dags.Process(grod, $"@setarray({key},2,3,{value})");
-        result = Dags.Process(grod, $"@getarray({key},2,3)");
+        Dags.Process(grod, $"{SETARRAY_TOKEN}{key},2,3,{value})");
+        result = Dags.Process(grod, $"{GETARRAY_TOKEN}{key},2,3)");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
@@ -93,9 +93,9 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "123";
-        Dags.Process(grod, $"@setarray({key},2,3,{value})");
-        Dags.Process(grod, $"@cleararray({key})");
-        result = Dags.Process(grod, $"@getarray({key},2,3)");
+        Dags.Process(grod, $"{SETARRAY_TOKEN}{key},2,3,{value})");
+        Dags.Process(grod, $"{CLEARARRAY_TOKEN}{key})");
+        result = Dags.Process(grod, $"{GETARRAY_TOKEN}{key},2,3)");
         Assert.That(Squash(result), Is.EqualTo(""));
     }
 
@@ -104,8 +104,8 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "123";
-        Dags.Process(grod, $"@setlist({key},1,{value})");
-        result = Dags.Process(grod, $"@getlist({key},1)");
+        Dags.Process(grod, $"{SETLIST_TOKEN}{key},1,{value})");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},1)");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
@@ -114,8 +114,8 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "";
-        Dags.Process(grod, $"@setlist({key},1,{value})");
-        result = Dags.Process(grod, $"@getlist({key},1)");
+        Dags.Process(grod, $"{SETLIST_TOKEN}{key},1,{value})");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},1)");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
@@ -124,8 +124,8 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "abc\t\r\n123";
-        Dags.Process(grod, $"@setlist({key},1,\"{value}\")");
-        result = Dags.Process(grod, $"@getlist({key},1)");
+        Dags.Process(grod, $"{SETLIST_TOKEN}{key},1,\"{value}\")");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},1)");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
@@ -134,14 +134,14 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "123";
-        Dags.Process(grod, $"@addlist({key},0)");
-        Dags.Process(grod, $"@addlist({key},1)");
-        Dags.Process(grod, $"@addlist({key},2)");
-        Dags.Process(grod, $"@addlist({key},3)");
-        Dags.Process(grod, $"@insertatlist({key},1,{value})");
-        result = Dags.Process(grod, $"@getlist({key},1)");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},0)");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},1)");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},2)");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},3)");
+        Dags.Process(grod, $"{INSERTATLIST_TOKEN}{key},1,{value})");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},1)");
         Assert.That(Squash(result), Is.EqualTo(value));
-        result = Dags.Process(grod, $"@getlist({key},4)");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},4)");
         Assert.That(Squash(result), Is.EqualTo("3"));
     }
 
@@ -150,16 +150,16 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "123";
-        Dags.Process(grod, $"@setlist({key},3,{value})");
-        Dags.Process(grod, $"@removeatlist({key},0)");
-        result = Dags.Process(grod, $"@getlist({key},2)");
+        Dags.Process(grod, $"{SETLIST_TOKEN}{key},3,{value})");
+        Dags.Process(grod, $"{REMOVEATLIST_TOKEN}{key},0)");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},2)");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
     [Test]
     public void Test_Function()
     {
-        Dags.Process(grod, "@set(\"@boo\",\"@write(eek!)\")");
+        Dags.Process(grod, $"{SET_TOKEN}\"@boo\",\"{WRITE_TOKEN}eek!)\")");
         result = Dags.Process(grod, "@boo");
         Assert.That(Squash(result), Is.EqualTo("eek!"));
     }
@@ -167,7 +167,7 @@ public class UnitTestDags
     [Test]
     public void Test_FunctionParameters()
     {
-        Dags.Process(grod, "@set(\"@boo(x)\",\"@write($x)\")");
+        Dags.Process(grod, $"{SET_TOKEN}\"@boo(x)\",\"{WRITE_TOKEN}$x)\")");
         result = Dags.Process(grod, "@boo(eek!)");
         Assert.That(Squash(result), Is.EqualTo("eek!"));
     }
@@ -175,373 +175,373 @@ public class UnitTestDags
     [Test]
     public void Test_Abs()
     {
-        result = Dags.Process(grod, "@write(@abs(1))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ABS_TOKEN}1))");
         Assert.That(Squash(result), Is.EqualTo("1"));
-        result = Dags.Process(grod, "@write(@abs(-1))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ABS_TOKEN}-1))");
         Assert.That(Squash(result), Is.EqualTo("1"));
     }
 
     [Test]
     public void Test_Add()
     {
-        result = Dags.Process(grod, "@write(@add(1,3))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ADD_TOKEN}1,3))");
         Assert.That(Squash(result), Is.EqualTo("4"));
     }
 
     [Test]
     public void Test_AddTo()
     {
-        result = Dags.Process(grod, "@set(value,12) @addto(value,7) @write(@get(value))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,12) {ADDTO_TOKEN}value,7) {WRITE_TOKEN}{GET_TOKEN}value))");
         Assert.That(Squash(result), Is.EqualTo("19"));
     }
 
     [Test]
     public void Test_Comment()
     {
-        result = Dags.Process(grod, "@comment(\"this is a comment\")");
+        result = Dags.Process(grod, $"{COMMENT_TOKEN}\"this is a comment\")");
         Assert.That(Squash(result), Is.EqualTo(""));
     }
 
     [Test]
     public void Test_Concat()
     {
-        result = Dags.Process(grod, "@write(@concat(abc,def,123))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{CONCAT_TOKEN}abc, def, 123))");
         Assert.That(Squash(result), Is.EqualTo("abcdef123"));
     }
 
     [Test]
     public void Test_Debug()
     {
-        grod.Set(DEBUG, "true");
-        result = Dags.Process(grod, "@debug(\"this is a comment\")");
-        Assert.That(Squash(result), Is.EqualTo("### this is a comment" + NL));
-        result = Dags.Process(grod, "@debug(@add(123,456))");
-        Assert.That(Squash(result), Is.EqualTo("### 579" + NL));
-        grod.Set(DEBUG, "false");
-        result = Dags.Process(grod, "@debug(\"this is a comment\")");
+        grod.Set(DEBUG_FLAG, TRUE);
+        result = Dags.Process(grod, $"{DEBUG_TOKEN}\"this is a comment\")");
+        Assert.That(Squash(result), Is.EqualTo("### this is a comment" + NL_CHAR));
+        result = Dags.Process(grod, $"{DEBUG_TOKEN}{ADD_TOKEN}123,456))");
+        Assert.That(Squash(result), Is.EqualTo("### 579" + NL_CHAR));
+        grod.Set(DEBUG_FLAG, FALSE);
+        result = Dags.Process(grod, $"{DEBUG_TOKEN}\"this is a comment\")");
         Assert.That(Squash(result), Is.EqualTo(""));
     }
 
     [Test]
     public void Test_Div()
     {
-        result = Dags.Process(grod, "@write(@div(42,6))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{DIV_TOKEN}42,6))");
         Assert.That(Squash(result), Is.EqualTo("7"));
     }
 
     [Test]
     public void Test_DivTo()
     {
-        result = Dags.Process(grod, "@set(value,12) @divto(value,3) @write(@get(value))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,12) {DIVTO_TOKEN}value,3) {WRITE_TOKEN}{GET_TOKEN}value))");
         Assert.That(Squash(result), Is.EqualTo("4"));
     }
 
     [Test]
     public void Test_EQ()
     {
-        result = Dags.Process(grod, "@write(@eq(42,6))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@eq(42,42))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{EQ_TOKEN}42,6))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{EQ_TOKEN}42,42))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
     }
 
     [Test]
     public void Test_Exec()
     {
-        result = Dags.Process(grod, "@exec(\"@set(value,23)\") @write(@get(value))");
+        result = Dags.Process(grod, $"{EXEC_TOKEN}\"{SET_TOKEN}value,23)\") {WRITE_TOKEN}{GET_TOKEN}value))");
         Assert.That(Squash(result), Is.EqualTo("23"));
     }
 
     [Test]
     public void Test_False()
     {
-        result = Dags.Process(grod, "@write(@false(\"\"))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@false(0))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@false(1))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@false(abc))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISFALSE_TOKEN}\"\"))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISFALSE_TOKEN}0))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISFALSE_TOKEN}1))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISFALSE_TOKEN}abc))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
     }
 
     [Test]
     public void Test_For()
     {
-        result = Dags.Process(grod, "@for(x,1,3) @write($x) @endfor");
+        result = Dags.Process(grod, $"{FOR_TOKEN}x,1,3) {WRITE_TOKEN}$x) {ENDFOR_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("123"));
     }
 
     [Test]
     public void Test_ForEachKey()
     {
-        Dags.Process(grod, "@set(value.1,100) @set(value.2,200)");
-        result = Dags.Process(grod, "@foreachkey(x,\"value.\") @write($x) @endforeachkey");
+        Dags.Process(grod, $"{SET_TOKEN}value.1,100) {SET_TOKEN}value.2,200)");
+        result = Dags.Process(grod, $"{FOREACHKEY_TOKEN}x,\"value.\") {WRITE_TOKEN}$x) {ENDFOREACHKEY_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("12"));
-        result = Dags.Process(grod, "@foreachkey(x,\"value.\") @get(value.$x) @endforeachkey");
+        result = Dags.Process(grod, $"{FOREACHKEY_TOKEN}x,\"value.\") {GET_TOKEN}value.$x) {ENDFOREACHKEY_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("100200"));
     }
 
     [Test]
     public void Test_ForEachList()
     {
-        Dags.Process(grod, "@setlist(value,1,10)");
-        Dags.Process(grod, "@setlist(value,2,20)");
-        Dags.Process(grod, "@setlist(value,3,30)");
-        result = Dags.Process(grod, "@foreachlist(x,value) @write($x) @endforeachlist");
+        Dags.Process(grod, $"{SETLIST_TOKEN}value,1,10)");
+        Dags.Process(grod, $"{SETLIST_TOKEN}value,2,20)");
+        Dags.Process(grod, $"{SETLIST_TOKEN}value,3,30)");
+        result = Dags.Process(grod, $"{FOREACHLIST_TOKEN}x,value) {WRITE_TOKEN}$x) {ENDFOREACHLIST_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("102030"));
     }
 
     [Test]
     public void Test_Format()
     {
-        result = Dags.Process(grod, "@write(@format(\"{0}-{1}-{2}\",1,2,3))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{FORMAT_TOKEN}\"{{0}}-{{1}}-{{2}}\",1,2,3))");
         Assert.That(Squash(result), Is.EqualTo("1-2-3"));
-        result = Dags.Process(grod, "@write(@format(\"{2}-{1}-{0}\",1,2,3))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{FORMAT_TOKEN}\"{{2}}-{{1}}-{{0}}\",1,2,3))");
         Assert.That(Squash(result), Is.EqualTo("3-2-1"));
-        result = Dags.Process(grod, "@write(@format(\"{0}-{1}-{2}\",1,2))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{FORMAT_TOKEN}\"{{0}}-{{1}}-{{2}}\",1,2))");
         Assert.That(Squash(result), Is.EqualTo("1-2-{2}"));
     }
 
     [Test]
     public void Test_GE()
     {
-        result = Dags.Process(grod, "@write(@ge(42,6))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@ge(42,42))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@ge(1,42))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GE_TOKEN}42,6))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GE_TOKEN}42,42))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GE_TOKEN}1,42))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
     }
 
     [Test]
     public void Test_GetInChannel()
     {
         grod.Set(INCHANNEL, "abc");
-        result = Dags.Process(grod, "@write(@getinchannel)");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GETINCHANNEL_TOKEN})");
         Assert.That(Squash(result), Is.EqualTo("abc"));
-        result = Dags.Process(grod, "@write(@getinchannel)");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GETINCHANNEL_TOKEN})");
         Assert.That(Squash(result), Is.EqualTo(""));
     }
 
     [Test]
     public void Test_GetValue()
     {
-        Dags.Process(grod, "@set(v1,\"@get(v2)\") @set(v2,123)");
-        result = Dags.Process(grod, "@get(v1)");
-        Assert.That(Squash(result), Is.EqualTo("@get(v2)"));
-        result = Dags.Process(grod, "@write(@getvalue(v1))");
+        Dags.Process(grod, $"{SET_TOKEN}v1,\"{GET_TOKEN}v2)\") {SET_TOKEN}v2,123)");
+        result = Dags.Process(grod, $"{GET_TOKEN}v1)");
+        Assert.That(Squash(result), Is.EqualTo($"{GET_TOKEN}v2)"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GETVALUE_TOKEN}v1))");
         Assert.That(Squash(result), Is.EqualTo("123"));
     }
 
     [Test]
     public void Test_GoLabel()
     {
-        result = Dags.Process(grod, "@write(abc) @golabel(1) @write(def) @label(1) @write(xyz)");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}abc) {GOLABEL_TOKEN}1) {WRITE_TOKEN}def) {LABEL_TOKEN}1) {WRITE_TOKEN}xyz)");
         Assert.That(Squash(result), Is.EqualTo("abcxyz"));
     }
 
     [Test]
     public void Test_GT()
     {
-        result = Dags.Process(grod, "@write(@gt(42,6))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@gt(42,42))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@gt(1,42))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GT_TOKEN}42,6))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GT_TOKEN}42,42))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{GT_TOKEN}1,42))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
     }
 
     [Test]
     public void Test_If()
     {
-        result = Dags.Process(grod, "@if true @then @write(abc) @else @write(def) @endif");
+        result = Dags.Process(grod, $"{IF_TOKEN} {TRUE} {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {WRITE_TOKEN}def) {ENDIF_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("abc"));
-        result = Dags.Process(grod, "@if false @then @write(abc) @else @write(def) @endif");
+        result = Dags.Process(grod, $"{IF_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {WRITE_TOKEN}def) {ENDIF_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("def"));
-        result = Dags.Process(grod, "@if true @or false @then @write(abc) @else @write(def) @endif");
+        result = Dags.Process(grod, $"{IF_TOKEN} {TRUE} {OR_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {WRITE_TOKEN}def) {ENDIF_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("abc"));
-        result = Dags.Process(grod, "@if true @and false @then @write(abc) @else @write(def) @endif");
+        result = Dags.Process(grod, $"{IF_TOKEN} {TRUE} {AND_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {WRITE_TOKEN}def) {ENDIF_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("def"));
-        result = Dags.Process(grod, "@if null @then @write(abc) @else @write(def) @endif");
+        result = Dags.Process(grod, $"{IF_TOKEN} null {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {WRITE_TOKEN}def) {ENDIF_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("def"));
     }
 
     [Test]
     public void Test_IsBool()
     {
-        result = Dags.Process(grod, "@write(@isbool(0))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@isbool(1))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@isbool(notboolean))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISBOOL_TOKEN}0))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISBOOL_TOKEN}1))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISBOOL_TOKEN}notboolean))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
     }
 
     [Test]
     public void Test_Null()
     {
-        result = Dags.Process(grod, "@write(@null(null))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@null(abc))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@null(@get(value)))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISNULL_TOKEN}null))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISNULL_TOKEN}abc))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISNULL_TOKEN}{GET_TOKEN}value)))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
     }
 
     [Test]
     public void Test_Exists()
     {
-        result = Dags.Process(grod, "@write(@exists(test.value))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@set(test.value,null) @write(@exists(test.value))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@set(test.value,abc) @write(@exists(test.value))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@set(test.value,\"\") @write(@exists(test.value))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{EXISTS_TOKEN}test.value))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{SET_TOKEN}test.value,null) {WRITE_TOKEN}{EXISTS_TOKEN}test.value))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{SET_TOKEN}test.value,abc) {WRITE_TOKEN}{EXISTS_TOKEN}test.value))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{SET_TOKEN}test.value,\"\") {WRITE_TOKEN}{EXISTS_TOKEN}test.value))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
     }
 
     [Test]
     public void Test_IsScript()
     {
-        result = Dags.Process(grod, "@set(test.value,abc) @write(@isscript(test.value))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@set(test.value,\"@get(value)\") @write(@isscript(test.value))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
+        result = Dags.Process(grod, $"{SET_TOKEN}test.value,abc) {WRITE_TOKEN}{ISSCRIPT_TOKEN}test.value))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{SET_TOKEN}test.value,\"{GET_TOKEN}value)\") {WRITE_TOKEN}{ISSCRIPT_TOKEN}test.value))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
     }
 
     [Test]
     public void Test_LE()
     {
-        result = Dags.Process(grod, "@write(@le(42,6))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@le(42,42))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@le(1,42))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{LE_TOKEN}42,6))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{LE_TOKEN}42,42))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{LE_TOKEN}1,42))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
     }
 
     [Test]
     public void Test_Lower()
     {
-        result = Dags.Process(grod, "@lower(ABC)");
+        result = Dags.Process(grod, $"{LOWER_TOKEN}ABC)");
         Assert.That(Squash(result), Is.EqualTo("abc"));
-        result = Dags.Process(grod, "@lower(DEF)");
+        result = Dags.Process(grod, $"{LOWER_TOKEN}DEF)");
         Assert.That(Squash(result), Is.EqualTo("def"));
     }
 
     [Test]
     public void Test_LT()
     {
-        result = Dags.Process(grod, "@write(@lt(42,6))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@lt(42,42))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@lt(1,42))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{LT_TOKEN}42,6))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{LT_TOKEN}42,42))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{LT_TOKEN}1,42))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
     }
 
     [Test]
     public void Test_Mod()
     {
-        result = Dags.Process(grod, "@write(@mod(13,4))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{MOD_TOKEN}13,4))");
         Assert.That(Squash(result), Is.EqualTo("1"));
-        result = Dags.Process(grod, "@write(@mod(12,4))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{MOD_TOKEN}12,4))");
         Assert.That(Squash(result), Is.EqualTo("0"));
     }
 
     [Test]
     public void Test_ModTo()
     {
-        result = Dags.Process(grod, "@set(value,13) @modto(value,4) @write(@get(value))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,13) {MODTO_TOKEN}value,4) {WRITE_TOKEN}{GET_TOKEN}value))");
         Assert.That(Squash(result), Is.EqualTo("1"));
     }
 
     [Test]
     public void Test_Msg()
     {
-        result = Dags.Process(grod, "@set(value,abcdef) @msg(value)");
-        Assert.That(Squash(result), Is.EqualTo("abcdef" + NL));
+        result = Dags.Process(grod, $"{SET_TOKEN}value,abcdef) {MSG_TOKEN}value)");
+        Assert.That(Squash(result), Is.EqualTo("abcdef" + NL_CHAR));
     }
 
     [Test]
     public void Test_Mul()
     {
-        result = Dags.Process(grod, "@write(@mul(3,4))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{MUL_TOKEN}3,4))");
         Assert.That(Squash(result), Is.EqualTo("12"));
     }
 
     [Test]
     public void Test_MulTo()
     {
-        result = Dags.Process(grod, "@set(value,3) @multo(value,4) @write(@get(value))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,3) {MULTO_TOKEN}value,4) {WRITE_TOKEN}{GET_TOKEN}value))");
         Assert.That(Squash(result), Is.EqualTo("12"));
     }
 
     [Test]
     public void Test_NE()
     {
-        result = Dags.Process(grod, "@write(@ne(42,6))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@ne(42,42))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{NE_TOKEN}42,6))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{NE_TOKEN}42,42))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
     }
 
     [Test]
     public void Test_Neg()
     {
-        result = Dags.Process(grod, "@write(@neg(3))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{NEG_TOKEN}3))");
         Assert.That(Squash(result), Is.EqualTo("-3"));
     }
 
     [Test]
     public void Test_NegTo()
     {
-        result = Dags.Process(grod, "@set(value,3) @negto(value) @write(@get(value))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,3) {NEGTO_TOKEN}value) {WRITE_TOKEN}{GET_TOKEN}value))");
         Assert.That(Squash(result), Is.EqualTo("-3"));
     }
 
     [Test]
     public void Test_NL()
     {
-        result = Dags.Process(grod, "@nl");
-        Assert.That(Squash(result), Is.EqualTo(NL));
+        result = Dags.Process(grod, NL_TOKEN);
+        Assert.That(Squash(result), Is.EqualTo(NL_CHAR));
     }
 
     [Test]
     public void Test_Not()
     {
-        result = Dags.Process(grod, "@if @not false @then @write(abc) @else @write(def) @endif");
+        result = Dags.Process(grod, $"{IF_TOKEN} {NOT_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {WRITE_TOKEN}def) {ENDIF_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("abc"));
     }
 
     [Test]
     public void Test_Or()
     {
-        result = Dags.Process(grod, "@if true @or false @then @write(abc) @else @write(def) @endif");
+        result = Dags.Process(grod, $"{IF_TOKEN} {TRUE} {OR_TOKEN} {FALSE} {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {WRITE_TOKEN}def) {ENDIF_TOKEN}");
         Assert.That(Squash(result), Is.EqualTo("abc"));
     }
 
     [Test]
     public void Test_Rand()
     {
-        result = Dags.Process(grod, "@rand(30)");
-        Assert.That(result[0].Value == "true" || result[0].Value == "false");
+        result = Dags.Process(grod, $"{RAND_TOKEN}30)");
+        Assert.That(result[0].Value == TRUE || result[0].Value == FALSE);
     }
 
     [Test]
     public void Test_Replace()
     {
-        result = Dags.Process(grod, "@write(@replace(abcdef,d,x))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{REPLACE_TOKEN}abcdef,d,x))");
         Assert.That(Squash(result), Is.EqualTo("abcxef"));
     }
 
     [Test]
     public void Test_Rnd()
     {
-        result = Dags.Process(grod, "@set(value,@rnd(20))");
-        result = Dags.Process(grod, "@get(value)");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,{RND_TOKEN}20))");
+        result = Dags.Process(grod, $"{GET_TOKEN}value)");
         var r1 = int.Parse(Squash(result));
         Assert.That(r1 >= 0 && r1 < 20);
     }
@@ -549,15 +549,15 @@ public class UnitTestDags
     [Test]
     public void Test_Script()
     {
-        result = Dags.Process(grod, "@set(script1,\"@write(abc)\")");
-        result = Dags.Process(grod, "@script(script1)");
+        result = Dags.Process(grod, $"{SET_TOKEN}script1,\"{WRITE_TOKEN}abc)\")");
+        result = Dags.Process(grod, $"{SCRIPT_TOKEN}script1)");
         Assert.That(Squash(result), Is.EqualTo("abc"));
     }
 
     [Test]
     public void Test_SetOutChannel()
     {
-        result = Dags.Process(grod, "@setoutchannel(abc)");
+        result = Dags.Process(grod, $"{SETOUTCHANNEL_TOKEN}abc)");
         using (Assert.EnterMultipleScope())
         {
             Assert.That(result[0].Type, Is.EqualTo(MessageType.OutChannel));
@@ -568,61 +568,61 @@ public class UnitTestDags
     [Test]
     public void Test_Sub()
     {
-        result = Dags.Process(grod, "@write(@sub(1,3))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{SUB_TOKEN}1,3))");
         Assert.That(Squash(result), Is.EqualTo("-2"));
     }
 
     [Test]
     public void Test_Substring()
     {
-        result = Dags.Process(grod, "@write(@substring(abcdef,1,4))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{SUBSTRING_TOKEN}abcdef,1,4))");
         Assert.That(Squash(result), Is.EqualTo("bcde"));
     }
 
     [Test]
     public void Test_SubTo()
     {
-        result = Dags.Process(grod, "@set(value,12) @subto(value,7) @write(@get(value))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,12) {SUBTO_TOKEN}value,7) {WRITE_TOKEN}{GET_TOKEN}value))");
         Assert.That(Squash(result), Is.EqualTo("5"));
     }
 
     [Test]
     public void Test_Swap()
     {
-        result = Dags.Process(grod, "@set(value1,abc) @set(value2,def) @swap(value1,value2) @write(@get(value1),@get(value2))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value1,abc) {SET_TOKEN}value2,def) {SWAP_TOKEN}value1,value2) {WRITE_TOKEN}{GET_TOKEN}value1),{GET_TOKEN}value2))");
         Assert.That(Squash(result), Is.EqualTo("defabc"));
     }
 
     [Test]
     public void Test_Trim()
     {
-        result = Dags.Process(grod, "@set(value,\"   abc   \") @write(@trim(@get(value)))");
+        result = Dags.Process(grod, $"{SET_TOKEN}value,\"   abc   \") {WRITE_TOKEN}{TRIM_TOKEN}{GET_TOKEN}value)))");
         Assert.That(Squash(result), Is.EqualTo("abc"));
     }
 
     [Test]
     public void Test_True()
     {
-        result = Dags.Process(grod, "@write(@true(0))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, "@write(@true(1))");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, "@write(@true(abc))");
-        Assert.That(Squash(result), Is.EqualTo("false"));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISTRUE_TOKEN}0))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISTRUE_TOKEN}1))");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{ISTRUE_TOKEN}abc))");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
     }
 
     [Test]
     public void Test_Upper()
     {
-        result = Dags.Process(grod, "@write(@upper(abc))");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{UPPER_TOKEN}abc))");
         Assert.That(Squash(result), Is.EqualTo("ABC"));
     }
 
     [Test]
     public void Test_PrettyScript()
     {
-        var script = "@if @eq(@get(value),0) @then @write(\"zero\") @else @write(\"not zero\") @endif";
-        var expected = "@if @eq(@get(value),0) @then\r\n\t@write(\"zero\")\r\n@else\r\n\t@write(\"not zero\")\r\n@endif";
+        var script = $"{IF_TOKEN} {EQ_TOKEN}{GET_TOKEN}value),0) {THEN_TOKEN} {WRITE_TOKEN}\"zero\") {ELSE_TOKEN} {WRITE_TOKEN}\"not zero\") {ENDIF_TOKEN}";
+        var expected = $"{IF_TOKEN} {EQ_TOKEN}{GET_TOKEN}value),0) {THEN_TOKEN}\r\n\t{WRITE_TOKEN}\"zero\")\r\n{ELSE_TOKEN}\r\n\t{WRITE_TOKEN}\"not zero\")\r\n{ENDIF_TOKEN}";
         var actual = Dags.PrettyScript(script);
         Assert.That(actual, Is.EqualTo(expected));
     }
@@ -630,8 +630,8 @@ public class UnitTestDags
     [Test]
     public void Test_PrettyScript_Min()
     {
-        var script = "@if@eq(@get(value),0)@then@write(\"zero\")@else@write(\"not zero\")@endif";
-        var expected = "@if @eq(@get(value),0) @then\r\n\t@write(\"zero\")\r\n@else\r\n\t@write(\"not zero\")\r\n@endif";
+        var script = $"{IF_TOKEN}{EQ_TOKEN}{GET_TOKEN}value),0){THEN_TOKEN}{WRITE_TOKEN}\"zero\"){ELSE_TOKEN}{WRITE_TOKEN}\"not zero\"){ENDIF_TOKEN}";
+        var expected = $"{IF_TOKEN} {EQ_TOKEN}{GET_TOKEN}value),0) {THEN_TOKEN}\r\n\t{WRITE_TOKEN}\"zero\")\r\n{ELSE_TOKEN}\r\n\t{WRITE_TOKEN}\"not zero\")\r\n{ENDIF_TOKEN}";
         var actual = Dags.PrettyScript(script);
         Assert.That(actual, Is.EqualTo(expected));
     }
@@ -639,7 +639,7 @@ public class UnitTestDags
     [Test]
     public void Test_PrettyScript_Same()
     {
-        var script = "@write(\"hello \\\"wonderful\\\" world.\")";
+        var script = $"{WRITE_TOKEN}\"hello \\\"wonderful\\\" world.\")";
         var actual = Dags.PrettyScript(script);
         Assert.That(actual, Is.EqualTo(script));
     }
@@ -647,7 +647,7 @@ public class UnitTestDags
     [Test]
     public void Test_IfThenNoStatements()
     {
-        var script = "@if @eq(1,1) @then @endif";
+        var script = $"{IF_TOKEN} {EQ_TOKEN}1,1) {THEN_TOKEN} {ENDIF_TOKEN}";
         result = Dags.Process(grod, script);
         Assert.That(Squash(result), Is.EqualTo(""));
     }
@@ -655,7 +655,7 @@ public class UnitTestDags
     [Test]
     public void Test_IfThenElseNoStatements()
     {
-        var script = "@if @eq(1,2) @then @write(abc) @else @endif";
+        var script = $"{IF_TOKEN} {EQ_TOKEN}1,2) {THEN_TOKEN} {WRITE_TOKEN}abc) {ELSE_TOKEN} {ENDIF_TOKEN}";
         result = Dags.Process(grod, script);
         Assert.That(Squash(result), Is.EqualTo(""));
     }
@@ -666,9 +666,9 @@ public class UnitTestDags
         var key = "abc";
         var value1 = "123";
         var value2 = "456";
-        result = Dags.Process(grod, $"@set({key},{value1}) @return @set({key},{value2})");
+        result = Dags.Process(grod, $"{SET_TOKEN}{key},{value1}) {RETURN_TOKEN} {SET_TOKEN}{key},{value2})");
         Assert.That(result, Is.Empty);
-        result = Dags.Process(grod, $"@get({key})");
+        result = Dags.Process(grod, $"{GET_TOKEN}{key})");
         Assert.That(Squash(result), Is.EqualTo(value1));
     }
 
@@ -678,8 +678,8 @@ public class UnitTestDags
         var key = "abc";
         var value1 = "123";
         var value2 = "456";
-        Dags.Process(grod, $"@addlist({key},{value1}) @addlist({key},{value2})");
-        result = Dags.Process(grod, $"@get({key})");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},{value1}) {ADDLIST_TOKEN}{key},{value2})");
+        result = Dags.Process(grod, $"{GET_TOKEN}{key})");
         Assert.That(Squash(result), Is.EqualTo(value1 + ',' + value2));
     }
 
@@ -689,9 +689,9 @@ public class UnitTestDags
         var key = "abc";
         var value1 = "123";
         var value2 = "456";
-        Dags.Process(grod, $"@addlist({key},{value1}) @addlist({key},{value2})");
-        Dags.Process(grod, $"@clearlist({key})");
-        result = Dags.Process(grod, $"@get({key})");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},{value1}) {ADDLIST_TOKEN}{key},{value2})");
+        Dags.Process(grod, $"{CLEARLIST_TOKEN}{key})");
+        result = Dags.Process(grod, $"{GET_TOKEN}{key})");
         Assert.That(Squash(result), Is.EqualTo(""));
     }
 
@@ -700,8 +700,8 @@ public class UnitTestDags
     {
         var key = "abc";
         var value = "123";
-        Dags.Process(grod, $"@setarray({key},2,3,{value})");
-        result = Dags.Process(grod, $"@getarray({key},2,3)");
+        Dags.Process(grod, $"{SETARRAY_TOKEN}{key},2,3,{value})");
+        result = Dags.Process(grod, $"{GETARRAY_TOKEN}{key},2,3)");
         Assert.That(Squash(result), Is.EqualTo(value));
     }
 
@@ -711,12 +711,12 @@ public class UnitTestDags
         var key = "abc";
         var value1 = "123";
         var value2 = "456";
-        Dags.Process(grod, $"@addlist({key},{value1}) @addlist({key},{value2})");
-        result = Dags.Process(grod, $"@getlist({key},0)");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},{value1}) {ADDLIST_TOKEN}{key},{value2})");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},0)");
         Assert.That(Squash(result), Is.EqualTo(value1));
-        result = Dags.Process(grod, $"@getlist({key},1)");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},1)");
         Assert.That(Squash(result), Is.EqualTo(value2));
-        result = Dags.Process(grod, $"@getlist({key},2)");
+        result = Dags.Process(grod, $"{GETLIST_TOKEN}{key},2)");
         Assert.That(Squash(result), Is.EqualTo(""));
     }
 
@@ -726,11 +726,11 @@ public class UnitTestDags
         var value1 = "123";
         var value2 = "abc";
         var value3 = "";
-        result = Dags.Process(grod, $"@isnumber({value1})");
-        Assert.That(Squash(result), Is.EqualTo("true"));
-        result = Dags.Process(grod, $"@isnumber({value2})");
-        Assert.That(Squash(result), Is.EqualTo("false"));
-        result = Dags.Process(grod, $"@isnumber({value3})");
+        result = Dags.Process(grod, $"{ISNUMBER_TOKEN}{value1})");
+        Assert.That(Squash(result), Is.EqualTo(TRUE));
+        result = Dags.Process(grod, $"{ISNUMBER_TOKEN}{value2})");
+        Assert.That(Squash(result), Is.EqualTo(FALSE));
+        result = Dags.Process(grod, $"{ISNUMBER_TOKEN}{value3})");
         Assert.That(result[0].Type, Is.EqualTo(MessageType.Error));
     }
 
@@ -740,8 +740,8 @@ public class UnitTestDags
         var key = "abc";
         var value1 = "123";
         var value2 = "456";
-        Dags.Process(grod, $"@addlist({key},{value1}) @addlist({key},{value2})");
-        result = Dags.Process(grod, $"@listlength({key})");
+        Dags.Process(grod, $"{ADDLIST_TOKEN}{key},{value1}) {ADDLIST_TOKEN}{key},{value2})");
+        result = Dags.Process(grod, $"{LISTLENGTH_TOKEN}{key})");
         Assert.That(Squash(result), Is.EqualTo("2"));
     }
 
@@ -749,7 +749,7 @@ public class UnitTestDags
     public void Test_Write()
     {
         var value1 = "123";
-        result = Dags.Process(grod, $"@write({value1})");
+        result = Dags.Process(grod, $"{WRITE_TOKEN}{value1})");
         Assert.That(Squash(result), Is.EqualTo(value1));
     }
 
@@ -757,127 +757,127 @@ public class UnitTestDags
     public void Test_WriteLine()
     {
         var value1 = "123";
-        result = Dags.Process(grod, $"@writeline({value1})");
+        result = Dags.Process(grod, $"{WRITELINE_TOKEN}{value1})");
         // @writeline result ends with two characters, '\' and 'n'.
         // This is the expected behavior. See Test_NL().
-        Assert.That(Squash(result), Is.EqualTo(value1 + NL));
+        Assert.That(Squash(result), Is.EqualTo(value1 + NL_CHAR));
     }
 
     [Test]
     public void Test_GetBit()
     {
-        result = Dags.Process(grod, $"@getbit(4,2)");
+        result = Dags.Process(grod, $"{GETBIT_TOKEN}4,2)");
         Assert.That(Squash(result), Is.EqualTo("1"));
-        result = Dags.Process(grod, $"@getbit(8,2)");
+        result = Dags.Process(grod, $"{GETBIT_TOKEN}8,2)");
         Assert.That(Squash(result), Is.EqualTo("0"));
-        result = Dags.Process(grod, $"@getbit(1073741824,30)");
+        result = Dags.Process(grod, $"{GETBIT_TOKEN}1073741824,30)");
         Assert.That(Squash(result), Is.EqualTo("1"));
     }
 
     [Test]
     public void Test_SetBit()
     {
-        result = Dags.Process(grod, $"@setbit(0,2)");
+        result = Dags.Process(grod, $"{SETBIT_TOKEN}0,2)");
         Assert.That(Squash(result), Is.EqualTo("4"));
-        result = Dags.Process(grod, $"@setbit(0,0)");
+        result = Dags.Process(grod, $"{SETBIT_TOKEN}0,0)");
         Assert.That(Squash(result), Is.EqualTo("1"));
-        result = Dags.Process(grod, $"@setbit(0,30)");
+        result = Dags.Process(grod, $"{SETBIT_TOKEN}0,30)");
         Assert.That(Squash(result), Is.EqualTo("1073741824"));
     }
 
     [Test]
     public void Test_ClearBit()
     {
-        result = Dags.Process(grod, $"@clearbit(7,2)");
+        result = Dags.Process(grod, $"{CLEARBIT_TOKEN}7,2)");
         Assert.That(Squash(result), Is.EqualTo("3"));
-        result = Dags.Process(grod, $"@clearbit(7,0)");
+        result = Dags.Process(grod, $"{CLEARBIT_TOKEN}7,0)");
         Assert.That(Squash(result), Is.EqualTo("6"));
-        result = Dags.Process(grod, $"@clearbit(1073741824,30)");
+        result = Dags.Process(grod, $"{CLEARBIT_TOKEN}1073741824,30)");
         Assert.That(Squash(result), Is.EqualTo("0"));
     }
 
     [Test]
     public void Test_BitwiseAnd()
     {
-        result = Dags.Process(grod, $"@bitwiseand(7,2)");
+        result = Dags.Process(grod, $"{BITWISEAND_TOKEN}7,2)");
         Assert.That(Squash(result), Is.EqualTo("2"));
-        result = Dags.Process(grod, $"@bitwiseand(8,2)");
+        result = Dags.Process(grod, $"{BITWISEAND_TOKEN}8,2)");
         Assert.That(Squash(result), Is.EqualTo("0"));
     }
 
     [Test]
     public void Test_BitwiseOr()
     {
-        result = Dags.Process(grod, $"@bitwiseor(7,2)");
+        result = Dags.Process(grod, $"{BITWISEOR_TOKEN}7,2)");
         Assert.That(Squash(result), Is.EqualTo("7"));
-        result = Dags.Process(grod, $"@bitwiseor(8,2)");
+        result = Dags.Process(grod, $"{BITWISEOR_TOKEN}8,2)");
         Assert.That(Squash(result), Is.EqualTo("10"));
     }
 
     [Test]
     public void Test_BitwiseXor()
     {
-        result = Dags.Process(grod, $"@bitwisexor(7,2)");
+        result = Dags.Process(grod, $"{BITWISEXOR_TOKEN}7,2)");
         Assert.That(Squash(result), Is.EqualTo("5"));
-        result = Dags.Process(grod, $"@bitwisexor(8,7)");
+        result = Dags.Process(grod, $"{BITWISEXOR_TOKEN}8,7)");
         Assert.That(Squash(result), Is.EqualTo("15"));
     }
 
     [Test]
     public void Test_ToBinary()
     {
-        result = Dags.Process(grod, $"@tobinary(7)");
+        result = Dags.Process(grod, $"{TOBINARY_TOKEN}7)");
         Assert.That(Squash(result), Is.EqualTo("111"));
     }
 
     [Test]
     public void Test_ToInteger()
     {
-        result = Dags.Process(grod, $"@tointeger(111)");
+        result = Dags.Process(grod, $"{TOINTEGER_TOKEN}111)");
         Assert.That(Squash(result), Is.EqualTo("7"));
     }
 
     [Test]
     public void Test_ToHex()
     {
-        result = Dags.Process(grod, "@tohex(255)");
+        result = Dags.Process(grod, $"{TOHEX_TOKEN}255)");
         Assert.That(Squash(result), Is.EqualTo("FF"));
     }
 
     [Test]
     public void Test_FromHex()
     {
-        result = Dags.Process(grod, "@fromhex(FF)");
+        result = Dags.Process(grod, $"{FROMHEX_TOKEN}FF)");
         Assert.That(Squash(result), Is.EqualTo("255"));
     }
 
     [Test]
     public void Test_FlipBit()
     {
-        result = Dags.Process(grod, $"@flipbit(7,2)");
+        result = Dags.Process(grod, $"{FLIPBIT_TOKEN}7,2)");
         Assert.That(Squash(result), Is.EqualTo("3"));
-        result = Dags.Process(grod, $"@flipbit(8,2)");
+        result = Dags.Process(grod, $"{FLIPBIT_TOKEN}8,2)");
         Assert.That(Squash(result), Is.EqualTo("12"));
     }
 
     [Test]
     public void Test_Len()
     {
-        result = Dags.Process(grod, $"@len(abcabc)");
+        result = Dags.Process(grod, $"{LEN_TOKEN}abcabc)");
         Assert.That(Squash(result), Is.EqualTo("6"));
-        result = Dags.Process(grod, $"@len(\"\")");
+        result = Dags.Process(grod, $"{LEN_TOKEN}\"\")");
         Assert.That(Squash(result), Is.EqualTo("0"));
-        result = Dags.Process(grod, $"@len(null)");
+        result = Dags.Process(grod, $"{LEN_TOKEN}null)");
         Assert.That(Squash(result), Is.EqualTo("4"));
     }
 
     [Test]
     public void Test_ValidateScript()
     {
-        var script1 = "@set(value,123) @write(@get(value))";
+        var script1 = $"{SET_TOKEN}value,123) {WRITE_TOKEN}{GET_TOKEN}value))";
         bool isValid = ValidateScript(script1);
         Assert.That(isValid, Is.True);
-        var script2 = "@set(value,123 @write(@get(value))";
+        var script2 = $"{SET_TOKEN}value,123 {WRITE_TOKEN}{GET_TOKEN}value))";
         isValid = ValidateScript(script2);
         Assert.That(isValid, Is.False);
     }

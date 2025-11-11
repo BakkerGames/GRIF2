@@ -1,6 +1,7 @@
 ﻿using static Grif.Common;
 using static Grif.IO;
 using static Grif.Parser;
+using static Grif.Dags;
 
 namespace Grif;
 
@@ -16,7 +17,6 @@ public class Game
     private string _saveBasePath = "";
     private string? _referenceBasePath;
 
-    private const string SCRIPT = "@script(";
     private const string BACKGROUND_PREFIX = "background.";
 
     public event InputEventHandler? InputEvent;
@@ -192,7 +192,7 @@ public class Game
         var keys = _overlayGrod.Keys(BACKGROUND_PREFIX, true, false);
         foreach (var key in keys)
         {
-            var script = $"{SCRIPT}{key})";
+            var script = $"{SCRIPT_TOKEN}{key})";
             var items = Dags.Process(_overlayGrod, script);
             foreach (var item in items)
             {
