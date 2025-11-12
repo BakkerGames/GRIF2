@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text;
+﻿using System.Text;
 using static Grif.Common;
 
 namespace Grif;
@@ -9,6 +8,9 @@ internal class Program
     private static string? outputFilename = null;
 
     private static readonly Queue<string> _inputQueue = new();
+
+    private static int outputCount = 0;
+    private static int maxOutputWidth = 0;
 
     static async Task Main(string[] args)
     {
@@ -161,6 +163,9 @@ internal class Program
                 return;
             }
         }
+        // check for max width setting
+        maxOutputWidth = baseGrod.GetInt("system.output_width", true) ?? 0;
+        // start game loop
         game.InputEvent += Input;
         game.OutputEvent += Output;
         await game.GameLoop();
@@ -170,11 +175,10 @@ internal class Program
 
     private static string Syntax()
     {
-        Version version = Assembly.GetEntryAssembly()?.GetName().Version ?? Version.Parse("1.0.0.0");
         StringBuilder result = new();
         result.AppendLine("GRIF - Game Runner for Interactive Fiction");
         result.AppendLine();
-        result.AppendLine($"Version {version}");
+        result.AppendLine($"Version {Game.Version}");
         result.AppendLine();
         result.AppendLine("grif <filename.grif | directory>");
         result.AppendLine("     [-i | --input  <filename>]");
@@ -223,14 +227,60 @@ internal class Program
             var index = text.IndexOf("\\n");
             var before = text[..index];
             text = text[(index + 2)..];
-            Console.WriteLine(before);
-            OutputTextLog(before + Environment.NewLine);
+            var lines = Wordwrap(before);
+            foreach (var line in lines)
+            {
+                Console.WriteLine(line);
+                OutputTextLog(line + Environment.NewLine);
+            }
+            outputCount = 0;
         }
         if (!string.IsNullOrEmpty(text))
         {
-            Console.Write(text);
-            OutputTextLog(text);
+            var lines = Wordwrap(text);
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                var line = lines[i];
+                Console.WriteLine(line);
+                OutputTextLog(line + Environment.NewLine);
+            }
+            var lastLine = lines[^1];
+            Console.Write(lastLine);
+            OutputTextLog(lastLine);
         }
+    }
+
+    private static List<string> Wordwrap(string text)
+    {
+        if (maxOutputWidth <= 0 || string.IsNullOrEmpty(text))
+        {
+            return [text];
+        }
+        List<string> result = [];
+        StringBuilder currentLine = new();
+        var words = text.Split(' ');
+        foreach (var word in words)
+        {
+            if (outputCount + word.Length + 1 > maxOutputWidth)
+            {
+                // output current line
+                result.Add(currentLine.ToString());
+                currentLine.Clear();
+                outputCount = 0;
+            }
+            if (currentLine.Length > 0)
+            {
+                currentLine.Append(' ');
+                outputCount++;
+            }
+            currentLine.Append(word);
+            outputCount += word.Length;
+        }
+        if (currentLine.Length > 0)
+        {
+            result.Add(currentLine.ToString());
+        }
+        return result;
     }
 
     private static void OutputTextLog(string text)

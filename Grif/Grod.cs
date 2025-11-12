@@ -1,14 +1,11 @@
-﻿namespace Grif;
+﻿using static Grif.Common;
+
+namespace Grif;
 
 public class Grod
 {
-    public static string Version { get { return "2.2025.1109"; } }
-
-    private const string NULL = "null";
-    private const string TRUE = "true";
-    private const string FALSE = "false";
-    private readonly string[] _true = ["y", "yes", "t", "1", "-1", TRUE];
-    private readonly string[] _false = ["n", "no", "f", "0", "", FALSE];
+    private readonly string[] _trueList = ["y", "yes", "t", "1", "-1", TRUE];
+    private readonly string[] _falseList = ["n", "no", "f", "0", "", FALSE];
 
     private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
 
@@ -76,11 +73,11 @@ public class Grod
         {
             return null;
         }
-        if (_true.Contains(value, StringComparer.OrdinalIgnoreCase))
+        if (_trueList.Contains(value, StringComparer.OrdinalIgnoreCase))
         {
             return true;
         }
-        if (_false.Contains(value, StringComparer.OrdinalIgnoreCase))
+        if (_falseList.Contains(value, StringComparer.OrdinalIgnoreCase))
         {
             return false;
         }

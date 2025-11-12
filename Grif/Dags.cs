@@ -4,8 +4,6 @@ namespace Grif;
 
 public partial class Dags
 {
-    public static string Version { get { return "2.2025.1104"; } }
-
     private static readonly Random _random = new();
 
     public static List<Message> Process(Grod grod, string? script)
