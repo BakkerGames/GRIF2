@@ -75,12 +75,19 @@ public partial class Dags
                 inToken = false;
                 continue;
             }
-            if (!inToken)
+            if (char.IsWhiteSpace(c))
             {
-                if (char.IsWhiteSpace(c))
+                if (!inToken)
                 {
                     continue;
                 }
+                result.Add(token.ToString());
+                token.Clear();
+                inToken = false;
+                continue;
+            }
+            if (!inToken)
+            {
                 if (c == '"')
                 {
                     inQuote = true;
@@ -342,19 +349,23 @@ public partial class Dags
         {
             return script;
         }
-
         StringBuilder result = new();
         var tokens = SplitTokens(script);
         char lastChar = ',';
         bool addSpace;
-
         foreach (string s in tokens)
         {
             addSpace = false;
             if (s.StartsWith('@'))
             {
                 if (lastChar != '(' && lastChar != ',')
+                {
                     addSpace = true;
+                }
+            }
+            else
+            {
+                addSpace = true;
             }
             if (addSpace)
             {
