@@ -28,6 +28,11 @@
       "commandName": "Project",
       "commandLineArgs": "\"..\\Castlequest_GRIF\\Castlequest.grif\" -m \"..\\Castlequest_GRIF\\Mods\\corrections.grif\"",
       "workingDirectory": ".."
+    },
+    "Adventure": {
+      "commandName": "Project",
+      "commandLineArgs": "\"..\\AdventureToGRIF\\GRIFOutput\"",
+      "workingDirectory": ".."
     }
   }
 }
