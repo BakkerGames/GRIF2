@@ -238,3 +238,7 @@
 
 2025-11-11
 - Changing inline strings to static tokens.
+
+2025-11-20
+- Added game.Intro() to handle intro script.
+- Bug: @return fails if in @if block, probably others.

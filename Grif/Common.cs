@@ -13,8 +13,6 @@ public static class Common
     public const string SPACE_CHAR = "\\s";
     public const string COMMA_CHAR = "\\u002c";
 
-    public const string INCHANNEL = "#INCHANNEL;";
-
     public const string APP_NAME = "GRIF";
     public const string DATA_EXTENSION = ".grif";
     public const string SAVE_FILENAME = "save";
@@ -31,8 +29,9 @@ public static class Common
     public const string UPPERCASE = "system.uppercase";
     public const string DEBUG_FLAG = "system.debug";
     public const string WORDSIZE = "system.wordsize";
+    public const string VERSION = "system.version";
 
-    // OutChannel constants used by GRIF
+    public const string INCHANNEL = "#INCHANNEL;";
 
     public const string OUTCHANNEL_ASK = "#ASK;";
     public const string OUTCHANNEL_ENTER = "#ENTER;";

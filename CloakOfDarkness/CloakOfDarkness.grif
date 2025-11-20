@@ -1,6 +1,4 @@
 // CloakOfDarkness.grif - GRIF format
-@!version
-	2025.11.03
 @addscore(x)
 	@if @ne($x,0) @then
 		@addto(value.score,$x)
@@ -101,13 +99,6 @@ adjective.hook
 	brass,small
 articles
 	a,an,another,the,this
-background.intro
-	@if @false(@get(value.introdone)) @then
-		@msg(message.intro)
-		@set(value.introdone,true)
-		@nl
-		@look
-	@endif
 command.down
 	@godir(down)
 command.drop
@@ -304,7 +295,7 @@ command.up
 command.use.hook
 	@script(command.hang.cloak)
 command.version
-	@writeline(@__version)
+	@msg(system.version)
 command.west
 	@godir(west)
 direction.down
@@ -544,10 +535,19 @@ system.gamename
 	CloakOfDarkness
 system.gametitle
 	Cloak Of Darkness
+system.intro
+	@if @false(@get(value.introdone)) @then
+		@msg(message.intro)
+		@set(value.introdone,true)
+		@nl
+		@look
+	@endif
 system.output_width
 	80
 system.prompt
 	\n>
+system.version
+	2025.11.20
 value.cloakscore
 	1
 value.maxscore

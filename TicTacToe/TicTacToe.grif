@@ -80,11 +80,6 @@
 	@write(" ",@value(7)," | ",@value(8)," | ",@value(9)," \n")
 @value(x)
 	@write(@piece(@getlist(ttt,$x)))
-background.0
-	@if @false(@get(value.intro)) @then
-		@script(system.intro)
-		@set(value.intro,true)
-	@endif
 command.1
 	@move(1)
 command.2
@@ -149,7 +144,7 @@ script.restart
 	@if @true(@get(temp.yorn)) @then
 		@restart
 	@elseif @false(@get(temp.yorn)) @then
-		@quit
+		@return
 	@else
 		@msg(message.yorn_error)
 		@setoutchannel("#ASK;")
@@ -173,16 +168,19 @@ system.dont_understand
 system.gamename
 	TicTacToe
 system.intro
-	@comment("script run at the beginning of the game")
-	@write("Tic-Tac-Toe\n\n")
-	@write("Board positions:\n\n")
-	@write(" 1 | 2 | 3 \n")
-	@write("---+---+---\n")
-	@write(" 4 | 5 | 6 \n")
-	@write("---+---+---\n")
-	@write(" 7 | 8 | 9 \n\n")
-	@clear
-	@showboard
+	@if @false(@get(value.intro)) @then
+		@set(value.intro,true)
+		@comment("script run at the beginning of the game")
+		@write("Tic-Tac-Toe\n\n")
+		@write("Board positions:\n\n")
+		@write(" 1 | 2 | 3 \n")
+		@write("---+---+---\n")
+		@write(" 4 | 5 | 6 \n")
+		@write("---+---+---\n")
+		@write(" 7 | 8 | 9 \n\n")
+		@clear
+		@showboard
+	@endif
 system.prompt
 	@if @false(@get(value.gameover)) @then
 		@write("\n",@piece(@get(value.player)),"'s turn>")

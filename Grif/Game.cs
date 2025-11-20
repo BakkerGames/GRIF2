@@ -10,7 +10,7 @@ public delegate void OutputEventHandler(object sender, Message e);
 
 public class Game
 {
-    public static string Version { get { return "2.2025.1111"; } }
+    public static string Version { get { return "2.2025.1120"; } }
 
     private Grod _baseGrod = new("");
     private Grod _overlayGrod = new("");
@@ -21,6 +21,8 @@ public class Game
 
     public event InputEventHandler? InputEvent;
     public event OutputEventHandler? OutputEvent;
+
+    public bool GameOver { get; set; } = false;
 
     public Queue<Message> InputMessages { get; } = new();
 
@@ -90,6 +92,24 @@ public class Game
         }
     }
 
+    public async Task Intro()
+    {
+        var intro = _overlayGrod.Get(INTRO, true);
+        if (intro != null && intro.StartsWith('@'))
+        {
+            var introItems = await Task.Run(() => Process(_overlayGrod, intro));
+            foreach (var item in introItems)
+            {
+                OutputMessages.Enqueue(item);
+            }
+            while (OutputMessages.Count > 0)
+            {
+                var outputMessage = OutputMessages.Dequeue();
+                ProcessOutputMessage(outputMessage);
+            }
+        }
+    }
+
     public async Task GameLoop()
     {
         while (true)
@@ -129,8 +149,6 @@ public class Game
         }
     }
 
-    public bool GameOver { get; set; } = false;
-
     public string? Prompt()
     {
         var prompt = _overlayGrod.Get(PROMPT, true);
@@ -155,6 +173,8 @@ public class Game
         }
         return afterPrompt;
     }
+
+    #region Private routines
 
     private void ProcessInputMessage(Message inputMessage)
     {
@@ -201,7 +221,7 @@ public class Game
         }
     }
 
-    public void HandleOutChannel(Message item)
+    private void HandleOutChannel(Message item)
     {
         bool exists;
         if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
@@ -330,4 +350,6 @@ public class Game
         }
         throw new Exception($"Unknown OutChannel command {item.Value}");
     }
+
+    #endregion
 }
