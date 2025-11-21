@@ -66,10 +66,11 @@ public partial class Dags
     public const string NOT_TOKEN = "@not";
     public const string ISNULL_TOKEN = "@null(";
     public const string OR_TOKEN = "@or";
+    public const string PICTURE_TOKEN = "@picture(";
     public const string RAND_TOKEN = "@rand(";
     public const string REMOVEATLIST_TOKEN = "@removeatlist(";
     public const string REPLACE_TOKEN = "@replace(";
-    public const string RETURN_TOKEN = "@return";
+    //public const string RETURN_TOKEN = "@return";
     public const string RND_TOKEN = "@rnd(";
     public const string SCRIPT_TOKEN = "@script(";
     public const string SET_TOKEN = "@set(";
@@ -77,6 +78,7 @@ public partial class Dags
     public const string SETBIT_TOKEN = "@setbit(";
     public const string SETLIST_TOKEN = "@setlist(";
     public const string SETOUTCHANNEL_TOKEN = "@setoutchannel(";
+    public const string SLEEP_TOKEN = "@sleep(";
     public const string SUB_TOKEN = "@sub(";
     public const string SUBSTRING_TOKEN = "@substring(";
     public const string SUBTO_TOKEN = "@subto(";

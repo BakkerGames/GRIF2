@@ -241,4 +241,6 @@
 
 2025-11-20
 - Added game.Intro() to handle intro script.
-- Bug: @return fails if in @if block, probably others.
+- Bug: @return fails if in @if block. Removed for now.
+- Added IsScript() and removed hard-coded logic.
+- @sleep() and @picture() commands

@@ -30,8 +30,11 @@ public partial class Dags
                 {
                     continue;
                 }
-                if (item.Value.StartsWith('@'))
+                if (IsScript(item.Value))
                 {
+                    //TODO var script = new Script(item.Value);
+
+
                     var tokens = SplitTokens(item.Value);
                     int index = 0;
                     do

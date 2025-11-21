@@ -8,9 +8,13 @@ public partial class Dags
     /// <summary>
     /// Split the script into tokens for processing.
     /// </summary>
-    public static string[] SplitTokens(string script)
+    public static string[] SplitTokens(string? script)
     {
         List<string> result = [];
+        if (string.IsNullOrWhiteSpace(script))
+        {
+            return [.. result];
+        }
         StringBuilder token = new();
         bool inToken = false;
         bool inQuote = false;
@@ -159,11 +163,11 @@ public partial class Dags
     /// Format the script with line breaks and indents.
     /// Parameter "indent" adds one extra tab at the beginning of each line.
     /// </summary>
-    public static string PrettyScript(string script, bool indent = false)
+    public static string PrettyScript(string? script, bool indent = false)
     {
         StringBuilder result = new();
 
-        if (!script.TrimStart().StartsWith('@') && !script.TrimStart().StartsWith('['))
+        if (!IsScript(script) )
         {
             if (indent)
             {
@@ -180,74 +184,10 @@ public partial class Dags
         bool forLine = false;
         bool forEachKeyLine = false;
         bool forEachListLine = false;
-        bool inList = false;
-        bool inArray = false;
-        bool lastComma = false;
-        var tokens = Dags.SplitTokens(script);
+        var tokens = SplitTokens(script);
 
         foreach (string s in tokens)
         {
-            // handle lists and arrays
-            if (s == "[")
-            {
-                if (!inList)
-                {
-                    inList = true;
-                    if (inArray && !lastComma)
-                    {
-                        result.AppendLine(",");
-                    }
-                }
-                else
-                {
-                    inArray = true;
-                    result.AppendLine();
-                    indentLevel++;
-                }
-                if (indentLevel > 0)
-                {
-                    result.Append(new string('\t', indentLevel));
-                }
-                result.Append(s);
-                lastComma = false;
-                continue;
-            }
-            if (s == "]")
-            {
-                if (inList)
-                {
-                    inList = false;
-                }
-                else
-                {
-                    inArray = false;
-                    if (!lastComma)
-                    {
-                        result.AppendLine();
-                    }
-                    if (indentLevel > startIndent) indentLevel--;
-                    if (indentLevel > 0)
-                    {
-                        result.Append(new string('\t', indentLevel));
-                    }
-                }
-                result.Append(s);
-                lastComma = false;
-                continue;
-            }
-            if (s == "," && inArray && !inList)
-            {
-                result.AppendLine(s);
-                lastComma = true;
-                continue;
-            }
-            if (inArray || inList)
-            {
-                result.Append(s);
-                lastComma = false;
-                continue;
-            }
-            // handle everything else
             switch (s.ToLower())
             {
                 case ELSEIF_TOKEN:
@@ -343,11 +283,11 @@ public partial class Dags
     /// <summary>
     /// Format the script in a single line with minimal spaces.
     /// </summary>
-    public static string CompressScript(string script)
+    public static string CompressScript(string? script)
     {
-        if (!script.TrimStart().StartsWith('@'))
+        if (!IsScript(script))
         {
-            return script;
+            return script ?? "";
         }
         StringBuilder result = new();
         var tokens = SplitTokens(script);
@@ -356,7 +296,7 @@ public partial class Dags
         foreach (string s in tokens)
         {
             addSpace = false;
-            if (s.StartsWith('@'))
+            if (s.StartsWith(SCRIPT_CHAR))
             {
                 if (lastChar != '(' && lastChar != ',')
                 {
@@ -380,9 +320,9 @@ public partial class Dags
     /// <summary>
     /// Validate the script for correct syntax.
     /// </summary>
-    public static bool ValidateScript(string script)
+    public static bool ValidateScript(string? script)
     {
-        if (!script.TrimStart().StartsWith('@'))
+        if (!IsScript(script))
         {
             return true;
         }
@@ -395,7 +335,7 @@ public partial class Dags
         int forEachListCount = 0;
         foreach (string s in tokens)
         {
-            if (s.StartsWith('@') && s.EndsWith('('))
+            if (s.StartsWith(SCRIPT_CHAR) && s.EndsWith('('))
             {
                 parens++;
             }
@@ -515,6 +455,20 @@ public partial class Dags
         return intValue;
     }
 
+    /// <summary>
+    /// Determines if the value is a script.
+    /// </summary>
+    public static bool IsScript(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+        int pos = 0;
+        SkipWhitespace(value, ref pos);
+        return pos < value.Length && value[pos] == SCRIPT_CHAR;
+    }
+
     #region Private routines
 
     private static List<Message> GetParameters(string[] tokens, ref int index, Grod grod)
@@ -523,7 +477,7 @@ public partial class Dags
         while (index < tokens.Length && tokens[index] != ")")
         {
             var token = tokens[index];
-            if (token.StartsWith('@'))
+            if (IsScript(token))
             {
                 // Handle nested tokens
                 parameters.AddRange(ProcessOneCommand(tokens, ref index, grod));
@@ -586,9 +540,9 @@ public partial class Dags
         {
             return "";
         }
-        if (!value!.StartsWith('@'))
+        if (!IsScript(value))
         {
-            return value;
+            return value ?? "";
         }
         var resultItems = Process(grod, value);
         if (resultItems.Count == 1 &&

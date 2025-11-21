@@ -660,17 +660,17 @@ public class UnitTestDags
         Assert.That(Squash(result), Is.EqualTo(""));
     }
 
-    [Test]
-    public void Test_Return()
-    {
-        var key = "abc";
-        var value1 = "123";
-        var value2 = "456";
-        result = Dags.Process(grod, $"{SET_TOKEN}{key},{value1}) {RETURN_TOKEN} {SET_TOKEN}{key},{value2})");
-        Assert.That(result, Is.Empty);
-        result = Dags.Process(grod, $"{GET_TOKEN}{key})");
-        Assert.That(Squash(result), Is.EqualTo(value1));
-    }
+    //[Test]
+    //public void Test_Return()
+    //{
+    //    var key = "abc";
+    //    var value1 = "123";
+    //    var value2 = "456";
+    //    result = Dags.Process(grod, $"{SET_TOKEN}{key},{value1}) {RETURN_TOKEN} {SET_TOKEN}{key},{value2})");
+    //    Assert.That(result, Is.Empty);
+    //    result = Dags.Process(grod, $"{GET_TOKEN}{key})");
+    //    Assert.That(Squash(result), Is.EqualTo(value1));
+    //}
 
     [Test]
     public void Test_AddList()

@@ -38,10 +38,10 @@
 	@debug("goto $x")
 	@if @null(@get(room.$x.longdesc)) @and @null(@get(room.$x.shortdesc)) @then
 		@writeline("Invalid room: $x")
-		@return
+	@else
+		@set(value.room,$x)
+		@look
 	@endif
-	@set(value.room,$x)
-	@look
 @here(x)
 	@if @eq(@getvalue(item.$x.location),@room) @then
 		@write(true)
@@ -198,11 +198,11 @@ command.read.message
 			@if @lt(@get(value.scuffed),2) @then
 				@write(@get(message.readable))
 				@write(".")
-				@setoutchannel("#SLEEP;",1000)
+				@sleep(1000)
 				@write(".")
-				@setoutchannel("#SLEEP;",1000)
+				@sleep(1000)
 				@write(".")
-				@setoutchannel("#SLEEP;",1000)
+				@sleep(1000)
 				@nl
 				@nl
 				@msg(message.you_won)
@@ -212,11 +212,11 @@ command.read.message
 			@else
 				@write(@get(message.unreadable))
 				@write(".")
-				@setoutchannel("#SLEEP;",1000)
+				@sleep(1000)
 				@write(".")
-				@setoutchannel("#SLEEP;",1000)
+				@sleep(1000)
 				@write(".")
-				@setoutchannel("#SLEEP;",1000)
+				@sleep(1000)
 				@nl
 				@nl
 				@msg(message.you_lost)

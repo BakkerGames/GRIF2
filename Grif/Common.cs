@@ -1,12 +1,14 @@
 ﻿namespace Grif;
 
-public static class Common
+public static partial class Common
 {
     public static readonly StringComparison OIC = StringComparison.OrdinalIgnoreCase;
 
     public const string NULL = "null";
     public const string TRUE = "true";
     public const string FALSE = "false";
+
+    public const char SCRIPT_CHAR = '@';
 
     public const string NL_CHAR = "\\n";
     public const string TAB_CHAR = "\\t";
@@ -38,6 +40,7 @@ public static class Common
     public const string OUTCHANNEL_EXISTS_SAVE = "#EXISTS;";
     public const string OUTCHANNEL_EXISTS_SAVE_NAME = "#EXISTSNAME;";
     public const string OUTCHANNEL_GAMEOVER = "#GAMEOVER;";
+    public const string OUTCHANNEL_PICTURE = "#PICTURE;";
     public const string OUTCHANNEL_RESTART = "#RESTART;";
     public const string OUTCHANNEL_RESTORE = "#RESTORE;";
     public const string OUTCHANNEL_RESTORE_NAME = "#RESTORENAME;";

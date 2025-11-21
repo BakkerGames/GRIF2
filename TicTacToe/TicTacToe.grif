@@ -144,7 +144,7 @@ script.restart
 	@if @true(@get(temp.yorn)) @then
 		@restart
 	@elseif @false(@get(temp.yorn)) @then
-		@return
+		@msg(message.ok)
 	@else
 		@msg(message.yorn_error)
 		@setoutchannel("#ASK;")

@@ -22,7 +22,7 @@ public partial class Dags
             }
             var token = tokens[index++];
             // static value
-            if (!token.StartsWith('@'))
+            if (!token.StartsWith(SCRIPT_CHAR))
             {
                 result.Add(new Message(MessageType.Internal, token));
                 return result;
@@ -42,9 +42,9 @@ public partial class Dags
                     case NL_TOKEN:
                         result.Add(new Message(MessageType.Text, NL_CHAR));
                         break;
-                    case RETURN_TOKEN:
-                        index = tokens.Length; // End processing
-                        return result;
+                    //case RETURN_TOKEN:
+                    //    index = tokens.Length; // End processing
+                    //    return result;
                     default:
                         value = grod.Get(token, true);
                         if (value != null)
@@ -418,7 +418,7 @@ public partial class Dags
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(value!.StartsWith('@'))));
+                        result.Add(new Message(MessageType.Internal, TrueFalse(IsScript(value))));
                     }
                     break;
                 case LABEL_TOKEN:
@@ -578,6 +578,10 @@ public partial class Dags
                     CheckParameterCount(p, 1);
                     result.Add(new Message(MessageType.Internal, TrueFalse(IsNullOrEmpty(p[0].Value))));
                     break;
+                case PICTURE_TOKEN:
+                    CheckParameterCount(p, 1);
+                    result.Add(new Message(MessageType.OutChannel, OUTCHANNEL_PICTURE, p[0].Value));
+                    break;
                 case RAND_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
@@ -647,6 +651,11 @@ public partial class Dags
                     {
                         result.Add(new Message(MessageType.OutChannel, p[0].Value, p[1].Value));
                     }
+                    break;
+                case SLEEP_TOKEN:
+                    CheckParameterCount(p, 1);
+                    int1 = GetIntValue(p[0].Value);
+                    result.Add(new Message(MessageType.OutChannel, OUTCHANNEL_SLEEP, int1.ToString()));
                     break;
                 case SUB_TOKEN:
                     CheckParameterCount(p, 2);

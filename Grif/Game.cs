@@ -95,18 +95,22 @@ public class Game
     public async Task Intro()
     {
         var intro = _overlayGrod.Get(INTRO, true);
-        if (intro != null && intro.StartsWith('@'))
+        if (IsScript(intro))
         {
             var introItems = await Task.Run(() => Process(_overlayGrod, intro));
             foreach (var item in introItems)
             {
                 OutputMessages.Enqueue(item);
             }
-            while (OutputMessages.Count > 0)
-            {
-                var outputMessage = OutputMessages.Dequeue();
-                ProcessOutputMessage(outputMessage);
-            }
+        }
+        else
+        {
+            OutputMessages.Enqueue(new Message(MessageType.Text, intro ?? ""));
+        }
+        while (OutputMessages.Count > 0)
+        {
+            var outputMessage = OutputMessages.Dequeue();
+            ProcessOutputMessage(outputMessage);
         }
     }
 
@@ -152,9 +156,9 @@ public class Game
     public string? Prompt()
     {
         var prompt = _overlayGrod.Get(PROMPT, true);
-        if (prompt != null && prompt.StartsWith('@'))
+        if (IsScript(prompt))
         {
-            var promptData = Dags.Process(_overlayGrod, prompt);
+            var promptData = Process(_overlayGrod, prompt);
             prompt = "";
             foreach (var item in promptData)
             {
@@ -167,9 +171,9 @@ public class Game
     public string? AfterPrompt()
     {
         var afterPrompt = _overlayGrod.Get(AFTER_PROMPT, true);
-        if (afterPrompt != null && afterPrompt.StartsWith('@'))
+        if (IsScript(afterPrompt))
         {
-            afterPrompt = Dags.Process(_overlayGrod, afterPrompt).FirstOrDefault()?.Value;
+            afterPrompt = Process(_overlayGrod, afterPrompt).FirstOrDefault()?.Value;
         }
         return afterPrompt;
     }
@@ -334,9 +338,9 @@ public class Game
             Thread.Sleep(value);
             return;
         }
-        if (item.Value.StartsWith('@'))
+        if (IsScript(item.Value))
         {
-            var outputItems = Dags.ProcessItems(_overlayGrod, [new Message(MessageType.Script, item.Value)]);
+            var outputItems = ProcessItems(_overlayGrod, [new Message(MessageType.Script, item.Value)]);
             foreach (var outputItem in outputItems)
             {
                 OutputMessages.Enqueue(outputItem);

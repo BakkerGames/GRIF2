@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using static Grif.Common;
+using static Grif.Dags;
 
 namespace Grif;
 
@@ -91,20 +92,20 @@ public static class IO
             {
                 writer.WriteLine(item.Key);
             }
-            if (item.Value != null && item.Value.StartsWith('@'))
+            if (IsScript(item.Value))
             {
                 // If the value starts with '@', it is a script
                 if (jsonFormat)
                 {
                     writer.Write(" \"");
-                    value = Dags.CompressScript(item.Value);
+                    value = CompressScript(item.Value);
                     writer.Write(EncodeString(value));
                     writer.Write('\"');
                     needsComma = true;
                 }
                 else
                 {
-                    writer.WriteLine(Dags.PrettyScript(item.Value, true));
+                    writer.WriteLine(PrettyScript(item.Value, true));
                 }
             }
             else
@@ -150,7 +151,7 @@ public static class IO
     private static string EncodeString(string value)
     {
         StringBuilder result = new();
-        var isScript = value.StartsWith('@');
+        var isScript = IsScript(value);
         foreach (char c in value)
         {
             if (c < ' ' || c > '~')
@@ -354,44 +355,6 @@ public static class IO
         SkipWhitespace(content, ref index);
         string value = GetJsonString(content, ref index);
         return (key, value);
-    }
-
-    private static void SkipWhitespace(string content, ref int index)
-    {
-        bool found;
-        do
-        {
-            found = false;
-            while (index < content.Length && char.IsWhiteSpace(content[index]))
-            {
-                index++;
-                found = true;
-            }
-            if (index + 1 < content.Length && content[index] == '/' && content[index + 1] == '/')
-            {
-                // Single line comment
-                index += 2;
-                while (index < content.Length && content[index] != '\n')
-                {
-                    index++;
-                }
-                found = true;
-            }
-            if (index + 1 < content.Length && content[index] == '/' && content[index + 1] == '*')
-            {
-                // Multi-line comment
-                index += 2;
-                while (index + 1 < content.Length && !(content[index] == '*' && content[index + 1] == '/'))
-                {
-                    index++;
-                }
-                if (index + 1 < content.Length)
-                {
-                    index += 2; // Skip past the closing */
-                }
-                found = true;
-            }
-        } while (found);
     }
 
     #endregion
