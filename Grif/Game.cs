@@ -17,7 +17,6 @@ public class Game
     private string _saveBasePath = "";
     private string? _referenceBasePath;
 
-    private const string BACKGROUND_PREFIX = "background.";
 
     public event InputEventHandler? InputEvent;
     public event OutputEventHandler? OutputEvent;

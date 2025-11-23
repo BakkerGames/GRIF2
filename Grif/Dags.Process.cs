@@ -45,6 +45,17 @@ public partial class Dags
                     //case RETURN_TOKEN:
                     //    index = tokens.Length; // End processing
                     //    return result;
+                    case AND_TOKEN:
+                    case ELSEIF_TOKEN:
+                    case ELSE_TOKEN:
+                    case ENDFOREACHKEY_TOKEN:
+                    case ENDFOREACHLIST_TOKEN:
+                    case ENDFOR_TOKEN:
+                    case ENDIF_TOKEN:
+                    case NOT_TOKEN:
+                    case OR_TOKEN:
+                    case THEN_TOKEN:
+                        throw new SystemException($"Token found out of context: {token}");
                     default:
                         value = grod.Get(token, true);
                         if (value != null)
@@ -222,6 +233,7 @@ public partial class Dags
                     result.Add(new Message(MessageType.Internal, TrueFalse(!IsNullOrEmpty(value))));
                     break;
                 case ISFALSE_TOKEN:
+                case ISFALSE2_TOKEN:
                     CheckParameterCount(p, 1);
                     try
                     {
@@ -575,6 +587,7 @@ public partial class Dags
                     grod.Set(p[0].Value, int1.ToString());
                     break;
                 case ISNULL_TOKEN:
+                case ISNULL2_TOKEN:
                     CheckParameterCount(p, 1);
                     result.Add(new Message(MessageType.Internal, TrueFalse(IsNullOrEmpty(p[0].Value))));
                     break;
@@ -707,6 +720,7 @@ public partial class Dags
                     result.Add(new Message(MessageType.Internal, p[0].Value.Trim()));
                     break;
                 case ISTRUE_TOKEN:
+                case ISTRUE2_TOKEN:
                     CheckParameterCount(p, 1);
                     try
                     {

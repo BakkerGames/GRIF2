@@ -21,6 +21,7 @@ public static partial class Common
     public const string SAVE_EXTENSION = ".grifsave";
 
     public const string AFTER_PROMPT = "system.after_prompt";
+    public const string ARTICLE_KEY = "system.articles";
     public const string DONT_UNDERSTAND = "system.dont_understand";
     public const string GAMENAME = "system.gamename";
     public const string GAMETITLE = "system.gametitle";
@@ -47,4 +48,12 @@ public static partial class Common
     public const string OUTCHANNEL_SAVE = "#SAVE;";
     public const string OUTCHANNEL_SAVE_NAME = "#SAVENAME;";
     public const string OUTCHANNEL_SLEEP = "#SLEEP;";
+
+    public const string ADJECTIVE_PREFIX = "adjective.";
+    public const string BACKGROUND_PREFIX = "background.";
+    public const string COMMAND_PREFIX = "command.";
+    public const string DIRECTION_PREFIX = "direction.";
+    public const string NOUN_PREFIX = "noun.";
+    public const string PREPOSITION_PREFIX = "preposition.";
+    public const string VERB_PREFIX = "verb.";
 }

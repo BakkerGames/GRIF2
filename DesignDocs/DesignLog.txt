@@ -244,3 +244,10 @@
 - Bug: @return fails if in @if block. Removed for now.
 - Added IsScript() and removed hard-coded logic.
 - @sleep() and @picture() commands
+
+2025-11-23
+- Error on tokens out of context (@then, @else, etc.)
+- Added ISFALSE2_TOKEN, ISTRUE2_TOKEN, ISNULL2_TOKEN so both versions are allowed.
+- ExtraText for command.verb.?
+- Fixing restore for Cloak of Darkness and TicTacToe.
+- Articles moved to system.articles

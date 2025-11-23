@@ -6,17 +6,17 @@
 		@write(@get(value.winner))
 		@nl
 		@nl
-		@msg(message.playagain)
+		@msg(message.ask_playagain)
 		@setoutchannel("#ASK;")
-		@setoutchannel("@script(script.restart)")
+		@setoutchannel("@script(script.playagain)")
 	@elseif @eq(@get(value.moves),9) @then
 		@set(value.gameover,true)
 		@nl
 		@msg(message.tie)
 		@nl
-		@msg(message.playagain)
+		@msg(message.ask_playagain)
 		@setoutchannel("#ASK;")
-		@setoutchannel("@script(script.restart)")
+		@setoutchannel("@script(script.playagain)")
 	@endif
 @checkwin(x,y,z)
 	@set(temp.count,0)
@@ -73,11 +73,11 @@
 	@setoutchannel("#RESTORE;")
 	@setoutchannel("@showboard")
 @showboard
-	@write(" ",@value(1)," | ",@value(2)," | ",@value(3)," \n")
-	@write("---+---+---\n")
-	@write(" ",@value(4)," | ",@value(5)," | ",@value(6)," \n")
-	@write("---+---+---\n")
-	@write(" ",@value(7)," | ",@value(8)," | ",@value(9)," \n")
+	@writeline(" ",@value(1)," | ",@value(2)," | ",@value(3)," ")
+	@writeline("---+---+---")
+	@writeline(" ",@value(4)," | ",@value(5)," | ",@value(6)," ")
+	@writeline("---+---+---")
+	@writeline(" ",@value(7)," | ",@value(8)," | ",@value(9)," ")
 @value(x)
 	@write(@piece(@getlist(ttt,$x)))
 command.1
@@ -111,12 +111,13 @@ command.restart
 	@setoutchannel("#ASK;")
 	@setoutchannel("@script(script.restart)")
 command.restore
-	@msg(message.ask_restore)
-	@setoutchannel("#ASK;")
-	@setoutchannel("@script(script.restore)")
+	@setoutchannel("#EXISTS;")
+	@setoutchannel("@script(script.checksavefile)")
 command.save
 	@setoutchannel("#SAVE;")
 	@setoutchannel("@msg(message.ok)")
+message.ask_playagain
+	Do you want to play again?
 message.ask_restart
 	Are you sure you want to restart the game?
 message.ask_restore
@@ -129,8 +130,8 @@ message.ok
 	OK
 message.o_won
 	O has won!
-message.playagain
-	Do you want to play again?
+message.savefile_not_found
+	Cannot find a save file to restore.
 message.thanks
 	Thanks for playing!
 message.tie
@@ -139,6 +140,26 @@ message.x_won
 	X has won!
 message.yorn_error
 	Please answer YES or NO.
+script.checksavefile	
+	@set(temp.yorn,@getinchannel)
+	@if @true(@get(temp.yorn)) @then
+		@msg(message.ask_restore)
+		@setoutchannel("#ASK;")
+		@setoutchannel("@script(script.restore)")
+	@else
+		@msg(message.savefile_not_found)
+	@endif
+script.playagain
+	@set(temp.yorn,@getinchannel)
+	@if @true(@get(temp.yorn)) @then
+		@restart
+	@elseif @false(@get(temp.yorn)) @then
+		@quit
+	@else
+		@msg(message.yorn_error)
+		@setoutchannel("#ASK;")
+		@setoutchannel("@script(script.playagain)")
+	@endif
 script.restart
 	@set(temp.yorn,@getinchannel)
 	@if @true(@get(temp.yorn)) @then
@@ -171,22 +192,25 @@ system.intro
 	@if @false(@get(value.intro)) @then
 		@set(value.intro,true)
 		@comment("script run at the beginning of the game")
-		@write("Tic-Tac-Toe\n\n")
-		@write("Board positions:\n\n")
-		@write(" 1 | 2 | 3 \n")
-		@write("---+---+---\n")
-		@write(" 4 | 5 | 6 \n")
-		@write("---+---+---\n")
-		@write(" 7 | 8 | 9 \n\n")
+		@writeline("Tic-Tac-Toe",@nl)
+		@writeline("Version: ",@get(system.version),@nl)
+		@writeline("Board positions:",@nl)
+		@writeline(" 1 | 2 | 3 ")
+		@writeline("---+---+---")
+		@writeline(" 4 | 5 | 6 ")
+		@writeline("---+---+---")
+		@writeline(" 7 | 8 | 9 ",@nl)
 		@clear
 		@showboard
 	@endif
 system.prompt
 	@if @false(@get(value.gameover)) @then
-		@write("\n",@piece(@get(value.player)),"'s turn>")
+		@write(@nl,@piece(@get(value.player)),"'s turn>")
 	@else
-		@write("\n>")
+		@write(@nl,">")
 	@endif
+system.version
+	2025.11.23
 value.intro
 	false
 value.moves

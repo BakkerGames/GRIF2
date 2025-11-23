@@ -18,13 +18,6 @@ Noun must come before indirect noun if both are present.
 public static class Parser
 {
     private static int _maxWordLen = 0;
-    private const string VERB_PREFIX = "verb.";
-    private const string NOUN_PREFIX = "noun.";
-    private const string DIRECTION_PREFIX = "direction.";
-    private const string PREPOSITION_PREFIX = "preposition.";
-    private const string ADJECTIVE_PREFIX = "adjective.";
-    private const string ARTICLE_KEY = "articles";
-    private const string COMMAND_PREFIX = "command.";
     private static string DONT_UNDERSTAND_TEXT = "";
     private static List<GrodItem> _verbs = [];
     private static List<GrodItem> _nouns = [];
@@ -78,6 +71,7 @@ public static class Parser
         string? prepositionWord = null;
         string? indirectNoun = null;
         string? indirectNounWord = null;
+        string? extraText = null;
         if (string.IsNullOrWhiteSpace(input))
         {
             return null;
@@ -115,11 +109,6 @@ public static class Parser
         if (verb == null && direction == null)
         {
             result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
-            return result;
-        }
-        if (words.Count > 0)
-        {
-            result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, string.Join(", ", words))));
             return result;
         }
         string command;
@@ -182,6 +171,20 @@ public static class Parser
                 command += ".*"; // any noun
             }
         }
+        if (words.Count > 0)
+        {
+            if (grod.Get(command + ".?", true) != null)
+            {
+                command += ".?"; // any extra text
+                extraText = string.Join(' ', words);
+                words.Clear();
+            }
+            else
+            {
+                result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+                return result;
+            }
+        }
         if (grod.Get(command, true) == null)
         {
             result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
@@ -198,6 +201,7 @@ public static class Parser
         result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.prepositionword,{prepositionWord ?? NULL})"));
         result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.indirectnoun,{indirectNoun ?? NULL})"));
         result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.indirectnounword,{indirectNounWord ?? NULL})"));
+        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.extratext,{extraText ?? NULL})"));
         result.Add(new Message(MessageType.Script, $"{SCRIPT_TOKEN}{command})"));
         return result;
     }

@@ -1,5 +1,9 @@
 ﻿namespace Grif;
 
+/// <summary>
+/// Skip past whitespace and comments in the given content string, updating the index accordingly.
+/// Non-terminated comments (// and /* */) do not throw errors if they run to the end of the content.
+/// </summary>
 public static partial class Common
 {
     public static void SkipWhitespace(string content, ref int index)
