@@ -377,7 +377,7 @@ message.hook_desc_start
 message.hook_with_cloak
 	There is a handsome cloak hanging on the hook.
 message.intro
-	Cloak of Darkness\n\nA basic IF demonstration.\n\nHurrying through the rainswept November night, you're glad to see the bright lights of the Opera House. It's surprising that there aren't more people about but, hey, what do you expect in a cheap demo game...?
+	A basic IF demonstration.\n\nHurrying through the rainswept November night, you're glad to see the bright lights of the Opera House. It's surprising that there aren't more people about but, hey, what do you expect in a cheap demo game...?
 message.inv_empty
 	You aren't carrying anything.
 message.invalid_save_slot
@@ -394,6 +394,8 @@ message.readable
 	The message, neatly marked in the sawdust, reads
 message.read_what
 	Read what?
+message.restarting
+	Restarting the game...
 message.restore_complete
 	Restore complete.
 message.savefile_not_found
@@ -496,6 +498,8 @@ script.restart
 	@set(temp.yorn,@getinchannel)
 	@if @true(@get(temp.yorn)) @then
 		@setoutchannel("#RESTART;")
+		@setoutchannel("@msg(message.restarting) @nl")
+		@setoutchannel("@script(system.intro)")
 	@elseif @false(@get(temp.yorn)) @then
 		@msg(message.ok)
 	@else
@@ -564,6 +568,10 @@ system.gametitle
 	Cloak Of Darkness
 system.intro
 	@if @false(@get(value.introdone)) @then
+		@msg(system.gametitle)
+		@nl
+		@writeline("Version ",@get(system.version))
+		@nl
 		@msg(message.intro)
 		@set(value.introdone,true)
 		@nl
@@ -574,7 +582,7 @@ system.output_width
 system.prompt
 	\n>
 system.version
-	2025.11.20
+	2025.11.23
 value.cloakscore
 	1
 value.maxscore
