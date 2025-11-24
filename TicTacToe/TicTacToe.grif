@@ -170,6 +170,8 @@ script.restart
 		@restart
 	@elseif @false(@get(temp.yorn)) @then
 		@msg(message.ok)
+		@nl
+		@showboard
 	@else
 		@msg(message.yorn_error)
 		@set(temp.askflag,true)
@@ -182,6 +184,8 @@ script.restore
 		@restore
 	@elseif @false(@get(temp.yorn)) @then
 		@msg(message.ok)
+		@nl
+		@showboard
 	@else
 		@msg(message.yorn_error)
 		@set(temp.askflag,true)
