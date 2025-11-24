@@ -32,9 +32,6 @@ public partial class Dags
                 }
                 if (IsScript(item.Value))
                 {
-                    //TODO var script = new Script(item.Value);
-
-
                     var tokens = SplitTokens(item.Value);
                     int index = 0;
                     do
