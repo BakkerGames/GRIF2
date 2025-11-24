@@ -1,5 +1,7 @@
 ﻿namespace Grif;
 
+// TODO : Add support for script objects
+
 internal class Script(string code)
 {
     public string Code { get; init; } = code;
