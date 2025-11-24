@@ -234,6 +234,8 @@ command.restore
 	@msg(message.save_slot_number)
 	@setoutchannel("#ASK;")
 	@setoutchannel("@script(script.restore_slot_get)")
+command.restore.?
+	@msg(message.invalid_save_slot)
 command.restore.#
 	@set(temp.slot,@get(input.nounword))
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
@@ -242,8 +244,6 @@ command.restore.#
 		@msg(message.invalid_save_slot)
 		@set(temp.slot,null)
 	@endif
-command.restore.?
-	@msg(message.invalid_save_slot)
 command.save
 	@msg(message.save_slot_number)
 	@setoutchannel("#ASK;")
@@ -378,10 +378,10 @@ message.hook_with_cloak
 	There is a handsome cloak hanging on the hook.
 message.intro
 	A basic IF demonstration.\n\nHurrying through the rainswept November night, you're glad to see the bright lights of the Opera House. It's surprising that there aren't more people about but, hey, what do you expect in a cheap demo game...?
-message.inv_empty
-	You aren't carrying anything.
 message.invalid_save_slot
 	Invalid save slot number. Please enter a number from 1 to 5.
+message.inv_empty
+	You aren't carrying anything.
 message.leave_operahouse
 	You've only just arrived, and besides, the weather outside seems to be getting worse.
 message.movedark
@@ -518,9 +518,6 @@ script.restore_slot
 		@msg(message.ok)
 		@set(temp.slot,null)
 	@endif
-script.restore_slot_get
-	@set(temp.slot,@getinchannel)
-	@script(script.restore_slot_check)
 script.restore_slot_check
 	@comment("temp.slot already has slot number")
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then
@@ -542,6 +539,9 @@ script.restore_slot_check_file
 		@set(temp.slot,null)
 		@msg(message.savefile_not_found)
 	@endif
+script.restore_slot_get
+	@set(temp.slot,@getinchannel)
+	@script(script.restore_slot_check)
 script.save_slot
 	@set(temp.slot,@getinchannel)
 	@if @isnumber(@get(temp.slot)) @and @ge(@get(temp.slot),1) @and @le(@get(temp.slot),5) @then

@@ -142,7 +142,7 @@ message.x_won
 	X has won!
 message.yorn_error
 	Please answer YES or NO.
-script.checksavefile	
+script.checksavefile
 	@set(temp.yorn,@getinchannel)
 	@if @true(@get(temp.yorn)) @then
 		@msg(message.ask_restore)
@@ -160,6 +160,7 @@ script.playagain
 		@quit
 	@else
 		@msg(message.yorn_error)
+		@set(temp.askflag,true)
 		@setoutchannel("#ASK;")
 		@setoutchannel("@script(script.playagain)")
 	@endif
@@ -171,6 +172,7 @@ script.restart
 		@msg(message.ok)
 	@else
 		@msg(message.yorn_error)
+		@set(temp.askflag,true)
 		@setoutchannel("#ASK;")
 		@setoutchannel("@script(script.restart)")
 	@endif
@@ -182,6 +184,7 @@ script.restore
 		@msg(message.ok)
 	@else
 		@msg(message.yorn_error)
+		@set(temp.askflag,true)
 		@setoutchannel("#ASK;")
 		@setoutchannel("@script(script.restore)")
 	@endif
@@ -210,10 +213,11 @@ system.intro
 		@showboard
 	@endif
 system.prompt
-	@if @false(@get(value.gameover)) @then
-		@write(@nl,@piece(@get(value.player)),"'s turn>")
-	@else
+	@if @true(@get(temp.askflag)) @then
+		@set(temp.askflag,null)
 		@write(@nl,">")
+	@else
+		@write(@nl,@piece(@get(value.player)),"'s turn>")
 	@endif
 system.version
 	2025.11.23
