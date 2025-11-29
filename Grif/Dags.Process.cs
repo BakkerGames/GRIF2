@@ -5,9 +5,9 @@ namespace Grif;
 
 public partial class Dags
 {
-    private static List<Message> ProcessOneCommand(string[] tokens, ref int index, Grod grod)
+    private static List<GrifMessage> ProcessOneCommand(string[] tokens, ref int index, Grod grod)
     {
-        List<Message> result = [];
+        List<GrifMessage> result = [];
         string? value;
         int int1, int2;
         int intAnswer;
@@ -24,7 +24,7 @@ public partial class Dags
             // static value
             if (!token.StartsWith(SCRIPT_CHAR))
             {
-                result.Add(new Message(MessageType.Internal, token));
+                result.Add(new GrifMessage(MessageType.Internal, token));
                 return result;
             }
             // tokens without parameters
@@ -36,11 +36,11 @@ public partial class Dags
                         result.AddRange(ProcessIf(tokens, ref index, grod));
                         break;
                     case GETINCHANNEL_TOKEN:
-                        result.Add(new Message(MessageType.Internal, grod.Get(INCHANNEL, true) ?? ""));
+                        result.Add(new GrifMessage(MessageType.Internal, grod.Get(INCHANNEL, true) ?? ""));
                         grod.Remove(INCHANNEL, false); // Clear after reading
                         break;
                     case NL_TOKEN:
-                        result.Add(new Message(MessageType.Text, NL_CHAR));
+                        result.Add(new GrifMessage(MessageType.Text, NL_CHAR));
                         break;
                     //case RETURN_TOKEN:
                     //    index = tokens.Length; // End processing
@@ -78,14 +78,14 @@ public partial class Dags
                     {
                         int1 = -int1;
                     }
-                    result.Add(new Message(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case ADD_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     intAnswer = int1 + int2;
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case ADDLIST_TOKEN:
                     CheckParameterCount(p, 2);
@@ -107,7 +107,7 @@ public partial class Dags
                         throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
                     }
                     intAnswer = int1 & int2;
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case BITWISEOR_TOKEN:
                     CheckParameterCount(p, 2);
@@ -118,7 +118,7 @@ public partial class Dags
                         throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
                     }
                     intAnswer = int1 | int2;
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case BITWISEXOR_TOKEN:
                     CheckParameterCount(p, 2);
@@ -129,7 +129,7 @@ public partial class Dags
                         throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
                     }
                     intAnswer = int1 ^ int2;
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case CLEARARRAY_TOKEN:
                     CheckParameterCount(p, 1);
@@ -144,7 +144,7 @@ public partial class Dags
                         throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
                     }
                     intAnswer = int1 ^ (int)Math.Pow(2, int2);
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case CLEARLIST_TOKEN:
                     CheckParameterCount(p, 1);
@@ -164,15 +164,15 @@ public partial class Dags
                     {
                         sb.Append(item.Value);
                     }
-                    result.Add(new Message(MessageType.Internal, sb.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, sb.ToString()));
                     break;
                 case DEBUG_TOKEN:
                     CheckParameterCount(p, 1);
                     if (IsTrue(grod.Get(DEBUG_FLAG, true)))
                     {
-                        result.Add(new Message(MessageType.Text, "### "));
-                        result.Add(new Message(MessageType.Text, p[0].Value));
-                        result.Add(new Message(MessageType.Text, NL_CHAR));
+                        result.Add(new GrifMessage(MessageType.Text, "### "));
+                        result.Add(new GrifMessage(MessageType.Text, p[0].Value));
+                        result.Add(new GrifMessage(MessageType.Text, NL_CHAR));
                     }
                     break;
                 case DIV_TOKEN:
@@ -184,7 +184,7 @@ public partial class Dags
                         throw new SystemException("Division by zero is not allowed.");
                     }
                     int1 /= int2;
-                    result.Add(new Message(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case DIVTO_TOKEN:
                     CheckParameterCount(p, 2);
@@ -203,23 +203,23 @@ public partial class Dags
                     isNull1 = IsNull(p[1].Value);
                     if (isNull0 && isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else if (isNull0 || isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else if (string.Compare(p[0].Value, p[1].Value, OIC) == 0)
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(int1 == int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 == int2)));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     break;
                 case EXEC_TOKEN:
@@ -230,7 +230,7 @@ public partial class Dags
                 case EXISTS_TOKEN:
                     CheckParameterCount(p, 1);
                     value = grod.Get(p[0].Value, true);
-                    result.Add(new Message(MessageType.Internal, TrueFalse(!IsNullOrEmpty(value))));
+                    result.Add(new GrifMessage(MessageType.Internal, TrueFalse(!IsNullOrEmpty(value))));
                     break;
                 case ISFALSE_TOKEN:
                 case ISFALSE2_TOKEN:
@@ -238,11 +238,11 @@ public partial class Dags
                     try
                     {
                         boolAnswer = IsTrue(p[0].Value);
-                        result.Add(new Message(MessageType.Internal, TrueFalse(!boolAnswer)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(!boolAnswer)));
                     }
                     catch (Exception)
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(false)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(false)));
                     }
                     break;
                 case FLIPBIT_TOKEN:
@@ -254,7 +254,7 @@ public partial class Dags
                         throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
                     }
                     intAnswer = int1 ^ (int)Math.Pow(2, int2);
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case FOR_TOKEN:
                     CheckParameterCount(p, 3);
@@ -278,7 +278,7 @@ public partial class Dags
                     {
                         value = value.Replace($"{{{i - 1}}}", p[i].Value); // {0} = p[1]
                     }
-                    result.Add(new Message(MessageType.Internal, value));
+                    result.Add(new GrifMessage(MessageType.Internal, value));
                     break;
                 case FROMHEX_TOKEN:
                     CheckParameterCount(p, 1);
@@ -286,7 +286,7 @@ public partial class Dags
                     {
                         int1 = Convert.ToInt32(p[0].Value, 16);
                         value = int1.ToString();
-                        result.Add(new Message(MessageType.Internal, value));
+                        result.Add(new GrifMessage(MessageType.Internal, value));
                     }
                     catch (Exception)
                     {
@@ -299,26 +299,26 @@ public partial class Dags
                     isNull1 = IsNull(p[1].Value);
                     if (isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else if (isNull0)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(int1 >= int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 >= int2)));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal,
+                        result.Add(new GrifMessage(MessageType.Internal,
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) >= 0)));
                     }
                     break;
                 case GET_TOKEN:
                     CheckParameterCount(p, 1);
                     value = grod.Get(p[0].Value, true) ?? "";
-                    result.Add(new Message(MessageType.Internal, value));
+                    result.Add(new GrifMessage(MessageType.Internal, value));
                     break;
                 case GETARRAY_TOKEN:
                     CheckParameterCount(p, 3);
@@ -329,7 +329,7 @@ public partial class Dags
                     int1 = GetIntValue(p[1].Value);
                     int2 = GetIntValue(p[2].Value);
                     value = GetArrayItem(grod, p[0].Value, int1, int2);
-                    result.Add(new Message(MessageType.Internal, value ?? ""));
+                    result.Add(new GrifMessage(MessageType.Internal, value ?? ""));
                     break;
                 case GETBIT_TOKEN:
                     CheckParameterCount(p, 2);
@@ -344,7 +344,7 @@ public partial class Dags
                     {
                         intAnswer = 1;
                     }
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case GETLIST_TOKEN:
                     CheckParameterCount(p, 2);
@@ -354,12 +354,12 @@ public partial class Dags
                     }
                     int1 = GetIntValue(p[1].Value);
                     value = GetListItem(grod, p[0].Value, int1);
-                    result.Add(new Message(MessageType.Internal, value ?? ""));
+                    result.Add(new GrifMessage(MessageType.Internal, value ?? ""));
                     break;
                 case GETVALUE_TOKEN:
                     CheckParameterCount(p, 1);
                     value = GetValue(grod, grod.Get(p[0].Value, true));
-                    result.Add(new Message(MessageType.Internal, value));
+                    result.Add(new GrifMessage(MessageType.Internal, value));
                     break;
                 case GOLABEL_TOKEN:
                     CheckParameterCount(p, 1);
@@ -377,19 +377,19 @@ public partial class Dags
                     isNull1 = IsNull(p[1].Value);
                     if (!isNull0 && isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else if (isNull0)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(int1 > int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 > int2)));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal,
+                        result.Add(new GrifMessage(MessageType.Internal,
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) > 0)));
                     }
                     break;
@@ -403,22 +403,22 @@ public partial class Dags
                     try
                     {
                         boolAnswer = IsTrue(p[0].Value);
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     catch (Exception)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     break;
                 case ISNUMBER_TOKEN:
                     CheckParameterCount(p, 1);
                     if (int.TryParse(p[0].Value, out _))
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     break;
                 case ISSCRIPT_TOKEN:
@@ -426,11 +426,11 @@ public partial class Dags
                     value = grod.Get(p[0].Value, true);
                     if (IsNull(value))
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(IsScript(value))));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(IsScript(value))));
                     }
                     break;
                 case LABEL_TOKEN:
@@ -442,25 +442,25 @@ public partial class Dags
                     isNull1 = IsNull(p[1].Value);
                     if (isNull0)
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else if (isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(int1 <= int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 <= int2)));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal,
+                        result.Add(new GrifMessage(MessageType.Internal,
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) <= 0)));
                     }
                     break;
                 case LEN_TOKEN:
                     CheckParameterCount(p, 1);
-                    result.Add(new Message(MessageType.Internal, p[0].Value.Length.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.Length.ToString()));
                     break;
                 case LISTLENGTH_TOKEN:
                     CheckParameterCount(p, 1);
@@ -471,17 +471,17 @@ public partial class Dags
                     value = grod.Get(p[0].Value, true);
                     if (IsNullOrEmpty(value))
                     {
-                        result.Add(new Message(MessageType.Internal, "0"));
+                        result.Add(new GrifMessage(MessageType.Internal, "0"));
                     }
                     else
                     {
                         var listItems = value!.Split(',');
-                        result.Add(new Message(MessageType.Internal, listItems.Length.ToString()));
+                        result.Add(new GrifMessage(MessageType.Internal, listItems.Length.ToString()));
                     }
                     break;
                 case LOWER_TOKEN:
                     CheckParameterCount(p, 1);
-                    result.Add(new Message(MessageType.Internal, p[0].Value.ToLower()));
+                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.ToLower()));
                     break;
                 case LT_TOKEN:
                     CheckParameterCount(p, 2);
@@ -489,19 +489,19 @@ public partial class Dags
                     isNull1 = IsNull(p[1].Value);
                     if (isNull0 && !isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else if (isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(int1 < int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 < int2)));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal,
+                        result.Add(new GrifMessage(MessageType.Internal,
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) < 0)));
                     }
                     break;
@@ -510,7 +510,7 @@ public partial class Dags
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     int1 %= int2;
-                    result.Add(new Message(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case MODTO_TOKEN:
                     CheckParameterCount(p, 2);
@@ -529,18 +529,18 @@ public partial class Dags
                             value = msgItem.Value;
                             if (!string.IsNullOrEmpty(value)) // whitespace is allowed
                             {
-                                result.Add(new Message(MessageType.Text, value));
+                                result.Add(new GrifMessage(MessageType.Text, value));
                             }
                         }
                     }
-                    result.Add(new Message(MessageType.Text, NL_CHAR));
+                    result.Add(new GrifMessage(MessageType.Text, NL_CHAR));
                     break;
                 case MUL_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     int1 *= int2;
-                    result.Add(new Message(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case MULTO_TOKEN:
                     CheckParameterCount(p, 2);
@@ -555,30 +555,30 @@ public partial class Dags
                     isNull1 = IsNull(p[1].Value);
                     if (isNull0 && isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else if (isNull0 || isNull1)
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     else if (string.Compare(p[0].Value, p[1].Value, OIC) == 0)
                     {
-                        result.Add(new Message(MessageType.Internal, FALSE));
+                        result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
                     else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(int1 != int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 != int2)));
                     }
                     else
                     {
-                        result.Add(new Message(MessageType.Internal, TRUE));
+                        result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
                     break;
                 case NEG_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     int1 = -int1;
-                    result.Add(new Message(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case NEGTO_TOKEN:
                     CheckParameterCount(p, 1);
@@ -589,18 +589,18 @@ public partial class Dags
                 case ISNULL_TOKEN:
                 case ISNULL2_TOKEN:
                     CheckParameterCount(p, 1);
-                    result.Add(new Message(MessageType.Internal, TrueFalse(IsNullOrEmpty(p[0].Value))));
+                    result.Add(new GrifMessage(MessageType.Internal, TrueFalse(IsNullOrEmpty(p[0].Value))));
                     break;
                 case PICTURE_TOKEN:
                     CheckParameterCount(p, 1);
-                    result.Add(new Message(MessageType.OutChannel, OUTCHANNEL_PICTURE, p[0].Value));
+                    result.Add(new GrifMessage(MessageType.OutChannel, OUTCHANNEL_PICTURE, p[0].Value));
                     break;
                 case RAND_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
                     int2 = _random.Next(100);
                     boolAnswer = int2 < int1;
-                    result.Add(new Message(MessageType.Internal, TrueFalse(boolAnswer)));
+                    result.Add(new GrifMessage(MessageType.Internal, TrueFalse(boolAnswer)));
                     break;
                 case REMOVEATLIST_TOKEN:
                     CheckParameterCount(p, 2);
@@ -609,12 +609,12 @@ public partial class Dags
                     break;
                 case REPLACE_TOKEN:
                     CheckParameterCount(p, 3);
-                    result.Add(new Message(MessageType.Internal, p[0].Value.Replace(p[1].Value, p[2].Value, OIC)));
+                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.Replace(p[1].Value, p[2].Value, OIC)));
                     break;
                 case RND_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
-                    result.Add(new Message(MessageType.Internal, _random.Next(int1).ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, _random.Next(int1).ToString()));
                     break;
                 case SCRIPT_TOKEN:
                     CheckParameterCount(p, 1);
@@ -648,7 +648,7 @@ public partial class Dags
                         throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
                     }
                     intAnswer = int1 | (int)Math.Pow(2, int2);
-                    result.Add(new Message(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
                     break;
                 case SETLIST_TOKEN:
                     CheckParameterCount(p, 3);
@@ -658,24 +658,24 @@ public partial class Dags
                 case SETOUTCHANNEL_TOKEN:
                     if (p.Count == 1)
                     {
-                        result.Add(new Message(MessageType.OutChannel, p[0].Value));
+                        result.Add(new GrifMessage(MessageType.OutChannel, p[0].Value));
                     }
                     else if (p.Count == 2)
                     {
-                        result.Add(new Message(MessageType.OutChannel, p[0].Value, p[1].Value));
+                        result.Add(new GrifMessage(MessageType.OutChannel, p[0].Value, p[1].Value));
                     }
                     break;
                 case SLEEP_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
-                    result.Add(new Message(MessageType.OutChannel, OUTCHANNEL_SLEEP, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.OutChannel, OUTCHANNEL_SLEEP, int1.ToString()));
                     break;
                 case SUB_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     int1 -= int2;
-                    result.Add(new Message(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case SUBSTRING_TOKEN:
                     CheckParameterCount(p, 3);
@@ -685,7 +685,7 @@ public partial class Dags
                     {
                         throw new SystemException($"{token}{p[0].Value},{int1},{int2}): Invalid parameters");
                     }
-                    result.Add(new Message(MessageType.Internal, p[0].Value.Substring(int1, int2)));
+                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.Substring(int1, int2)));
                     break;
                 case SUBTO_TOKEN:
                     CheckParameterCount(p, 2);
@@ -703,21 +703,21 @@ public partial class Dags
                 case TOBINARY_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
-                    result.Add(new Message(MessageType.Internal, Convert.ToString(int1, 2)));
+                    result.Add(new GrifMessage(MessageType.Internal, Convert.ToString(int1, 2)));
                     break;
                 case TOHEX_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = GetIntValue(p[0].Value);
-                    result.Add(new Message(MessageType.Internal, int1.ToString("X")));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString("X")));
                     break;
                 case TOINTEGER_TOKEN:
                     CheckParameterCount(p, 1);
                     int1 = Convert.ToInt32(p[0].Value, 2);
-                    result.Add(new Message(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case TRIM_TOKEN:
                     CheckParameterCount(p, 1);
-                    result.Add(new Message(MessageType.Internal, p[0].Value.Trim()));
+                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.Trim()));
                     break;
                 case ISTRUE_TOKEN:
                 case ISTRUE2_TOKEN:
@@ -725,23 +725,23 @@ public partial class Dags
                     try
                     {
                         boolAnswer = IsTrue(p[0].Value);
-                        result.Add(new Message(MessageType.Internal, TrueFalse(boolAnswer)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(boolAnswer)));
                     }
                     catch (Exception)
                     {
-                        result.Add(new Message(MessageType.Internal, TrueFalse(false)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(false)));
                     }
                     break;
                 case UPPER_TOKEN:
                     CheckParameterCount(p, 1);
-                    result.Add(new Message(MessageType.Internal, p[0].Value.ToUpper()));
+                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.ToUpper()));
                     break;
                 case WRITE_TOKEN:
                     CheckParameterAtLeastOne(p);
                     foreach (var item in p) // concatenate all parameters
                     {
                         value = GetValue(grod, item.Value);
-                        result.Add(new Message(MessageType.Text, value));
+                        result.Add(new GrifMessage(MessageType.Text, value));
                     }
                     break;
                 case WRITELINE_TOKEN:
@@ -749,9 +749,9 @@ public partial class Dags
                     foreach (var item in p) // concatenate all parameters
                     {
                         value = GetValue(grod, item.Value);
-                        result.Add(new Message(MessageType.Text, value));
+                        result.Add(new GrifMessage(MessageType.Text, value));
                     }
-                    result.Add(new Message(MessageType.Text, NL_CHAR));
+                    result.Add(new GrifMessage(MessageType.Text, NL_CHAR));
                     break;
                 default:
                     var userResult = GetUserDefinedFunctionValues(token, p, grod);
@@ -775,7 +775,7 @@ public partial class Dags
                 }
                 error.AppendLine($"{i}: {token}");
             }
-            result.Add(new Message(MessageType.Error, error.ToString()));
+            result.Add(new GrifMessage(MessageType.Error, error.ToString()));
             return result;
         }
     }

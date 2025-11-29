@@ -206,13 +206,13 @@ internal class Program
         if (input != null)
         {
             OutputTextLog(input + Environment.NewLine);
-            var message = new Message(MessageType.Text, input);
+            var message = new GrifMessage(MessageType.Text, input);
             ((Game)sender).InputMessages.Enqueue(message);
             OutputText(((Game)sender).AfterPrompt() ?? "");
         }
     }
 
-    private static void Output(object sender, Message e)
+    private static void Output(object sender, GrifMessage e)
     {
         OutputText(e.Value);
     }

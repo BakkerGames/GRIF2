@@ -471,9 +471,9 @@ public partial class Dags
 
     #region Private routines
 
-    private static List<Message> GetParameters(string[] tokens, ref int index, Grod grod)
+    private static List<GrifMessage> GetParameters(string[] tokens, ref int index, Grod grod)
     {
-        List<Message> parameters = [];
+        List<GrifMessage> parameters = [];
         while (index < tokens.Length && tokens[index] != ")")
         {
             var token = tokens[index];
@@ -484,7 +484,7 @@ public partial class Dags
             }
             else
             {
-                parameters.Add(new Message(MessageType.Internal, TrimQuotes(token)));
+                parameters.Add(new GrifMessage(MessageType.Internal, TrimQuotes(token)));
                 index++;
             }
             if (index < tokens.Length)
@@ -518,7 +518,7 @@ public partial class Dags
         return value;
     }
 
-    private static void CheckParameterCount(List<Message> p, int count)
+    private static void CheckParameterCount(List<GrifMessage> p, int count)
     {
         if (p.Count != count)
         {
@@ -526,7 +526,7 @@ public partial class Dags
         }
     }
 
-    private static void CheckParameterAtLeastOne(List<Message> p)
+    private static void CheckParameterAtLeastOne(List<GrifMessage> p)
     {
         if (p.Count == 0)
         {
@@ -553,7 +553,7 @@ public partial class Dags
         throw new SystemException("Expected a single text result.");
     }
 
-    private static List<Message> GetUserDefinedFunctionValues(string token, List<Message> p, Grod grod)
+    private static List<GrifMessage> GetUserDefinedFunctionValues(string token, List<GrifMessage> p, Grod grod)
     {
         var keys = grod.Keys(token, true, true);
         if (keys.Count == 0)
