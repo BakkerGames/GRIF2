@@ -108,8 +108,17 @@ public static class Parser
         }
         if (verb == null && direction == null)
         {
-            result.Add(new GrifMessage(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
-            return result;
+            if (words.Count > 0)
+            {
+                verb = "?"; // any verb
+                extraText = string.Join(' ', words);
+                words.Clear();
+            }
+            else
+            {
+                result.Add(new GrifMessage(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+                return result;
+            }
         }
         string command;
         if (verb != null && direction != null)
