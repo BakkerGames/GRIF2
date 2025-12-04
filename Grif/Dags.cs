@@ -6,15 +6,15 @@ public partial class Dags
 {
     private static readonly Random _random = new();
 
-    public static List<Message> Process(Grod grod, string? script)
+    public static List<GrifMessage> Process(Grod grod, string? script)
     {
-        List<Message> items = [new Message(MessageType.Text, script ?? "")];
+        List<GrifMessage> items = [new GrifMessage(MessageType.Text, script ?? "")];
         return ProcessItems(grod, items);
     }
 
-    public static List<Message> ProcessItems(Grod grod, List<Message> items)
+    public static List<GrifMessage> ProcessItems(Grod grod, List<GrifMessage> items)
     {
-        List<Message> result = [];
+        List<GrifMessage> result = [];
         foreach (var item in items)
         {
             if (item.Type == MessageType.Error)

@@ -6,7 +6,7 @@ public partial class Dags
 {
     private const string _invalidIfSyntax = $"Invalid {IF_TOKEN} syntax";
 
-    private static List<Message> ProcessIf(string[] tokens, ref int index, Grod grod)
+    private static List<GrifMessage> ProcessIf(string[] tokens, ref int index, Grod grod)
     {
         // conditions
         bool notFlag;
@@ -85,7 +85,7 @@ public partial class Dags
             }
         }
         // process all commands in this section
-        List<Message> result = [];
+        List<GrifMessage> result = [];
         while (index < tokens.Length)
         {
             token = tokens[index].ToLower();

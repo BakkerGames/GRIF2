@@ -6,7 +6,7 @@ using static Grif.Dags;
 namespace Grif;
 
 public delegate void InputEventHandler(object sender);
-public delegate void OutputEventHandler(object sender, Message e);
+public delegate void OutputEventHandler(object sender, GrifMessage e);
 
 public class Game
 {
@@ -23,9 +23,9 @@ public class Game
 
     public bool GameOver { get; set; } = false;
 
-    public Queue<Message> InputMessages { get; } = new();
+    public Queue<GrifMessage> InputMessages { get; } = new();
 
-    public Queue<Message> OutputMessages { get; } = new();
+    public Queue<GrifMessage> OutputMessages { get; } = new();
 
     public void Initialize(Grod grod, string saveBasePath, string? referenceBasePath = null)
     {
@@ -104,7 +104,7 @@ public class Game
         }
         else
         {
-            OutputMessages.Enqueue(new Message(MessageType.Text, intro ?? ""));
+            OutputMessages.Enqueue(new GrifMessage(MessageType.Text, intro ?? ""));
         }
         while (OutputMessages.Count > 0)
         {
@@ -179,16 +179,16 @@ public class Game
 
     #region Private routines
 
-    private void ProcessInputMessage(Message inputMessage)
+    private void ProcessInputMessage(GrifMessage inputMessage)
     {
         var inputItems = ParseInput(_overlayGrod, inputMessage.Value);
         foreach (var item in inputItems ?? [])
         {
-            OutputMessages.Enqueue(new Message(item.Type, item.Value, item.ExtraValue));
+            OutputMessages.Enqueue(new GrifMessage(item.Type, item.Value, item.ExtraValue));
         }
     }
 
-    private void ProcessOutputMessage(Message message)
+    private void ProcessOutputMessage(GrifMessage message)
     {
         switch (message.Type)
         {
@@ -224,7 +224,7 @@ public class Game
         }
     }
 
-    private void HandleOutChannel(Message item)
+    private void HandleOutChannel(GrifMessage item)
     {
         bool exists;
         if (item.Value.Equals(OUTCHANNEL_GAMEOVER, OIC))
@@ -339,7 +339,7 @@ public class Game
         }
         if (IsScript(item.Value))
         {
-            var outputItems = ProcessItems(_overlayGrod, [new Message(MessageType.Script, item.Value)]);
+            var outputItems = ProcessItems(_overlayGrod, [new GrifMessage(MessageType.Script, item.Value)]);
             foreach (var outputItem in outputItems)
             {
                 OutputMessages.Enqueue(outputItem);

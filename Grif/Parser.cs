@@ -58,9 +58,9 @@ public static class Parser
             $"I don't understand \"{{0}}\".") + NL_CHAR;
     }
 
-    public static List<Message>? ParseInput(Grod grod, string input)
+    public static List<GrifMessage>? ParseInput(Grod grod, string input)
     {
-        var result = new List<Message>();
+        var result = new List<GrifMessage>();
         string? verb;
         string? verbWord;
         string? direction = null;
@@ -102,14 +102,23 @@ public static class Parser
             }
             else
             {
-                result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+                result.Add(new GrifMessage(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
                 return result;
             }
         }
         if (verb == null && direction == null)
         {
-            result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
-            return result;
+            if (words.Count > 0)
+            {
+                verb = "?"; // any verb
+                extraText = string.Join(' ', words);
+                words.Clear();
+            }
+            else
+            {
+                result.Add(new GrifMessage(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+                return result;
+            }
         }
         string command;
         if (verb != null && direction != null)
@@ -181,28 +190,28 @@ public static class Parser
             }
             else
             {
-                result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+                result.Add(new GrifMessage(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
                 return result;
             }
         }
         if (grod.Get(command, true) == null)
         {
-            result.Add(new Message(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
+            result.Add(new GrifMessage(MessageType.Text, string.Format(DONT_UNDERSTAND_TEXT, input)));
             return result;
         }
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.full,\"{input}\")"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.verb,{verb ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.verbword,{verbWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.direction,{direction ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.directionword,{directionWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.noun,{noun ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.nounword,{nounWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.preposition,{preposition ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.prepositionword,{prepositionWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.indirectnoun,{indirectNoun ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.indirectnounword,{indirectNounWord ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SET_TOKEN}input.extratext,{extraText ?? NULL})"));
-        result.Add(new Message(MessageType.Script, $"{SCRIPT_TOKEN}{command})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.full,\"{input}\")"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.verb,{verb ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.verbword,{verbWord ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.direction,{direction ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.directionword,{directionWord ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.noun,{noun ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.nounword,{nounWord ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.preposition,{preposition ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.prepositionword,{prepositionWord ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.indirectnoun,{indirectNoun ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.indirectnounword,{indirectNounWord ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SET_TOKEN}input.extratext,{extraText ?? NULL})"));
+        result.Add(new GrifMessage(MessageType.Script, $"{SCRIPT_TOKEN}{command})"));
         return result;
     }
 

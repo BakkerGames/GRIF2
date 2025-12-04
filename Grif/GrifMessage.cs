@@ -11,4 +11,4 @@ public enum MessageType
     InChannel = 5,
 }
 
-public record Message(MessageType Type, string Value, string? ExtraValue = null);
+public record GrifMessage(MessageType Type, string Value, string? ExtraValue = null);
