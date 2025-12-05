@@ -8,9 +8,9 @@ namespace Tests;
 public class UnitTestDags
 {
     private readonly Grod grod = new("base");
-    private List<Message> result = [];
+    private List<GrifMessage> result = [];
 
-    private static string Squash(List<Message> result)
+    private static string Squash(List<GrifMessage> result)
     {
         var sb = new StringBuilder();
         foreach (var item in result)

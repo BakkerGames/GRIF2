@@ -251,3 +251,10 @@
 - ExtraText for command.verb.?
 - Fixing restore for Cloak of Darkness and TicTacToe.
 - Articles moved to system.articles
+
+2025-12-04
+- Mod and ModTo return positive values only.
+- Added unit tests for Mod and ModTo negative values.
+- Added CheckParmeterCountBetween() for range checking.
+- Allow @substring with 2 or 3 parameters. If 2, goes to end of string.
+- Renamed Message to GrifMessage for clarity and to avoid Microsoft.Message conflicts.

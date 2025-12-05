@@ -59,6 +59,8 @@ public partial class Dags
     public const string LISTLENGTH_TOKEN = "@listlength(";
     public const string LOWER_TOKEN = "@lower(";
     public const string LT_TOKEN = "@lt(";
+    public const string MAX_TOKEN = "@max(";
+    public const string MIN_TOKEN = "@min(";
     public const string MODTO_TOKEN = "@modto(";
     public const string MOD_TOKEN = "@mod(";
     public const string MSG_TOKEN = "@msg(";

@@ -505,11 +505,29 @@ public partial class Dags
                             TrueFalse(string.Compare(p[0].Value, p[1].Value, OIC) < 0)));
                     }
                     break;
+                case MAX_TOKEN:
+                    CheckParameterCount(p, 2);
+                    int1 = GetIntValue(p[0].Value);
+                    int2 = GetIntValue(p[1].Value);
+                    int1 = Math.Max(int1, int2);
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    break;
+                case MIN_TOKEN:
+                    CheckParameterCount(p, 2);
+                    int1 = GetIntValue(p[0].Value);
+                    int2 = GetIntValue(p[1].Value);
+                    int1 = Math.Min(int1, int2);
+                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    break;
                 case MOD_TOKEN:
                     CheckParameterCount(p, 2);
                     int1 = GetIntValue(p[0].Value);
                     int2 = GetIntValue(p[1].Value);
                     int1 %= int2;
+                    if (int1 < 0) // make positive
+                    {
+                        int1 += int2;
+                    }
                     result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case MODTO_TOKEN:
@@ -517,6 +535,10 @@ public partial class Dags
                     int1 = GetIntValue(grod.Get(p[0].Value, true));
                     int2 = GetIntValue(p[1].Value);
                     int1 %= int2;
+                    if (int1 < 0) // make positive
+                    {
+                        int1 += int2;
+                    }
                     grod.Set(p[0].Value, int1.ToString());
                     break;
                 case MSG_TOKEN:
@@ -678,9 +700,16 @@ public partial class Dags
                     result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
                     break;
                 case SUBSTRING_TOKEN:
-                    CheckParameterCount(p, 3);
+                    CheckParmeterCountBetween(p, 2, 3);
                     int1 = GetIntValue(p[1].Value);
-                    int2 = GetIntValue(p[2].Value);
+                    if (p.Count == 2)
+                    {
+                        int2 = p[0].Value.Length - int1;
+                    }
+                    else
+                    {
+                        int2 = GetIntValue(p[2].Value);
+                    }
                     if (int1 < 0 || int2 < 0 || int1 + int2 > p[0].Value.Length)
                     {
                         throw new SystemException($"{token}{p[0].Value},{int1},{int2}): Invalid parameters");

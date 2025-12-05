@@ -534,6 +534,14 @@ public partial class Dags
         }
     }
 
+    private static void CheckParmeterCountBetween(List<GrifMessage> p, int min, int max)
+    {
+        if (p.Count < min || p.Count > max)
+        {
+            throw new ArgumentException($"Expected between {min} and {max} parameters, but got {p.Count}");
+        }
+    }
+
     private static string GetValue(Grod grod, string? value)
     {
         if (IsNull(value))

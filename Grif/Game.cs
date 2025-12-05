@@ -205,8 +205,12 @@ public class Game
                     OutputMessages.Enqueue(item);
                 }
                 break;
+            case MessageType.Error:
+                OutputEvent?.Invoke(this, message);
+                break;
             default:
-                throw new Exception($"Unsupported output message type: {message.Type}");
+                OutputEvent?.Invoke(this, new GrifMessage(MessageType.Text, $"Unsupported output message type: {message.Type}", message.Value + message.ExtraValue));
+                break;
         }
     }
 
