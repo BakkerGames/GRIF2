@@ -17,7 +17,7 @@ Noun must come before indirect noun if both are present.
 
 public static class Parser
 {
-    private static int _maxWordLen = 0;
+    private static long _maxWordLen = 0;
     private static string DONT_UNDERSTAND_TEXT = "";
     private static List<GrodItem> _verbs = [];
     private static List<GrodItem> _nouns = [];
@@ -44,7 +44,7 @@ public static class Parser
             .Where(x => !string.IsNullOrWhiteSpace(x.Value) && x.Value != NULL)
             .Select(x => new GrodItem(x.Key[ADJECTIVE_PREFIX.Length..], x.Value))];
         _articles = grod.Items(ARTICLE_KEY, true, true);
-        _maxWordLen = Dags.GetIntValue(grod.Get(WORDSIZE, true));
+        _maxWordLen = GetNumberValue(grod.Get(WORDSIZE, true));
         if (_maxWordLen > 0)
         {
             TrimSynonyms(ref _verbs);
@@ -226,7 +226,7 @@ public static class Parser
             {
                 if (_maxWordLen > 0 && words[j].Length > _maxWordLen)
                 {
-                    words[j] = words[j][.._maxWordLen];
+                    words[j] = words[j][..(int)_maxWordLen];
                 }
             }
             items[i] = new GrodItem(items[i].Key, string.Join(',', words));
@@ -240,7 +240,7 @@ public static class Parser
             var word = words[i];
             if (_maxWordLen > 0 && word.Length > _maxWordLen)
             {
-                word = word[.._maxWordLen];
+                word = word[..(int)_maxWordLen];
             }
             foreach (var item in vocabList)
             {
@@ -268,7 +268,7 @@ public static class Parser
         }
         for (int i = 0; i < words.Count; i++)
         {
-            if (int.TryParse(words[i], out int number))
+            if (long.TryParse(words[i], out long number))
             {
                 words.RemoveAt(i);
                 return ("#", number.ToString()); // numeric noun, normalized

@@ -542,7 +542,7 @@ public class UnitTestDags
     {
         result = Dags.Process(grod, $"{SET_TOKEN}value,{RND_TOKEN}20))");
         result = Dags.Process(grod, $"{GET_TOKEN}value)");
-        var r1 = int.Parse(Squash(result));
+        var r1 = long.Parse(Squash(result));
         Assert.That(r1 >= 0 && r1 < 20);
     }
 

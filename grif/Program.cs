@@ -17,6 +17,7 @@ internal class Program
         List<string> fileList = [];
         string filename;
         string? inputFilename = null;
+        string? splitInput = null;
         if (args.Length == 0)
         {
             OutputText(Syntax());
@@ -33,7 +34,14 @@ internal class Program
                     OutputText(Syntax());
                     return;
                 }
-                if (args[index].Equals("-i", OIC) ||
+                if (args[index].Equals("-h", OIC) ||
+                    args[index].Equals("--help", OIC) ||
+                    args[index].Equals("-?"))
+                {
+                    OutputText(Syntax());
+                    return;
+                }
+                else if (args[index].Equals("-i", OIC) ||
                     args[index].Equals("--input", OIC))
                 {
                     index++;
@@ -44,6 +52,12 @@ internal class Program
                         OutputText(Syntax());
                         return;
                     }
+                }
+                else if (args[index].Equals("-si", OIC) ||
+                    args[index].Equals("--split-input", OIC))
+                {
+                    index++;
+                    splitInput = args[index++];
                 }
                 else if (args[index].Equals("-o", OIC) ||
                     args[index].Equals("--output", OIC))
@@ -153,7 +167,18 @@ internal class Program
                     }
                     if (!string.IsNullOrWhiteSpace(tempLine))
                     {
-                        _inputQueue.Enqueue(tempLine);
+                        if (splitInput != null && tempLine.Contains(splitInput))
+                        {
+                            var splitLines = tempLine.Split(splitInput);
+                            foreach (var splitLine in splitLines)
+                            {
+                                _inputQueue.Enqueue(splitLine.Trim());
+                            }
+                        }
+                        else
+                        {
+                            _inputQueue.Enqueue(tempLine);
+                        }
                     }
                 }
             }
@@ -164,7 +189,7 @@ internal class Program
             }
         }
         // check for max width setting
-        maxOutputWidth = baseGrod.GetInt("system.output_width", true) ?? 0;
+        maxOutputWidth = (int)(baseGrod.GetNumber("system.output_width", true) ?? 0);
         // start game loop
         game.InputEvent += Input;
         game.OutputEvent += Output;

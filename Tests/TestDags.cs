@@ -1,6 +1,6 @@
 ﻿using Grif;
-using static Grif.Dags;
 using static Grif.Common;
+using static Grif.Dags;
 
 namespace Tests;
 
@@ -481,7 +481,7 @@ public class TestDags
     }
 
     [Test]
-    public void TestAddToNonInteger()
+    public void TestAddToNonNumber()
     {
         var counterValue = "five";
         Grod grod = new("testGrod");
@@ -489,11 +489,12 @@ public class TestDags
         string script = $"{ADDTO_TOKEN}counter,3){GET_TOKEN}counter)";
         var result = Dags.Process(grod, script);
         var expected = new List<GrifMessage> {
-            new(MessageType.Error, $"Error processing command at index 5:\r\nInvalid integer: five\r\n0: {ADDTO_TOKEN}\r\n1: counter\r\n2: ,\r\n3: 3\r\n4: )\r\n5: {GET_TOKEN}\r\n6: counter\r\n7: )\r\n"),
+            new(MessageType.Error, $"Error processing command at index 5:\r\nInvalid number: five\r\n0: {ADDTO_TOKEN}\r\n1: counter\r\n2: ,\r\n3: 3\r\n4: )\r\n5: {GET_TOKEN}\r\n6: counter\r\n7: )\r\n"),
             new(MessageType.Internal, counterValue)
         };
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Has.Count.EqualTo(2));
         Assert.That(result, Is.EqualTo(expected));
     }
 

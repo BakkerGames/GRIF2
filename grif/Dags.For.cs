@@ -28,9 +28,9 @@ public partial class Dags
             }
         } while (index < tokens.Length);
         var endIndex = index - 2;
-        var int1 = int.Parse(p[1].Value);
-        var int2 = int.Parse(p[2].Value);
-        for (int value = int1; value <= int2; value++)
+        var int1 = long.Parse(p[1].Value);
+        var int2 = long.Parse(p[2].Value);
+        for (long value = int1; value <= int2; value++)
         {
             List<string> loopTokens = [];
             for (int i = startIndex; i <= endIndex; i++)

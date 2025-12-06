@@ -52,18 +52,18 @@ public class Grod
         return null;
     }
 
-    public int? GetInt(string key, bool recursive)
+    public long? GetNumber(string key, bool recursive)
     {
         var value = Get(key, recursive);
         if (value == null)
         {
             return null;
         }
-        if (int.TryParse(value, out int intValue))
+        if (long.TryParse(value, out long longValue))
         {
-            return intValue;
+            return longValue;
         }
-        throw new FormatException($"Value for key '{key}' is not a valid integer.");
+        throw new FormatException($"Value for key '{key}' is not a valid number.");
     }
 
     public bool? GetBool(string key, bool recursive)
@@ -101,7 +101,7 @@ public class Grod
         }
     }
 
-    public void Set(string key, int value)
+    public void Set(string key, long value)
     {
         Set(key, value.ToString());
     }
@@ -246,7 +246,7 @@ public class Grod
             if (yTokens[i] == "?") return 1; // "?" comes next so y is earlier
             if (xTokens[i] == "#") return -1; // "#" comes next so x is earlier
             if (yTokens[i] == "#") return 1; // "#" comes next so y is earlier
-            if (int.TryParse(xTokens[i], out int xVal) && int.TryParse(yTokens[i], out int yVal))
+            if (long.TryParse(xTokens[i], out long xVal) && long.TryParse(yTokens[i], out long yVal))
             {
                 if (xVal == yVal) continue;
                 return xVal < yVal ? -1 : 1;

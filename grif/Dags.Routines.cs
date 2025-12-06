@@ -167,7 +167,7 @@ public partial class Dags
     {
         StringBuilder result = new();
 
-        if (!IsScript(script) )
+        if (!IsScript(script))
         {
             if (indent)
             {
@@ -440,19 +440,19 @@ public partial class Dags
     }
 
     /// <summary>
-    /// Get integer value from string, with error handling.
+    /// Get long value from string, with error handling.
     /// </summary>
-    public static int GetIntValue(string? value)
+    public static long GetNumberValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
             return 0; // Default to 0 if not found
         }
-        if (!int.TryParse(value, out int intValue))
+        if (!long.TryParse(value, out long longValue))
         {
-            throw new SystemException($"Invalid integer: {value}");
+            throw new SystemException($"Invalid number: {value}");
         }
-        return intValue;
+        return longValue;
     }
 
     /// <summary>
@@ -518,7 +518,7 @@ public partial class Dags
         return value;
     }
 
-    private static void CheckParameterCount(List<GrifMessage> p, int count)
+    private static void CheckParameterCount(List<GrifMessage> p, long count)
     {
         if (p.Count != count)
         {
@@ -534,7 +534,7 @@ public partial class Dags
         }
     }
 
-    private static void CheckParmeterCountBetween(List<GrifMessage> p, int min, int max)
+    private static void CheckParmeterCountBetween(List<GrifMessage> p, long min, long max)
     {
         if (p.Count < min || p.Count > max)
         {
@@ -671,7 +671,7 @@ public partial class Dags
         return value;
     }
 
-    private static string? GetArrayItem(Grod grod, string key, int y, int x)
+    private static string? GetArrayItem(Grod grod, string key, long y, long x)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -685,7 +685,7 @@ public partial class Dags
         return GetListItem(grod, itemKey, x);
     }
 
-    private static void SetArrayItem(Grod grod, string key, int y, int x, string? value)
+    private static void SetArrayItem(Grod grod, string key, long y, long x, string? value)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -699,7 +699,7 @@ public partial class Dags
         SetListItem(grod, itemKey, x, value);
     }
 
-    private static string? GetListItem(Grod grod, string key, int x)
+    private static string? GetListItem(Grod grod, string key, long x)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -722,7 +722,7 @@ public partial class Dags
         return FixListItemOut(items[x]);
     }
 
-    private static void SetListItem(Grod grod, string key, int x, string? value)
+    private static void SetListItem(Grod grod, string key, long x, string? value)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -742,11 +742,11 @@ public partial class Dags
         {
             items.Add(NULL);
         }
-        items[x] = FixListItemIn(value);
+        items[(int)x] = FixListItemIn(value);
         grod.Set(key, string.Join(',', items));
     }
 
-    private static void InsertAtListItem(Grod grod, string key, int x, string? value)
+    private static void InsertAtListItem(Grod grod, string key, long x, string? value)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -766,11 +766,11 @@ public partial class Dags
         {
             items.Add(NULL);
         }
-        items.Insert(x, FixListItemIn(value));
+        items.Insert((int)x, FixListItemIn(value));
         grod.Set(key, string.Join(',', items));
     }
 
-    private static void RemoveAtListItem(Grod grod, string key, int x)
+    private static void RemoveAtListItem(Grod grod, string key, long x)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -790,7 +790,7 @@ public partial class Dags
         {
             return; // Nothing to remove
         }
-        items.RemoveAt(x);
+        items.RemoveAt((int)x);
         grod.Set(key, string.Join(',', items));
     }
 

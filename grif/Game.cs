@@ -1,7 +1,7 @@
 ﻿using static Grif.Common;
+using static Grif.Dags;
 using static Grif.IO;
 using static Grif.Parser;
-using static Grif.Dags;
 
 namespace Grif;
 
@@ -334,11 +334,11 @@ public class Game
         }
         if (item.Value.Equals(OUTCHANNEL_SLEEP, OIC))
         {
-            if (!int.TryParse(item.ExtraValue, out int value))
+            if (!long.TryParse(item.ExtraValue, out long value))
             {
                 throw new Exception($"Invalid sleep duration: {item.ExtraValue}");
             }
-            Thread.Sleep(value);
+            Thread.Sleep((int)value);
             return;
         }
         if (IsScript(item.Value))

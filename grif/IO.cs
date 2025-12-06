@@ -237,7 +237,7 @@ public static class IO
                             Uri.IsHexDigit(content[index + 3]))
                         {
                             var hex = content.Substring(index, 4);
-                            if (int.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out int codePoint))
+                            if (long.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out long codePoint))
                             {
                                 result.Append((char)codePoint);
                                 index += 4;

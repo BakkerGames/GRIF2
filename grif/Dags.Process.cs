@@ -9,8 +9,8 @@ public partial class Dags
     {
         List<GrifMessage> result = [];
         string? value;
-        int int1, int2;
-        int intAnswer;
+        long long1, long2;
+        long longAnswer;
         bool boolAnswer;
         bool isNull0;
         bool isNull1;
@@ -73,19 +73,19 @@ public partial class Dags
             {
                 case ABS_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(p[0].Value);
-                    if (int1 < 0)
+                    long1 = GetNumberValue(p[0].Value);
+                    if (long1 < 0)
                     {
-                        int1 = -int1;
+                        long1 = -long1;
                     }
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case ADD_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    intAnswer = int1 + int2;
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    longAnswer = long1 + long2;
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case ADDLIST_TOKEN:
                     CheckParameterCount(p, 2);
@@ -93,43 +93,43 @@ public partial class Dags
                     break;
                 case ADDTO_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(grod.Get(p[0].Value, true));
-                    int2 = GetIntValue(p[1].Value);
-                    intAnswer = int1 + int2;
-                    grod.Set(p[0].Value, intAnswer.ToString());
+                    long1 = GetNumberValue(grod.Get(p[0].Value, true));
+                    long2 = GetNumberValue(p[1].Value);
+                    longAnswer = long1 + long2;
+                    grod.Set(p[0].Value, longAnswer.ToString());
                     break;
                 case BITWISEAND_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int1 < 0 || int2 < 0)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long1 < 0 || long2 < 0)
                     {
-                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{long1},{long2}): Invalid parameters");
                     }
-                    intAnswer = int1 & int2;
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    longAnswer = long1 & long2;
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case BITWISEOR_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int1 < 0 || int2 < 0)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long1 < 0 || long2 < 0)
                     {
-                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{long1},{long2}): Invalid parameters");
                     }
-                    intAnswer = int1 | int2;
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    longAnswer = long1 | long2;
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case BITWISEXOR_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int1 < 0 || int2 < 0)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long1 < 0 || long2 < 0)
                     {
-                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{long1},{long2}): Invalid parameters");
                     }
-                    intAnswer = int1 ^ int2;
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    longAnswer = long1 ^ long2;
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case CLEARARRAY_TOKEN:
                     CheckParameterCount(p, 1);
@@ -137,14 +137,14 @@ public partial class Dags
                     break;
                 case CLEARBIT_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int1 < 0 || int2 < 0 || int2 > 30)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long1 < 0 || long2 < 0 || long2 > 30)
                     {
-                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{long1},{long2}): Invalid parameters");
                     }
-                    intAnswer = int1 ^ (int)Math.Pow(2, int2);
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    longAnswer = long1 ^ (long)Math.Pow(2, long2);
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case CLEARLIST_TOKEN:
                     CheckParameterCount(p, 1);
@@ -177,25 +177,25 @@ public partial class Dags
                     break;
                 case DIV_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int2 == 0)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long2 == 0)
                     {
                         throw new SystemException("Division by zero is not allowed.");
                     }
-                    int1 /= int2;
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    long1 /= long2;
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case DIVTO_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(grod.Get(p[0].Value, true));
-                    int2 = GetIntValue(p[1].Value);
-                    if (int2 == 0)
+                    long1 = GetNumberValue(grod.Get(p[0].Value, true));
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long2 == 0)
                     {
                         throw new SystemException("Division by zero is not allowed.");
                     }
-                    int1 /= int2;
-                    grod.Set(p[0].Value, int1.ToString());
+                    long1 /= long2;
+                    grod.Set(p[0].Value, long1.ToString());
                     break;
                 case EQ_TOKEN:
                     CheckParameterCount(p, 2);
@@ -213,9 +213,9 @@ public partial class Dags
                     {
                         result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
-                    else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
+                    else if (long.TryParse(p[0].Value, out long1) && long.TryParse(p[1].Value, out long2))
                     {
-                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 == int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(long1 == long2)));
                     }
                     else
                     {
@@ -247,14 +247,14 @@ public partial class Dags
                     break;
                 case FLIPBIT_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int1 < 0 || int2 < 0 || int2 > 30)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long1 < 0 || long2 < 0 || long2 > 30)
                     {
-                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{long1},{long2}): Invalid parameters");
                     }
-                    intAnswer = int1 ^ (int)Math.Pow(2, int2);
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    longAnswer = long1 ^ (long)Math.Pow(2, long2);
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case FOR_TOKEN:
                     CheckParameterCount(p, 3);
@@ -284,8 +284,8 @@ public partial class Dags
                     CheckParameterCount(p, 1);
                     try
                     {
-                        int1 = Convert.ToInt32(p[0].Value, 16);
-                        value = int1.ToString();
+                        long1 = Convert.ToInt32(p[0].Value, 16);
+                        value = long1.ToString();
                         result.Add(new GrifMessage(MessageType.Internal, value));
                     }
                     catch (Exception)
@@ -305,9 +305,9 @@ public partial class Dags
                     {
                         result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
-                    else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
+                    else if (long.TryParse(p[0].Value, out long1) && long.TryParse(p[1].Value, out long2))
                     {
-                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 >= int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(long1 >= long2)));
                     }
                     else
                     {
@@ -326,25 +326,25 @@ public partial class Dags
                     {
                         throw new SystemException("Array name cannot be blank");
                     }
-                    int1 = GetIntValue(p[1].Value);
-                    int2 = GetIntValue(p[2].Value);
-                    value = GetArrayItem(grod, p[0].Value, int1, int2);
+                    long1 = GetNumberValue(p[1].Value);
+                    long2 = GetNumberValue(p[2].Value);
+                    value = GetArrayItem(grod, p[0].Value, long1, long2);
                     result.Add(new GrifMessage(MessageType.Internal, value ?? ""));
                     break;
                 case GETBIT_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int1 < 0 || int2 < 0 || int2 > 30)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long1 < 0 || long2 < 0 || long2 > 30)
                     {
-                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{long1},{long2}): Invalid parameters");
                     }
-                    intAnswer = int1 & (int)Math.Pow(2, int2);
-                    if (intAnswer != 0)
+                    longAnswer = long1 & (long)Math.Pow(2, long2);
+                    if (longAnswer != 0)
                     {
-                        intAnswer = 1;
+                        longAnswer = 1;
                     }
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case GETLIST_TOKEN:
                     CheckParameterCount(p, 2);
@@ -352,8 +352,8 @@ public partial class Dags
                     {
                         throw new SystemException("List name cannot be blank");
                     }
-                    int1 = GetIntValue(p[1].Value);
-                    value = GetListItem(grod, p[0].Value, int1);
+                    long1 = GetNumberValue(p[1].Value);
+                    value = GetListItem(grod, p[0].Value, long1);
                     result.Add(new GrifMessage(MessageType.Internal, value ?? ""));
                     break;
                 case GETVALUE_TOKEN:
@@ -383,9 +383,9 @@ public partial class Dags
                     {
                         result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
-                    else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
+                    else if (long.TryParse(p[0].Value, out long1) && long.TryParse(p[1].Value, out long2))
                     {
-                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 > int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(long1 > long2)));
                     }
                     else
                     {
@@ -395,8 +395,8 @@ public partial class Dags
                     break;
                 case INSERTATLIST_TOKEN:
                     CheckParameterCount(p, 3);
-                    int1 = GetIntValue(p[1].Value);
-                    InsertAtListItem(grod, p[0].Value, int1, p[2].Value);
+                    long1 = GetNumberValue(p[1].Value);
+                    InsertAtListItem(grod, p[0].Value, long1, p[2].Value);
                     break;
                 case ISBOOL_TOKEN:
                     CheckParameterCount(p, 1);
@@ -412,7 +412,7 @@ public partial class Dags
                     break;
                 case ISNUMBER_TOKEN:
                     CheckParameterCount(p, 1);
-                    if (int.TryParse(p[0].Value, out _))
+                    if (long.TryParse(p[0].Value, out _))
                     {
                         result.Add(new GrifMessage(MessageType.Internal, TRUE));
                     }
@@ -448,9 +448,9 @@ public partial class Dags
                     {
                         result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
-                    else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
+                    else if (long.TryParse(p[0].Value, out long1) && long.TryParse(p[1].Value, out long2))
                     {
-                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 <= int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(long1 <= long2)));
                     }
                     else
                     {
@@ -495,9 +495,9 @@ public partial class Dags
                     {
                         result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
-                    else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
+                    else if (long.TryParse(p[0].Value, out long1) && long.TryParse(p[1].Value, out long2))
                     {
-                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 < int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(long1 < long2)));
                     }
                     else
                     {
@@ -507,39 +507,39 @@ public partial class Dags
                     break;
                 case MAX_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    int1 = Math.Max(int1, int2);
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 = Math.Max(long1, long2);
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case MIN_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    int1 = Math.Min(int1, int2);
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 = Math.Min(long1, long2);
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case MOD_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    int1 %= int2;
-                    if (int1 < 0) // make positive
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 %= long2;
+                    if (long1 < 0) // make positive
                     {
-                        int1 += int2;
+                        long1 += long2;
                     }
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case MODTO_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(grod.Get(p[0].Value, true));
-                    int2 = GetIntValue(p[1].Value);
-                    int1 %= int2;
-                    if (int1 < 0) // make positive
+                    long1 = GetNumberValue(grod.Get(p[0].Value, true));
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 %= long2;
+                    if (long1 < 0) // make positive
                     {
-                        int1 += int2;
+                        long1 += long2;
                     }
-                    grod.Set(p[0].Value, int1.ToString());
+                    grod.Set(p[0].Value, long1.ToString());
                     break;
                 case MSG_TOKEN:
                     CheckParameterCount(p, 1);
@@ -559,17 +559,17 @@ public partial class Dags
                     break;
                 case MUL_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    int1 *= int2;
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 *= long2;
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case MULTO_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(grod.Get(p[0].Value, true));
-                    int2 = GetIntValue(p[1].Value);
-                    int1 *= int2;
-                    grod.Set(p[0].Value, int1.ToString());
+                    long1 = GetNumberValue(grod.Get(p[0].Value, true));
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 *= long2;
+                    grod.Set(p[0].Value, long1.ToString());
                     break;
                 case NE_TOKEN:
                     CheckParameterCount(p, 2);
@@ -587,9 +587,9 @@ public partial class Dags
                     {
                         result.Add(new GrifMessage(MessageType.Internal, FALSE));
                     }
-                    else if (int.TryParse(p[0].Value, out int1) && int.TryParse(p[1].Value, out int2))
+                    else if (long.TryParse(p[0].Value, out long1) && long.TryParse(p[1].Value, out long2))
                     {
-                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(int1 != int2)));
+                        result.Add(new GrifMessage(MessageType.Internal, TrueFalse(long1 != long2)));
                     }
                     else
                     {
@@ -598,15 +598,15 @@ public partial class Dags
                     break;
                 case NEG_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(p[0].Value);
-                    int1 = -int1;
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    long1 = -long1;
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case NEGTO_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(grod.Get(p[0].Value, true));
-                    int1 = -int1;
-                    grod.Set(p[0].Value, int1.ToString());
+                    long1 = GetNumberValue(grod.Get(p[0].Value, true));
+                    long1 = -long1;
+                    grod.Set(p[0].Value, long1.ToString());
                     break;
                 case ISNULL_TOKEN:
                 case ISNULL2_TOKEN:
@@ -619,15 +619,15 @@ public partial class Dags
                     break;
                 case RAND_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = _random.Next(100);
-                    boolAnswer = int2 < int1;
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = _random.Next(100);
+                    boolAnswer = long2 < long1;
                     result.Add(new GrifMessage(MessageType.Internal, TrueFalse(boolAnswer)));
                     break;
                 case REMOVEATLIST_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[1].Value);
-                    RemoveAtListItem(grod, p[0].Value, int1);
+                    long1 = GetNumberValue(p[1].Value);
+                    RemoveAtListItem(grod, p[0].Value, long1);
                     break;
                 case REPLACE_TOKEN:
                     CheckParameterCount(p, 3);
@@ -635,8 +635,8 @@ public partial class Dags
                     break;
                 case RND_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(p[0].Value);
-                    result.Add(new GrifMessage(MessageType.Internal, _random.Next(int1).ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    result.Add(new GrifMessage(MessageType.Internal, _random.Next((int)long1).ToString()));
                     break;
                 case SCRIPT_TOKEN:
                     CheckParameterCount(p, 1);
@@ -657,25 +657,25 @@ public partial class Dags
                     {
                         throw new SystemException("Array name cannot be blank");
                     }
-                    int1 = GetIntValue(p[1].Value); // y
-                    int2 = GetIntValue(p[2].Value); // x
-                    SetArrayItem(grod, p[0].Value, int1, int2, p[3].Value);
+                    long1 = GetNumberValue(p[1].Value); // y
+                    long2 = GetNumberValue(p[2].Value); // x
+                    SetArrayItem(grod, p[0].Value, long1, long2, p[3].Value);
                     break;
                 case SETBIT_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    if (int1 < 0 || int2 < 0 || int2 > 30)
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    if (long1 < 0 || long2 < 0 || long2 > 30)
                     {
-                        throw new SystemException($"{token}{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{long1},{long2}): Invalid parameters");
                     }
-                    intAnswer = int1 | (int)Math.Pow(2, int2);
-                    result.Add(new GrifMessage(MessageType.Internal, intAnswer.ToString()));
+                    longAnswer = long1 | (long)Math.Pow(2, long2);
+                    result.Add(new GrifMessage(MessageType.Internal, longAnswer.ToString()));
                     break;
                 case SETLIST_TOKEN:
                     CheckParameterCount(p, 3);
-                    int1 = GetIntValue(p[1].Value);
-                    SetListItem(grod, p[0].Value, int1, p[2].Value);
+                    long1 = GetNumberValue(p[1].Value);
+                    SetListItem(grod, p[0].Value, long1, p[2].Value);
                     break;
                 case SETOUTCHANNEL_TOKEN:
                     if (p.Count == 1)
@@ -689,39 +689,39 @@ public partial class Dags
                     break;
                 case SLEEP_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(p[0].Value);
-                    result.Add(new GrifMessage(MessageType.OutChannel, OUTCHANNEL_SLEEP, int1.ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    result.Add(new GrifMessage(MessageType.OutChannel, OUTCHANNEL_SLEEP, long1.ToString()));
                     break;
                 case SUB_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(p[0].Value);
-                    int2 = GetIntValue(p[1].Value);
-                    int1 -= int2;
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    long1 = GetNumberValue(p[0].Value);
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 -= long2;
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case SUBSTRING_TOKEN:
                     CheckParmeterCountBetween(p, 2, 3);
-                    int1 = GetIntValue(p[1].Value);
+                    long1 = GetNumberValue(p[1].Value);
                     if (p.Count == 2)
                     {
-                        int2 = p[0].Value.Length - int1;
+                        long2 = p[0].Value.Length - long1;
                     }
                     else
                     {
-                        int2 = GetIntValue(p[2].Value);
+                        long2 = GetNumberValue(p[2].Value);
                     }
-                    if (int1 < 0 || int2 < 0 || int1 + int2 > p[0].Value.Length)
+                    if (long1 < 0 || long2 < 0 || long1 + long2 > p[0].Value.Length)
                     {
-                        throw new SystemException($"{token}{p[0].Value},{int1},{int2}): Invalid parameters");
+                        throw new SystemException($"{token}{p[0].Value},{long1},{long2}): Invalid parameters");
                     }
-                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.Substring(int1, int2)));
+                    result.Add(new GrifMessage(MessageType.Internal, p[0].Value.Substring((int)long1, (int)long2)));
                     break;
                 case SUBTO_TOKEN:
                     CheckParameterCount(p, 2);
-                    int1 = GetIntValue(grod.Get(p[0].Value, true));
-                    int2 = GetIntValue(p[1].Value);
-                    int1 -= int2;
-                    grod.Set(p[0].Value, int1.ToString());
+                    long1 = GetNumberValue(grod.Get(p[0].Value, true));
+                    long2 = GetNumberValue(p[1].Value);
+                    long1 -= long2;
+                    grod.Set(p[0].Value, long1.ToString());
                     break;
                 case SWAP_TOKEN:
                     CheckParameterCount(p, 2);
@@ -731,18 +731,18 @@ public partial class Dags
                     break;
                 case TOBINARY_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(p[0].Value);
-                    result.Add(new GrifMessage(MessageType.Internal, Convert.ToString(int1, 2)));
+                    long1 = GetNumberValue(p[0].Value);
+                    result.Add(new GrifMessage(MessageType.Internal, Convert.ToString(long1, 2)));
                     break;
                 case TOHEX_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = GetIntValue(p[0].Value);
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString("X")));
+                    long1 = GetNumberValue(p[0].Value);
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString("X")));
                     break;
                 case TOINTEGER_TOKEN:
                     CheckParameterCount(p, 1);
-                    int1 = Convert.ToInt32(p[0].Value, 2);
-                    result.Add(new GrifMessage(MessageType.Internal, int1.ToString()));
+                    long1 = Convert.ToInt32(p[0].Value, 2);
+                    result.Add(new GrifMessage(MessageType.Internal, long1.ToString()));
                     break;
                 case TRIM_TOKEN:
                     CheckParameterCount(p, 1);
