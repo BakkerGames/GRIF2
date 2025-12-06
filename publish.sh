@@ -1,1 +1,1 @@
-dotnet publish Grif/Grif.csproj -o ${USERPROFILE}/EXE
+dotnet publish grif/grif.csproj -o ${USERPROFILE}/EXE
