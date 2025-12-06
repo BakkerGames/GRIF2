@@ -12,7 +12,7 @@ Keys are not case-sensitive. They cannot be null or empty or only whitespace. Th
 
 The `Get` operation retrieves the value associated with a given key. The `recursive` parameter indicates if parent levels are searched whenever the child level does not contain a key. If the key is not found in any level, null is returned.
 
-There are two variations of the `Get` operation: `GetNumber` and `GetBool`. `GetNumber` retrieves the value as a long, returning 0 if the key is not found or if the value cannot be converted to a long. `GetBool` retrieves the value as a boolean, returning false if the key is not found or if the value cannot be converted to a boolean. Other true/false values are recognized. Both return null if the key does not exist.
+There are two variations of the `Get` operation: `GetNumber` and `GetBool`. `GetNumber` retrieves the value as a long. `GetBool` retrieves the value as a boolean, and other truthy/falsey values are recognized. Both return null if the key does not exist.
 
 ## Set
 

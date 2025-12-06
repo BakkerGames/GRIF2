@@ -207,9 +207,11 @@ internal class Program
         result.AppendLine($"Version {Game.Version}");
         result.AppendLine();
         result.AppendLine("grif <filename.grif | directory>");
-        result.AppendLine("     [-i | --input  <filename>]");
-        result.AppendLine("     [-o | --output <filename>]");
-        result.AppendLine("     [-m | --mod    <filename.grif | directory>]");
+        result.AppendLine("     [-h  | --help | -?]");
+        result.AppendLine("     [-i  | --input  <filename>]");
+        result.AppendLine("     [-si | --split-input <splitchar>]");
+        result.AppendLine("     [-o  | --output <filename>]");
+        result.AppendLine("     [-m  | --mod    <filename.grif | directory>]");
         result.AppendLine();
         result.AppendLine("There may be multiple -m/--mod parameters.");
         return result.ToString();

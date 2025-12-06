@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>2.2025.1120</Version>
+    <Version>2.2025.1206</Version>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Grif\Grif.csproj" />
+    <ProjectReference Include="..\grif\grif.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,8 +4,8 @@ namespace Grif;
 
 public class Grod
 {
-    private readonly string[] _trueList = ["y", "yes", "t", "1", "-1", TRUE];
-    private readonly string[] _falseList = ["n", "no", "f", "0", "", FALSE];
+    private readonly string[] _truthyList = ["y", "yes", "t", "1", "-1", TRUE];
+    private readonly string[] _falseyList = ["n", "no", "f", "0", "", FALSE];
 
     private readonly Dictionary<string, string?> _data = new(StringComparer.OrdinalIgnoreCase);
 
@@ -73,11 +73,11 @@ public class Grod
         {
             return null;
         }
-        if (_trueList.Contains(value, StringComparer.OrdinalIgnoreCase))
+        if (_truthyList.Contains(value, StringComparer.OrdinalIgnoreCase))
         {
             return true;
         }
-        if (_falseList.Contains(value, StringComparer.OrdinalIgnoreCase))
+        if (_falseyList.Contains(value, StringComparer.OrdinalIgnoreCase))
         {
             return false;
         }
